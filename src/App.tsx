@@ -10,25 +10,30 @@ export default function App() {
   return (
     <Router>
       <AuthProvider>
-        <Toaster />
-        <RequireAuth whiteList={["/", "/browse", "/book/*", "/login"]}>
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-grow">
-              <Routes>
-                {routes.map((route, index) => (
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          <main className="flex-grow">
+            <Routes>
+              {routes.map((route, index) => {
+                const element = route.requireAuth ? (
+                  <RequireAuth>{route.element}</RequireAuth>
+                ) : (
+                  route.element
+                );
+                return (
                   <Route
                     key={index}
                     path={route.path}
-                    element={route.element}
+                    element={element}
                   />
-                ))}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
-        </RequireAuth>
+                );
+              })}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+        <Toaster />
       </AuthProvider>
     </Router>
   );

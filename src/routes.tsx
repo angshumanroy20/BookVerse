@@ -13,6 +13,7 @@ export interface RouteConfig {
   path: string;
   element: ReactNode;
   visible?: boolean;
+  requireAuth?: boolean;
 }
 
 const routes: RouteConfig[] = [
@@ -20,49 +21,57 @@ const routes: RouteConfig[] = [
     name: 'Home',
     path: '/',
     element: <Home />,
-    visible: true
+    visible: true,
+    requireAuth: false
   },
   {
     name: 'Browse',
     path: '/browse',
     element: <Browse />,
-    visible: true
+    visible: true,
+    requireAuth: false
   },
   {
     name: 'Book Detail',
     path: '/book/:id',
     element: <BookDetail />,
-    visible: false
+    visible: false,
+    requireAuth: false
   },
   {
     name: 'Upload Book',
     path: '/upload',
     element: <UploadBook />,
-    visible: false
+    visible: false,
+    requireAuth: true
   },
   {
     name: 'Dashboard',
     path: '/dashboard',
     element: <Dashboard />,
-    visible: false
+    visible: false,
+    requireAuth: true
   },
   {
     name: 'My Library',
     path: '/my-library',
     element: <MyLibrary />,
-    visible: false
+    visible: false,
+    requireAuth: true
   },
   {
     name: 'Admin',
     path: '/admin',
     element: <Admin />,
-    visible: false
+    visible: false,
+    requireAuth: true
   },
   {
     name: 'Login',
     path: '/login',
     element: <Login />,
-    visible: false
+    visible: false,
+    requireAuth: false
   }
 ];
 
