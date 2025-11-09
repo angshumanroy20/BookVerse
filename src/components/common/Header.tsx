@@ -51,7 +51,7 @@ export default function Header() {
                 <BookOpen className="w-6 h-6 text-primary-foreground" />
               </div>
               <span className="text-2xl font-display font-bold gradient-text hidden sm:block">
-                Biblios
+                BookVerse
               </span>
             </Link>
 
@@ -192,7 +192,7 @@ export default function Header() {
                     <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center">
                       <BookOpen className="w-5 h-5 text-primary-foreground" />
                     </div>
-                    <span className="gradient-text">Biblios Menu</span>
+                    <span className="gradient-text">BookVerse Menu</span>
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col gap-4 mt-8">
