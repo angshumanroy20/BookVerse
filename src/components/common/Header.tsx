@@ -49,7 +49,7 @@ export default function Header() {
                 <BookOpen className="w-6 h-6 text-primary-foreground" />
               </div>
               <span className="text-2xl font-display font-bold text-foreground">
-                Biblios
+                BookVerse
               </span>
             </Link>
 

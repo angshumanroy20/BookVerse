@@ -12,7 +12,7 @@ export default function Footer() {
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <BookOpen className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-display font-bold">Biblios</span>
+              <span className="text-xl font-display font-bold">BookVerse</span>
             </div>
             <p className="text-muted-foreground text-sm">
               Discover, manage, and share your literary journey with a community of book lovers.
@@ -41,7 +41,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-          <p>{currentYear} Biblios</p>
+          <p>{currentYear} BookVerse</p>
         </div>
       </div>
     </footer>
