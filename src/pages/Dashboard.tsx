@@ -2,15 +2,17 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/db/api";
 import { useAuth } from "@/contexts/AuthContext";
-import type { ReadingList, Bookmark } from "@/types/types";
+import type { ReadingList, Bookmark, Review } from "@/types/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookOpen, Bookmark as BookmarkIcon, Library, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { BookOpen, Bookmark as BookmarkIcon, Library, Star, Upload, Search, MessageSquare } from "lucide-react";
 
 export default function Dashboard() {
   const { user } = useAuth();
   const [readingLists, setReadingLists] = useState<ReadingList[]>([]);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,12 +25,14 @@ export default function Dashboard() {
     if (!user) return;
 
     try {
-      const [listsData, bookmarksData] = await Promise.all([
+      const [listsData, bookmarksData, reviewsData] = await Promise.all([
         api.getUserReadingLists(user.id),
         api.getUserBookmarks(user.id),
+        api.getUserReviews(user.id),
       ]);
       setReadingLists(listsData);
       setBookmarks(bookmarksData);
+      setReviews(reviewsData);
     } catch (error) {
       console.error("Error loading dashboard:", error);
     } finally {
@@ -41,6 +45,7 @@ export default function Dashboard() {
     currentlyReading: readingLists.filter((item) => item.status === "currently_reading").length,
     read: readingLists.filter((item) => item.status === "read").length,
     bookmarked: bookmarks.length,
+    reviews: reviews.length,
   };
 
   if (loading) {
@@ -105,6 +110,126 @@ export default function Dashboard() {
             <CardContent>
               <div className="text-3xl font-bold">{stats.bookmarked}</div>
               <p className="text-xs text-muted-foreground mt-1">saved books</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-3 gap-4">
+              <Button asChild variant="default" className="h-auto py-6">
+                <Link to="/upload" className="flex flex-col items-center gap-2">
+                  <Upload className="w-6 h-6" />
+                  <span>Upload New Book</span>
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="h-auto py-6">
+                <Link to="/browse" className="flex flex-col items-center gap-2">
+                  <Search className="w-6 h-6" />
+                  <span>Browse Books</span>
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="h-auto py-6">
+                <Link to="/my-library" className="flex flex-col items-center gap-2">
+                  <Library className="w-6 h-6" />
+                  <span>My Library</span>
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid md:grid-cols-3 gap-8 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5" />
+                My Reviews
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {reviews.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">
+                  No reviews yet
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  <div className="text-3xl font-bold">{stats.reviews}</div>
+                  <p className="text-sm text-muted-foreground">
+                    You've reviewed {stats.reviews} {stats.reviews === 1 ? "book" : "books"}
+                  </p>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link to="/my-library">View All Reviews</Link>
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="w-5 h-5" />
+                Reading Progress
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-muted-foreground">Completion Rate</span>
+                    <span className="font-medium">
+                      {readingLists.length > 0
+                        ? Math.round((stats.read / readingLists.length) * 100)
+                        : 0}
+                      %
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div
+                      className="bg-primary rounded-full h-2 transition-all"
+                      style={{
+                        width: `${
+                          readingLists.length > 0
+                            ? (stats.read / readingLists.length) * 100
+                            : 0
+                        }%`,
+                      }}
+                    />
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {stats.read} of {readingLists.length} books completed
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Library className="w-5 h-5" />
+                Library Stats
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Total Books</span>
+                  <span className="font-bold">{readingLists.length}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Bookmarks</span>
+                  <span className="font-bold">{stats.bookmarked}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Reviews</span>
+                  <span className="font-bold">{stats.reviews}</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>

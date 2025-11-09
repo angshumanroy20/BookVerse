@@ -9,9 +9,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { BookOpen, Star, Edit, Trash2, Download, Bookmark, BookmarkCheck } from "lucide-react";
+import { BookOpen, Star, Edit, Trash2, Download, Bookmark, BookmarkCheck, BookOpenCheck } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { BookRecommendations } from "@/components/BookRecommendations";
+import { PdfViewer } from "@/components/PdfViewer";
 
 export default function BookDetail() {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +27,7 @@ export default function BookDetail() {
   const [userReview, setUserReview] = useState<Review | null>(null);
   const [readingStatus, setReadingStatus] = useState<ReadingStatus | null>(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const [newRating, setNewRating] = useState(5);
@@ -299,12 +301,18 @@ export default function BookDetail() {
               )}
 
               {book.pdf_url && (
-                <Button asChild variant="outline">
-                  <a href={book.pdf_url} target="_blank" rel="noopener noreferrer">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download PDF
-                  </a>
-                </Button>
+                <>
+                  <Button onClick={() => setIsPdfViewerOpen(true)} variant="default">
+                    <BookOpenCheck className="w-4 h-4 mr-2" />
+                    Read Book
+                  </Button>
+                  <Button asChild variant="outline">
+                    <a href={book.pdf_url} download>
+                      <Download className="w-4 h-4 mr-2" />
+                      Download PDF
+                    </a>
+                  </Button>
+                </>
               )}
 
               {canEdit && (
@@ -432,6 +440,15 @@ export default function BookDetail() {
 
         <BookRecommendations currentBook={book} />
       </div>
+
+      {book.pdf_url && (
+        <PdfViewer
+          pdfUrl={book.pdf_url}
+          bookTitle={book.title}
+          isOpen={isPdfViewerOpen}
+          onClose={() => setIsPdfViewerOpen(false)}
+        />
+      )}
     </div>
   );
 }

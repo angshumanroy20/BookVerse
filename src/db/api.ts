@@ -104,6 +104,20 @@ export const api = {
     return data;
   },
 
+  async getUserReviews(userId: string) {
+    const { data, error } = await supabase
+      .from("reviews")
+      .select(`
+        *,
+        book:books(id, title, author, cover_image_url)
+      `)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return Array.isArray(data) ? data : [];
+  },
+
   async createReview(review: Omit<Review, "id" | "created_at">) {
     const { data, error } = await supabase
       .from("reviews")
