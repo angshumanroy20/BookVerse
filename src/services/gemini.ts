@@ -1,5 +1,5 @@
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -8,52 +8,70 @@ export interface ChatMessage {
 
 export async function sendMessageToGemini(message: string, conversationHistory: ChatMessage[] = []): Promise<string> {
   try {
-    const contents = conversationHistory.map(msg => ({
-      role: msg.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: msg.content }]
-    }));
+    if (!GEMINI_API_KEY) {
+      throw new Error('Gemini API key is not configured');
+    }
 
+    // Build conversation history in Gemini format
+    const contents = [];
+    
+    // Add conversation history (excluding the initial system message)
+    for (const msg of conversationHistory) {
+      if (msg.role === 'assistant' && msg.content.includes('BookVerse AI assistant')) {
+        continue; // Skip the initial greeting message
+      }
+      contents.push({
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: msg.content }]
+      });
+    }
+
+    // Add current user message
     contents.push({
       role: 'user',
       parts: [{ text: message }]
     });
+
+    const requestBody = {
+      contents,
+      generationConfig: {
+        temperature: 0.9,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 2048,
+      },
+      safetySettings: [
+        {
+          category: 'HARM_CATEGORY_HARASSMENT',
+          threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+        },
+        {
+          category: 'HARM_CATEGORY_HATE_SPEECH',
+          threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+        },
+        {
+          category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+          threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+        },
+        {
+          category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+          threshold: 'BLOCK_MEDIUM_AND_ABOVE'
+        }
+      ]
+    };
 
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        contents,
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 1024,
-        },
-        safetySettings: [
-          {
-            category: 'HARM_CATEGORY_HARASSMENT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          },
-          {
-            category: 'HARM_CATEGORY_HATE_SPEECH',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          },
-          {
-            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          },
-          {
-            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-            threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-          }
-        ]
-      })
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Gemini API error response:', errorData);
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
@@ -65,9 +83,17 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
       }
     }
 
+    // Check if content was blocked
+    if (data.promptFeedback?.blockReason) {
+      throw new Error(`Content blocked: ${data.promptFeedback.blockReason}`);
+    }
+
     throw new Error('No response from Gemini API');
   } catch (error) {
     console.error('Error calling Gemini API:', error);
-    throw error;
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Failed to communicate with AI service');
   }
 }

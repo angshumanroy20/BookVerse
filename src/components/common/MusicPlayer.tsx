@@ -19,12 +19,12 @@ const tracks: Track[] = [
   },
   {
     name: "Ambient Library",
-    url: "https://cdn.pixabay.com/audio/2022/03/10/audio_4e5d5b6b54.mp3",
+    url: "https://cdn.pixabay.com/audio/2023/03/10/audio_c8dbccbf54.mp3",
     duration: "3:15"
   },
   {
     name: "Calm Study",
-    url: "https://cdn.pixabay.com/audio/2022/08/02/audio_884fe05c21.mp3",
+    url: "https://cdn.pixabay.com/audio/2022/08/23/audio_d1718ab41b.mp3",
     duration: "2:45"
   }
 ];
