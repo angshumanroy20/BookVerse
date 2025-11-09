@@ -164,13 +164,13 @@ export default function Browse() {
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
               {books.map((book) => (
                 <Link key={book.id} to={`/book/${book.id}`}>
-                  <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group h-full">
+                  <Card className="overflow-hidden hover-lift group h-full cursor-pointer">
                     <div className="relative aspect-[2/3] overflow-hidden bg-muted">
                       {book.cover_image_url ? (
                         <img
                           src={book.cover_image_url}
                           alt={book.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-muted">

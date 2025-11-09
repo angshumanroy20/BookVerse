@@ -3,6 +3,7 @@ import { supabase } from "@/db/supabase";
 import type { User, Session } from "@supabase/supabase-js";
 import type { Profile } from "@/types/types";
 import { api } from "@/db/api";
+import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
   user: User | null;
@@ -20,6 +21,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasShownWelcome, setHasShownWelcome] = useState(false);
+  const { toast } = useToast();
 
   const refreshProfile = async () => {
     if (user) {
@@ -44,24 +47,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
       if (session?.user) {
-        api.getProfile(session.user.id).then(setProfile).catch(console.error);
+        api.getProfile(session.user.id).then((profileData) => {
+          setProfile(profileData);
+          
+          if (event === "SIGNED_IN" && !hasShownWelcome) {
+            const displayName = profileData?.username || profileData?.email || session.user.email || "User";
+            toast({
+              title: `Welcome back, ${displayName}! 📚`,
+              description: "Ready to discover your next great read?",
+              duration: 4000,
+            });
+            setHasShownWelcome(true);
+          }
+        }).catch(console.error);
       } else {
         setProfile(null);
+        setHasShownWelcome(false);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [hasShownWelcome, toast]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
     setSession(null);
+    setHasShownWelcome(false);
+    toast({
+      title: "Signed out successfully",
+      description: "See you next time!",
+    });
   };
 
   return (

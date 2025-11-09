@@ -56,7 +56,7 @@ export default function Login() {
               <BookOpen className="w-8 h-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-display">Welcome to Biblios</CardTitle>
+          <CardTitle className="text-3xl font-display">Welcome to BookVerse</CardTitle>
           <CardDescription className="text-base">
             Discover your next literary obsession
           </CardDescription>
