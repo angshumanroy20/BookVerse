@@ -5,19 +5,23 @@ import type { Book } from "@/types/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Browse() {
   const [books, setBooks] = useState<Book[]>([]);
+  const [genres, setGenres] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const [searching, setSearching] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     loadBooks();
+    loadGenres();
   }, []);
 
   const loadBooks = async () => {
@@ -33,6 +37,15 @@ export default function Browse() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadGenres = async () => {
+    try {
+      const data = await api.getAllGenres();
+      setGenres(data);
+    } catch (error) {
+      console.error("Failed to load genres:", error);
     }
   };
 
@@ -58,6 +71,29 @@ export default function Browse() {
     }
   };
 
+  const handleGenreChange = async (genre: string) => {
+    setSelectedGenre(genre);
+    
+    if (genre === "all") {
+      loadBooks();
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const data = await api.getBooksByGenre(genre, 50);
+      setBooks(data);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to filter by genre",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -67,7 +103,7 @@ export default function Browse() {
             Explore our collection of books across all genres
           </p>
 
-          <form onSubmit={handleSearch} className="flex gap-2 max-w-2xl">
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 max-w-3xl">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
@@ -78,6 +114,19 @@ export default function Browse() {
                 className="pl-10"
               />
             </div>
+            <Select value={selectedGenre} onValueChange={handleGenreChange}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="All Genres" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Genres</SelectItem>
+                {genres.map((genre) => (
+                  <SelectItem key={genre} value={genre}>
+                    {genre}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button type="submit" disabled={searching}>
               {searching ? "Searching..." : "Search"}
             </Button>

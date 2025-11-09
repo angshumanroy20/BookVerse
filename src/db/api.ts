@@ -49,6 +49,22 @@ export const api = {
     return Array.isArray(data) ? data : [];
   },
 
+  async getAllGenres() {
+    const { data, error } = await supabase
+      .from("books")
+      .select("genre")
+      .not("genre", "is", null)
+      .order("genre", { ascending: true });
+
+    if (error) throw error;
+    
+    const genres = Array.isArray(data) 
+      ? [...new Set(data.map(item => item.genre).filter(Boolean))]
+      : [];
+    
+    return genres;
+  },
+
   async createBook(book: Omit<Book, "id" | "created_at" | "updated_at">) {
     const { data, error } = await supabase
       .from("books")

@@ -97,7 +97,7 @@ export default function BookDetail() {
         await api.createBookmark({
           user_id: user.id,
           book_id: id,
-          page_number: null,
+          page_number: 1,
           note: null,
         });
         setIsBookmarked(true);
@@ -297,15 +297,6 @@ export default function BookDetail() {
                       </>
                     )}
                   </Button>
-
-                  {book.created_by === user.id && (
-                    <Button asChild variant="outline">
-                      <Link to={`/book/${id}/edit`}>
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit Book
-                      </Link>
-                    </Button>
-                  )}
                 </>
               )}
 
