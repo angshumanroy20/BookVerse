@@ -3,6 +3,7 @@ import Browse from './pages/Browse';
 import BookDetail from './pages/BookDetail';
 import UploadBook from './pages/UploadBook';
 import MyLibrary from './pages/MyLibrary';
+import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
 import type { ReactNode } from 'react';
@@ -37,6 +38,12 @@ const routes: RouteConfig[] = [
     name: 'Upload Book',
     path: '/upload',
     element: <UploadBook />,
+    visible: false
+  },
+  {
+    name: 'Dashboard',
+    path: '/dashboard',
+    element: <Dashboard />,
     visible: false
   },
   {

@@ -210,6 +210,17 @@ export const api = {
   },
 
   // Bookmarks
+  async getUserBookmarks(userId: string) {
+    const { data, error } = await supabase
+      .from("bookmarks")
+      .select("*, book:books(*)")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return Array.isArray(data) ? data : [];
+  },
+
   async getBookmarksByBook(userId: string, bookId: string) {
     const { data, error } = await supabase
       .from("bookmarks")
@@ -222,6 +233,18 @@ export const api = {
     return Array.isArray(data) ? data : [];
   },
 
+  async checkBookmark(userId: string, bookId: string) {
+    const { data, error } = await supabase
+      .from("bookmarks")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("book_id", bookId)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  },
+
   async createBookmark(bookmark: Omit<Bookmark, "id" | "created_at">) {
     const { data, error } = await supabase
       .from("bookmarks")
@@ -231,6 +254,16 @@ export const api = {
 
     if (error) throw error;
     return data;
+  },
+
+  async deleteBookmarkByBook(userId: string, bookId: string) {
+    const { error } = await supabase
+      .from("bookmarks")
+      .delete()
+      .eq("user_id", userId)
+      .eq("book_id", bookId);
+
+    if (error) throw error;
   },
 
   async updateBookmark(id: string, updates: Partial<Bookmark>) {

@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { BookOpen, Star, Edit, Trash2, Download } from "lucide-react";
+import { BookOpen, Star, Edit, Trash2, Download, Bookmark, BookmarkCheck } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { BookRecommendations } from "@/components/BookRecommendations";
 
@@ -25,6 +25,7 @@ export default function BookDetail() {
   const [reviewCount, setReviewCount] = useState(0);
   const [userReview, setUserReview] = useState<Review | null>(null);
   const [readingStatus, setReadingStatus] = useState<ReadingStatus | null>(null);
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const [newRating, setNewRating] = useState(5);
@@ -63,6 +64,9 @@ export default function BookDetail() {
 
         const status = await api.getUserReadingStatus(user.id, id);
         setReadingStatus(status);
+
+        const bookmarkData = await api.checkBookmark(user.id, id);
+        setIsBookmarked(!!bookmarkData);
       }
     } catch (error) {
       console.error("Error loading book:", error);
@@ -73,6 +77,36 @@ export default function BookDetail() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleBookmark = async () => {
+    if (!user || !id) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      if (isBookmarked) {
+        await api.deleteBookmarkByBook(user.id, id);
+        setIsBookmarked(false);
+        toast({ title: "Success", description: "Bookmark removed" });
+      } else {
+        await api.createBookmark({
+          user_id: user.id,
+          book_id: id,
+          page_number: null,
+          note: null,
+        });
+        setIsBookmarked(true);
+        toast({ title: "Success", description: "Book bookmarked" });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update bookmark",
+        variant: "destructive",
+      });
     }
   };
 
@@ -236,16 +270,32 @@ export default function BookDetail() {
 
             <div className="flex flex-wrap gap-3">
               {user && (
-                <Select value={readingStatus || ""} onValueChange={(value) => handleReadingStatusChange(value as ReadingStatus)}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Add to library" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="want_to_read">Want to Read</SelectItem>
-                    <SelectItem value="currently_reading">Currently Reading</SelectItem>
-                    <SelectItem value="read">Read</SelectItem>
-                  </SelectContent>
-                </Select>
+                <>
+                  <Select value={readingStatus || ""} onValueChange={(value) => handleReadingStatusChange(value as ReadingStatus)}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Add to library" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="want_to_read">Want to Read</SelectItem>
+                      <SelectItem value="currently_reading">Currently Reading</SelectItem>
+                      <SelectItem value="read">Read</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Button onClick={handleToggleBookmark} variant="outline">
+                    {isBookmarked ? (
+                      <>
+                        <BookmarkCheck className="w-4 h-4 mr-2" />
+                        Bookmarked
+                      </>
+                    ) : (
+                      <>
+                        <Bookmark className="w-4 h-4 mr-2" />
+                        Bookmark
+                      </>
+                    )}
+                  </Button>
+                </>
               )}
 
               {book.pdf_url && (
