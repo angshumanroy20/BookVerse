@@ -122,8 +122,8 @@ export default function MusicPlayer() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
-      <Card className={`bg-card/95 backdrop-blur-sm border-border shadow-lg transition-all duration-300 ${
+    <div className="fixed bottom-6 left-6 z-50">
+      <Card className={`bg-card/95 backdrop-blur-sm border-2 border-border/50 shadow-2xl rounded-3xl transition-all duration-300 ${
         isExpanded ? "w-80" : "w-16"
       }`}>
         <div className="p-3">
@@ -133,7 +133,7 @@ export default function MusicPlayer() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsExpanded(true)}
-                className="hover:bg-primary/10 transition-colors"
+                className="hover:bg-primary/10 transition-colors rounded-full"
               >
                 <Music className="w-5 h-5 text-primary" />
               </Button>
@@ -149,20 +149,25 @@ export default function MusicPlayer() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Music className="w-5 h-5 text-primary" />
-                  <span className="font-display font-semibold text-sm">Reading Music</span>
+                  <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
+                    <Music className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-semibold text-sm">Reading Music</h3>
+                    <p className="text-xs text-muted-foreground">Ambient Sounds</p>
+                  </div>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setIsExpanded(false)}
-                  className="h-8 w-8"
+                  className="h-8 w-8 rounded-full hover:bg-muted/50"
                 >
                   <ChevronDown className="w-4 h-4" />
                 </Button>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 p-3 bg-muted/30 rounded-xl">
                 <p className="text-xs text-muted-foreground">Now Playing:</p>
                 <p className="text-sm font-medium">{tracks[currentTrackIndex].name}</p>
                 <p className="text-xs text-muted-foreground">{tracks[currentTrackIndex].duration}</p>
@@ -173,7 +178,7 @@ export default function MusicPlayer() {
                   variant="outline"
                   size="icon"
                   onClick={togglePlay}
-                  className="h-10 w-10 hover:bg-primary hover:text-primary-foreground transition-colors"
+                  className="h-10 w-10 rounded-xl gradient-primary text-primary-foreground hover:scale-105 transition-all duration-300 border-0"
                 >
                   {isPlaying ? (
                     <Pause className="w-5 h-5" />
@@ -187,7 +192,7 @@ export default function MusicPlayer() {
                     variant="ghost"
                     size="icon"
                     onClick={toggleMute}
-                    className="h-8 w-8"
+                    className="h-8 w-8 rounded-full"
                   >
                     {isMuted || volume === 0 ? (
                       <VolumeX className="w-4 h-4" />
@@ -215,10 +220,10 @@ export default function MusicPlayer() {
                     <button
                       key={index}
                       onClick={() => changeTrack(index)}
-                      className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                      className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-all duration-300 ${
                         currentTrackIndex === index
-                          ? "bg-primary text-primary-foreground"
-                          : "hover:bg-muted"
+                          ? "gradient-primary text-primary-foreground shadow-glow"
+                          : "hover:bg-muted/50"
                       }`}
                     >
                       <div className="flex items-center justify-between">
