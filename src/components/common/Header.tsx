@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
 import routes from "../../routes";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -131,6 +131,7 @@ export default function Header() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="rounded-full hidden sm:flex">
                       <Avatar className="w-8 h-8">
+                        <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.username || "User"} />
                         <AvatarFallback className="bg-primary text-primary-foreground">
                           {profile?.username?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || "U"}
                         </AvatarFallback>
@@ -143,6 +144,12 @@ export default function Header() {
                       <p className="text-xs text-muted-foreground">{user.email}</p>
                     </div>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="cursor-pointer">
+                        <User className="w-4 h-4 mr-2" />
+                        Profile Settings
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link to="/dashboard" className="cursor-pointer">
                         <LayoutDashboard className="w-4 h-4 mr-2" />
@@ -189,6 +196,7 @@ export default function Header() {
                   {user && (
                     <div className="flex items-center gap-3 pb-4 border-b border-border">
                       <Avatar className="w-12 h-12">
+                        <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.username || "User"} />
                         <AvatarFallback className="bg-primary text-primary-foreground">
                           {profile?.username?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || "U"}
                         </AvatarFallback>
@@ -217,6 +225,18 @@ export default function Header() {
                     ))}
                     {user && (
                       <>
+                        <Link
+                          to="/profile"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`px-4 py-3 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                            location.pathname === "/profile"
+                              ? "bg-primary text-primary-foreground"
+                              : "text-foreground hover:bg-muted"
+                          }`}
+                        >
+                          <User className="w-4 h-4" />
+                          Profile Settings
+                        </Link>
                         <Link
                           to="/dashboard"
                           onClick={() => setMobileMenuOpen(false)}

@@ -7,6 +7,7 @@ import MyLibrary from './pages/MyLibrary';
 import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
+import Profile from './pages/Profile';
 import type { ReactNode } from 'react';
 
 export interface RouteConfig {
@@ -64,6 +65,13 @@ const routes: RouteConfig[] = [
     name: 'My Library',
     path: '/my-library',
     element: <MyLibrary />,
+    visible: false,
+    requireAuth: true
+  },
+  {
+    name: 'Profile',
+    path: '/profile',
+    element: <Profile />,
     visible: false,
     requireAuth: true
   },

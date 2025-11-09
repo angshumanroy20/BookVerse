@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/db/api";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Book } from "@/types/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, Star, TrendingUp, Sparkles } from "lucide-react";
 
 export default function Home() {
+  const { profile } = useAuth();
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,17 +39,30 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <h1 className="text-5xl xl:text-7xl font-display font-bold mb-6 leading-tight text-white">
-              Unravel the Unwritten.
-              <br />
-              Explore Worlds Beyond
+              {profile ? (
+                <>
+                  Welcome back, {profile.username}! 📖
+                  <br />
+                  Continue Your Journey
+                </>
+              ) : (
+                <>
+                  Unravel the Unwritten.
+                  <br />
+                  Explore Worlds Beyond
+                </>
+              )}
             </h1>
             <p className="text-xl xl:text-2xl mb-8 text-white/90">
-              A book is a dream that you hold in your hand. Discover your next literary obsession.
+              {profile 
+                ? "Ready to discover your next great read? Your literary adventure awaits."
+                : "A book is a dream that you hold in your hand. Discover your next literary obsession."
+              }
             </p>
             <Button asChild size="lg" className="text-base bg-primary hover:bg-primary/90">
               <Link to="/browse">
                 <Sparkles className="w-5 h-5 mr-2" />
-                Discover Your Next Obsession
+                {profile ? "Explore Books" : "Discover Your Next Obsession"}
               </Link>
             </Button>
           </div>

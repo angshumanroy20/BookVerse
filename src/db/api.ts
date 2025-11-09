@@ -102,7 +102,7 @@ export const api = {
       .from("reviews")
       .select(`
         *,
-        user:profiles(id, username, email)
+        user:profiles(id, username, email, avatar_url)
       `)
       .eq("book_id", bookId)
       .order("created_at", { ascending: false });
@@ -389,6 +389,20 @@ export const api = {
 
     const { data: urlData } = supabase.storage
       .from("app-7flusvzm3281_book_pdfs")
+      .getPublicUrl(fileName);
+
+    return urlData.publicUrl;
+  },
+
+  async uploadAvatar(file: File, fileName: string) {
+    const { data, error } = await supabase.storage
+      .from("app-7flusvzm3281_avatars")
+      .upload(fileName, file, { upsert: true });
+
+    if (error) throw error;
+
+    const { data: urlData } = supabase.storage
+      .from("app-7flusvzm3281_avatars")
       .getPublicUrl(fileName);
 
     return urlData.publicUrl;

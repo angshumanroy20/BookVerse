@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, Bookmark as BookmarkIcon, Library, Star, Upload, Search, MessageSquare } from "lucide-react";
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [readingLists, setReadingLists] = useState<ReadingList[]>([]);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -66,7 +66,14 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-display font-bold mb-8">My Dashboard</h1>
+        <div className="mb-8">
+          <h1 className="text-4xl font-display font-bold mb-2">
+            Welcome back, {profile?.username || "Reader"}! 📚
+          </h1>
+          <p className="text-muted-foreground">
+            Here's an overview of your reading journey
+          </p>
+        </div>
 
         <div className="grid md:grid-cols-4 gap-6 mb-12">
           <Card>
