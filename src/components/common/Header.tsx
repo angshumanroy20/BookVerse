@@ -123,10 +123,6 @@ export default function Header() {
                     <Upload className="w-4 h-4" />
                   </Link>
                 </Button>
-                <Button onClick={handleSignOut} variant="outline" size="sm" className="hidden sm:flex">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="rounded-full hidden sm:flex">
