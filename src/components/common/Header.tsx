@@ -138,7 +138,7 @@ export default function Header() {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuContent align="end" className="w-56 z-[100]">
                     <div className="px-2 py-1.5">
                       <p className="text-sm font-medium">{profile?.username || "User"}</p>
                       <p className="text-xs text-muted-foreground">{user.email}</p>
