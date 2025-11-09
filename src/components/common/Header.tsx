@@ -128,15 +128,13 @@ export default function Header() {
                   Sign Out
                 </Button>
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full hidden sm:flex">
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.username || "User"} />
-                        <AvatarFallback className="bg-primary text-primary-foreground">
-                          {profile?.username?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
+                  <DropdownMenuTrigger className="hidden sm:flex rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                    <Avatar className="w-8 h-8 cursor-pointer">
+                      <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.username || "User"} />
+                      <AvatarFallback className="bg-primary text-primary-foreground">
+                        {profile?.username?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 z-[100]">
                     <div className="px-2 py-1.5">
