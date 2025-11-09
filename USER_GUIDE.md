@@ -47,6 +47,23 @@ Everything on the platform now has smooth transitions:
 
 **Timing**: 200ms for quick responses, 300-500ms for dramatic effects
 
+### 4. **🎵 Background Music Player**
+Create the perfect reading atmosphere with soothing background music:
+- **Location**: Floating player in bottom-right corner
+- **3 Curated Tracks**: Peaceful Reading, Ambient Library, Calm Study
+- **Full Controls**: Play/pause, volume control, track selection
+- **Minimizable**: Collapse to small icon when not needed
+- **Saved Preferences**: Your volume and track choice are remembered
+- **Auto-Play Next**: Seamlessly transitions between tracks
+- **Visual Feedback**: Animated visualizer bars when playing
+
+**How to Use:**
+1. Click the music icon (🎵) in the bottom-right corner
+2. Click the Play button to start the music
+3. Adjust volume with the slider (recommended: 20-40% for reading)
+4. Switch tracks by clicking on track names
+5. Minimize the player to keep it out of the way
+
 ---
 
 ## 🎯 Interactive Elements Guide

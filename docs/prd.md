@@ -3,7 +3,8 @@
 ## 1. Platform Overview
 
 ### 1.1 Platform Name
-Biblios\n
+Biblios
+
 ### 1.2 Platform Description
 A comprehensive book management and discovery platform that allows users to upload, browse, and manage their book collections while providing personalized reading recommendations through AI-powered suggestions.
 
@@ -12,9 +13,13 @@ A comprehensive book management and discovery platform that allows users to uplo
 ### 2.1 User Types
 - **Registered Users**: Full access to all platform features including upload, dashboard, and bookmarking
 - **Non-registered Users**: Can view, read, and rate available books without registration
-\n### 2.2 Authentication Requirements\n- Book upload functionality restricted to signed-in users only\n- User dashboard accessible only to logged-in users
+
+### 2.2 Authentication Requirements
+- Book upload functionality restricted to signed-in users only
+- User dashboard accessible only to logged-in users
 - Bookmarking features available exclusively to registered users
-\n## 3. Core Features
+
+## 3. Core Features
 
 ### 3.1 Book Upload & Management (Registered Users Only)
 - Allow signed-in users to upload book details including title, author, cover image, and synopsis
@@ -22,7 +27,7 @@ A comprehensive book management and discovery platform that allows users to uplo
 - Provide full CRUD operations (Create, Read, Update, Delete) for book management
 \n### 3.2 Book Browsing & Discovery (All Users)
 - Enable all users to browse books by multiple criteria: title, author, genre, and rating
-- Implement AI-powered book suggestions with'if you like this book, try this one' recommendations
+- Implement AI-powered book suggestions with 'if you like this book, try this one' recommendations
 - Provide advanced search and filtering capabilities
 - Allow non-registered users to read available books
 
@@ -36,7 +41,8 @@ A comprehensive book management and discovery platform that allows users to uplo
 ### 3.4 Reviews and Ratings (All Users)
 - Enable all users to submit reviews and ratings for each book
 - Display community reviews and ratings for book discovery
-- Provide review filtering and sorting options\n\n### 3.5 Personalized Recommendations (Registered Users)
+- Provide review filtering and sorting options
+\n### 3.5 Personalized Recommendations (Registered Users)
 - Generate book suggestions based on user reading history and rated books
 - Utilize AI analysis of reading patterns to create customized reading recommendations
 - Continuously improve recommendations based on user interactions
@@ -48,6 +54,13 @@ A comprehensive book management and discovery platform that allows users to uplo
 - Personalized recommendation feed
 - Bookmarked pages and favorite collections
 - Account settings and profile management
+
+### 3.7 Ambient Audio Experience (All Users)
+- Provide soothing background music designed for reading environments
+- Include multiple ambient soundscapes: soft instrumental, nature sounds, library atmosphere
+- Allow users to control volume levels and toggle music on/off
+- Ensure audio continues seamlessly during page navigation and reading sessions
+- Offer audio preferences saving for registered users
 
 ## 4. Homepage Design
 
@@ -63,20 +76,23 @@ A comprehensive book management and discovery platform that allows users to uplo
 - **Author Spotlight**: Highlight featured authors with profile images and quotes
 - **Literary Circle**: Community engagement section for book discussions
 \n### 4.3 Navigation
-- Clean top navigation bar with sections: GENRES, AUTHORS, COLLECTIONS\n- User authentication options: LOGIN/REGISTER buttons
+- Clean top navigation bar with sections: GENRES, AUTHORS, COLLECTIONS
+- User authentication options: LOGIN/REGISTER buttons
 - HOME and READING MARKET quick access links
 \n## 5. Design Specifications
 
 ### 5.1 Layout Structure
-- Implement clear grid structure withample white space to prevent cluttered appearance
+- Implement clear grid structure with ample white space to prevent cluttered appearance
 - Emphasize visual hierarchy for easy content scanning
 - Use card-based layout for book displays and collections
-\n### 5.2 Typography
+
+### 5.2 Typography
 - Headline font: 'Playfair' serif for elegant, fashionable, high-end aesthetic
 - Body font: 'PT Sans' sans-serif for improved readability in longer texts
 - Maintain consistent font sizing and spacing throughout the platform
 
-### 5.3 Color Scheme\n- Dark, atmospheric background (#1a1a2e to #16213e gradient)
+### 5.3 Color Scheme
+- Dark, atmospheric background (#1a1a2e to #16213e gradient)
 - Warm accent colors: golden yellow (#d4af37) for call-to-action elements
 - Soft cream (#f5f5dc) for text overlays and content cards
 - Subtle blue highlights (#4a90e2) for interactive elements
@@ -95,7 +111,9 @@ A comprehensive book management and discovery platform that allows users to uplo
 ## 6. Reference Images
 - Platform design reference: Gemini_Generated_Image_fvobtgfvobtgfvob.png
 - Homepage hero section inspiration: Gemini_Generated_Image_fvobtgfvobtgfvob.png
-\n## 7. Technical Implementation Notes
+- Additional design references: Screenshot 2025-11-09 145642.png
+
+## 7. Technical Implementation Notes
 
 ### 7.1 AI Integration
 - Utilize Gemini and Genkit for recommendation algorithms
@@ -105,3 +123,8 @@ A comprehensive book management and discovery platform that allows users to uplo
 - NextJS for React-based framework
 - Tailwind CSS and Vanilla CSS for styling
 - ShadCN UI for component library
+
+### 7.3 Audio Implementation
+- Implement HTML5 audio API for background music playback
+- Ensure cross-browser compatibility for audio features
+- Optimize audio file loading for smooth user experience
