@@ -17,7 +17,10 @@ export const api = {
   async getBookById(id: string) {
     const { data, error } = await supabase
       .from("books")
-      .select("*")
+      .select(`
+        *,
+        creator:profiles!created_by(id, username, email)
+      `)
       .eq("id", id)
       .maybeSingle();
 

@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { api } from "@/db/api";
 import { useAuth } from "@/contexts/AuthContext";
-import type { Book, Review, ReadingStatus } from "@/types/types";
+import type { Book, Review, ReadingStatus, BookWithDetails } from "@/types/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { BookOpen, Star, Edit, Trash2, Download, Bookmark, BookmarkCheck, BookOpenCheck } from "lucide-react";
+import { BookOpen, Star, Edit, Trash2, Download, Bookmark, BookmarkCheck, BookOpenCheck, User as UserIcon, Clock } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { BookRecommendations } from "@/components/BookRecommendations";
 import { PdfViewer } from "@/components/PdfViewer";
@@ -20,7 +20,7 @@ export default function BookDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [book, setBook] = useState<Book | null>(null);
+  const [book, setBook] = useState<BookWithDetails | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [avgRating, setAvgRating] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
@@ -238,11 +238,23 @@ export default function BookDetail() {
             <div>
               <h1 className="text-4xl font-display font-bold mb-2">{book.title}</h1>
               <p className="text-xl text-muted-foreground mb-4">by {book.author}</p>
-              {book.genre && (
-                <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
-                  {book.genre}
-                </span>
-              )}
+              <div className="flex flex-wrap items-center gap-3 mb-4">
+                {book.genre && (
+                  <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                    {book.genre}
+                  </span>
+                )}
+                {book.creator && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <UserIcon className="w-4 h-4" />
+                    <span>Uploaded by <span className="font-medium text-foreground">{book.creator.username || "Anonymous"}</span></span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Clock className="w-4 h-4" />
+                  <span>{new Date(book.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center gap-4">
@@ -352,50 +364,67 @@ export default function BookDetail() {
         <div className="max-w-4xl">
           <h2 className="text-2xl font-display font-bold mb-6">Reviews</h2>
 
-          {user && (
-            <Card className="mb-8">
-              <CardContent className="pt-6">
-                <h3 className="font-semibold mb-4">
-                  {userReview ? "Edit Your Review" : "Write a Review"}
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Rating</label>
-                    <div className="flex gap-2">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => setNewRating(i + 1)}
-                          className="focus:outline-none"
-                        >
-                          <Star
-                            className={`w-8 h-8 ${
-                              i < newRating
-                                ? "fill-primary text-primary"
-                                : "text-muted-foreground"
-                            }`}
-                          />
-                        </button>
-                      ))}
-                    </div>
+          <Card className="mb-8">
+            <CardContent className="pt-6">
+              <h3 className="font-semibold mb-4">
+                {user ? (userReview ? "Edit Your Review" : "Write a Review") : "Write a Review"}
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Rating</label>
+                  <div className="flex gap-2">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => {
+                          if (!user) {
+                            toast({
+                              title: "Sign in required",
+                              description: "Please sign in to rate this book",
+                            });
+                            navigate("/login");
+                            return;
+                          }
+                          setNewRating(i + 1);
+                        }}
+                        className="focus:outline-none"
+                      >
+                        <Star
+                          className={`w-8 h-8 ${
+                            i < newRating
+                              ? "fill-primary text-primary"
+                              : "text-muted-foreground"
+                          }`}
+                        />
+                      </button>
+                    ))}
                   </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Review (Optional)</label>
-                    <Textarea
-                      value={newReviewText}
-                      onChange={(e) => setNewReviewText(e.target.value)}
-                      placeholder="Share your thoughts about this book..."
-                      rows={4}
-                    />
-                  </div>
-                  <Button onClick={handleSubmitReview} disabled={submitting}>
-                    {submitting ? "Submitting..." : userReview ? "Update Review" : "Submit Review"}
-                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Review (Optional)</label>
+                  <Textarea
+                    value={newReviewText}
+                    onChange={(e) => setNewReviewText(e.target.value)}
+                    onFocus={() => {
+                      if (!user) {
+                        toast({
+                          title: "Sign in required",
+                          description: "Please sign in to write a review",
+                        });
+                        navigate("/login");
+                      }
+                    }}
+                    placeholder="Share your thoughts about this book..."
+                    rows={4}
+                  />
+                </div>
+                <Button onClick={handleSubmitReview} disabled={submitting || !user}>
+                  {submitting ? "Submitting..." : user ? (userReview ? "Update Review" : "Submit Review") : "Sign in to Review"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
 
           <div className="space-y-4">
             {reviews.length === 0 ? (
