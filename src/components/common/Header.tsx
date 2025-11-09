@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, User, LogOut, Library, Upload, Moon, Sun, LayoutDashboard } from "lucide-react";
+import { BookOpen, User, LogOut, Library, Upload, Moon, Sun, LayoutDashboard, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -12,12 +12,14 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
 import routes from "../../routes";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 export default function Header() {
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
   const navigation = routes.filter((route) => route.visible !== false);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
@@ -94,7 +96,7 @@ export default function Header() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
@@ -110,19 +112,24 @@ export default function Header() {
 
             {user ? (
               <>
-                <Button asChild variant="default" size="sm">
+                <Button asChild variant="default" size="sm" className="hidden sm:flex">
                   <Link to="/upload">
                     <Upload className="w-4 h-4 mr-2" />
                     Upload Book
                   </Link>
                 </Button>
-                <Button onClick={handleSignOut} variant="outline" size="sm">
+                <Button asChild variant="default" size="icon" className="sm:hidden">
+                  <Link to="/upload">
+                    <Upload className="w-4 h-4" />
+                  </Link>
+                </Button>
+                <Button onClick={handleSignOut} variant="outline" size="sm" className="hidden sm:flex">
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full">
+                    <Button variant="ghost" size="icon" className="rounded-full hidden sm:flex">
                       <Avatar className="w-8 h-8">
                         <AvatarFallback className="bg-primary text-primary-foreground">
                           {profile?.username?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || "U"}
@@ -164,6 +171,112 @@ export default function Header() {
                 <Link to="/login">Sign In</Link>
               </Button>
             )}
+
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                <SheetHeader>
+                  <SheetTitle className="flex items-center gap-2">
+                    <BookOpen className="w-5 h-5 text-primary" />
+                    BookVerse Menu
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-4 mt-8">
+                  {user && (
+                    <div className="flex items-center gap-3 pb-4 border-b border-border">
+                      <Avatar className="w-12 h-12">
+                        <AvatarFallback className="bg-primary text-primary-foreground">
+                          {profile?.username?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{profile?.username || "User"}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-2">
+                    {navigation.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`px-4 py-3 text-sm font-medium rounded-md transition-colors ${
+                          location.pathname === item.path
+                            ? "bg-primary text-primary-foreground"
+                            : "text-foreground hover:bg-muted"
+                        }`}
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                    {user && (
+                      <>
+                        <Link
+                          to="/dashboard"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`px-4 py-3 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                            location.pathname === "/dashboard"
+                              ? "bg-primary text-primary-foreground"
+                              : "text-foreground hover:bg-muted"
+                          }`}
+                        >
+                          <LayoutDashboard className="w-4 h-4" />
+                          Dashboard
+                        </Link>
+                        <Link
+                          to="/my-library"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`px-4 py-3 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                            location.pathname === "/my-library"
+                              ? "bg-primary text-primary-foreground"
+                              : "text-foreground hover:bg-muted"
+                          }`}
+                        >
+                          <Library className="w-4 h-4" />
+                          My Library
+                        </Link>
+                        {profile?.role === "admin" && (
+                          <Link
+                            to="/admin"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className={`px-4 py-3 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                              location.pathname === "/admin"
+                                ? "bg-primary text-primary-foreground"
+                                : "text-foreground hover:bg-muted"
+                            }`}
+                          >
+                            <User className="w-4 h-4" />
+                            Admin Dashboard
+                          </Link>
+                        )}
+                      </>
+                    )}
+                  </div>
+
+                  {user && (
+                    <div className="pt-4 border-t border-border">
+                      <Button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          handleSignOut();
+                        }}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Sign Out
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </nav>
