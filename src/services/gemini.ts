@@ -1,5 +1,5 @@
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -8,8 +8,8 @@ export interface ChatMessage {
 
 export async function sendMessageToGemini(message: string, conversationHistory: ChatMessage[] = []): Promise<string> {
   try {
-    if (!GEMINI_API_KEY) {
-      throw new Error('Gemini API key is not configured');
+    if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your-api-key-here') {
+      throw new Error('Gemini API key is not configured. Please add your API key to the .env file.');
     }
 
     // Build conversation history in Gemini format
@@ -17,9 +17,12 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
     
     // Add conversation history (excluding the initial system message)
     for (const msg of conversationHistory) {
+      // Skip the initial greeting message
       if (msg.role === 'assistant' && msg.content.includes('BookVerse AI assistant')) {
-        continue; // Skip the initial greeting message
+        continue;
       }
+      
+      // Gemini requires alternating user/model messages
       contents.push({
         role: msg.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: msg.content }]
@@ -31,6 +34,11 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
       role: 'user',
       parts: [{ text: message }]
     });
+
+    // Ensure we start with a user message
+    if (contents.length > 0 && contents[0].role === 'model') {
+      contents.shift();
+    }
 
     const requestBody = {
       contents,
@@ -60,6 +68,8 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
       ]
     };
 
+    console.log('Sending request to Gemini API...');
+    
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
@@ -69,12 +79,21 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('Gemini API error response:', errorData);
-      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+      let errorMessage = `API Error: ${response.status} ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        console.error('Gemini API error response:', errorData);
+        if (errorData.error?.message) {
+          errorMessage = errorData.error.message;
+        }
+      } catch (e) {
+        console.error('Could not parse error response');
+      }
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
+    console.log('Received response from Gemini API');
     
     if (data.candidates && data.candidates.length > 0) {
       const candidate = data.candidates[0];
@@ -88,7 +107,7 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
       throw new Error(`Content blocked: ${data.promptFeedback.blockReason}`);
     }
 
-    throw new Error('No response from Gemini API');
+    throw new Error('No valid response received from Gemini API');
   } catch (error) {
     console.error('Error calling Gemini API:', error);
     if (error instanceof Error) {
