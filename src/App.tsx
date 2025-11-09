@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
 import MusicPlayer from '@/components/common/MusicPlayer';
+import AIChatbot from '@/components/common/AIChatbot';
 import routes from './routes';
 
 export default function App() {
@@ -37,6 +38,7 @@ export default function App() {
             <Footer />
           </div>
           <MusicPlayer />
+          <AIChatbot />
           <Toaster />
         </ViewModeProvider>
       </AuthProvider>
