@@ -2,10 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, X, Send, Loader2, Bot, User } from "lucide-react";
 import { sendMessageToGemini, type ChatMessage } from "@/services/gemini";
-import { useToast } from "@/hooks/use-toast";
 
 export default function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,13 +15,14 @@ export default function AIChatbot() {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-    }
+    scrollToBottom();
   }, [messages]);
 
   const handleSendMessage = async () => {
@@ -82,7 +81,7 @@ export default function AIChatbot() {
 
       {isOpen && (
         <Card className="fixed bottom-6 right-6 w-[380px] h-[600px] flex flex-col shadow-2xl z-50 rounded-3xl border-2 border-border/50 overflow-hidden">
-          <div className="gradient-primary p-4 flex items-center justify-between">
+          <div className="gradient-primary p-4 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                 <Bot className="w-6 h-6 text-primary-foreground" />
@@ -102,50 +101,49 @@ export default function AIChatbot() {
             </Button>
           </div>
 
-          <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-            <div className="space-y-4">
-              {messages.map((message, index) => (
-                <div
-                  key={index}
-                  className={`flex gap-3 ${
-                    message.role === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
-                >
-                  {message.role === 'assistant' && (
-                    <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center flex-shrink-0">
-                      <Bot className="w-4 h-4 text-primary-foreground" />
-                    </div>
-                  )}
-                  <div
-                    className={`max-w-[75%] rounded-2xl px-4 py-3 ${
-                      message.role === 'user'
-                        ? 'gradient-primary text-primary-foreground'
-                        : 'bg-muted text-foreground'
-                    }`}
-                  >
-                    <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
-                  </div>
-                  {message.role === 'user' && (
-                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                      <User className="w-4 h-4 text-foreground" />
-                    </div>
-                  )}
-                </div>
-              ))}
-              {isLoading && (
-                <div className="flex gap-3 justify-start">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex gap-3 ${
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
+                }`}
+              >
+                {message.role === 'assistant' && (
                   <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center flex-shrink-0">
                     <Bot className="w-4 h-4 text-primary-foreground" />
                   </div>
-                  <div className="bg-muted rounded-2xl px-4 py-3">
-                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                  </div>
+                )}
+                <div
+                  className={`max-w-[75%] rounded-2xl px-4 py-3 ${
+                    message.role === 'user'
+                      ? 'gradient-primary text-primary-foreground'
+                      : 'bg-muted text-foreground'
+                  }`}
+                >
+                  <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                 </div>
-              )}
-            </div>
-          </ScrollArea>
+                {message.role === 'user' && (
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                    <User className="w-4 h-4 text-foreground" />
+                  </div>
+                )}
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex gap-3 justify-start">
+                <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-4 h-4 text-primary-foreground" />
+                </div>
+                <div className="bg-muted rounded-2xl px-4 py-3">
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
 
-          <div className="p-4 border-t border-border/50">
+          <div className="p-4 border-t border-border/50 flex-shrink-0">
             <div className="flex gap-2">
               <Input
                 value={inputMessage}
