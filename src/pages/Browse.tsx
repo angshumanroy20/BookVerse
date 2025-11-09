@@ -9,6 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import BookDisplay from "@/components/common/BookDisplay";
+import ViewModeToggle from "@/components/common/ViewModeToggle";
+import { useViewMode } from "@/contexts/ViewModeContext";
 
 export default function Browse() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -18,6 +21,7 @@ export default function Browse() {
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const [searching, setSearching] = useState(false);
   const { toast } = useToast();
+  const { viewMode } = useViewMode();
 
   useEffect(() => {
     loadBooks();
@@ -98,10 +102,15 @@ export default function Browse() {
     <div className="min-h-screen bg-background py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-display font-bold mb-4">Browse Books</h1>
-          <p className="text-muted-foreground mb-6">
-            Explore our collection of books across all genres
-          </p>
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h1 className="text-4xl font-display font-bold mb-2">Browse Books</h1>
+              <p className="text-muted-foreground">
+                Explore our collection of books across all genres
+              </p>
+            </div>
+            <ViewModeToggle />
+          </div>
 
           <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 max-w-3xl">
             <div className="relative flex-1">
@@ -134,17 +143,35 @@ export default function Browse() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <Card key={i} className="overflow-hidden">
-                <Skeleton className="w-full aspect-[2/3] bg-muted" />
-                <CardContent className="p-4">
-                  <Skeleton className="h-5 w-3/4 mb-2 bg-muted" />
-                  <Skeleton className="h-4 w-1/2 bg-muted" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          viewMode === "grid" ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <Card key={i} className="overflow-hidden">
+                  <Skeleton className="w-full aspect-[2/3] bg-muted" />
+                  <CardContent className="p-4">
+                    <Skeleton className="h-5 w-3/4 mb-2 bg-muted" />
+                    <Skeleton className="h-4 w-1/2 bg-muted" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Card key={i} className="overflow-hidden">
+                  <div className="flex gap-4 p-4">
+                    <Skeleton className="w-24 xl:w-32 aspect-[2/3] flex-shrink-0 bg-muted rounded-md" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-6 w-3/4 bg-muted" />
+                      <Skeleton className="h-4 w-1/2 bg-muted" />
+                      <Skeleton className="h-4 w-1/3 bg-muted" />
+                      <Skeleton className="h-16 w-full bg-muted" />
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )
         ) : books.length === 0 ? (
           <div className="text-center py-16">
             <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
@@ -161,36 +188,7 @@ export default function Browse() {
             <p className="text-sm text-muted-foreground mb-4">
               Showing {books.length} {books.length === 1 ? "book" : "books"}
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
-              {books.map((book) => (
-                <Link key={book.id} to={`/book/${book.id}`}>
-                  <Card className="overflow-hidden hover-lift group h-full cursor-pointer">
-                    <div className="relative aspect-[2/3] overflow-hidden bg-muted">
-                      {book.cover_image_url ? (
-                        <img
-                          src={book.cover_image_url}
-                          alt={book.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-muted">
-                          <BookOpen className="w-16 h-16 text-muted-foreground" />
-                        </div>
-                      )}
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-display font-semibold text-base mb-1 line-clamp-2 group-hover:text-primary transition-colors">
-                        {book.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-1">{book.author}</p>
-                      {book.genre && (
-                        <p className="text-xs text-muted-foreground mt-1">{book.genre}</p>
-                      )}
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
+            <BookDisplay books={books} />
           </>
         )}
       </div>
