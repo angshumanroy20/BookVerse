@@ -6,6 +6,17 @@ export interface ChatMessage {
   content: string;
 }
 
+// System context for the AI
+const SYSTEM_CONTEXT = `You are a helpful and knowledgeable AI assistant for BookVerse, a comprehensive book management and discovery platform. Your role is to:
+
+1. Help users discover new books based on their interests and reading history
+2. Provide information about books, authors, genres, and literary topics
+3. Offer reading recommendations and suggestions
+4. Answer questions about the BookVerse platform features
+5. Engage in friendly conversations about literature and reading
+
+Be conversational, enthusiastic about books, and provide detailed, helpful responses. If you don't know something specific about a book, be honest but still try to be helpful.`;
+
 // Fallback responses for when API is unavailable
 function getFallbackResponse(message: string): string {
   const lowerMessage = message.toLowerCase();
@@ -36,7 +47,7 @@ function getFallbackResponse(message: string): string {
   }
   
   // Default response
-  return "That's an interesting question! While I'm currently in demo mode, I can help you with:\n\n📖 Book recommendations\n📚 Genre exploration\n✍️ Reading tips\n🔍 Platform features\n\nFeel free to ask me anything about books or reading!";
+  return "I'm currently having trouble connecting to my AI service, but I'm here to help with book recommendations, genre information, reading tips, and platform features. Could you rephrase your question, or ask me about books and reading?";
 }
 
 export async function sendMessageToGemini(message: string, conversationHistory: ChatMessage[] = []): Promise<string> {
@@ -49,7 +60,19 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
     // Build conversation history in Gemini format
     const contents = [];
     
-    // Add conversation history (excluding the initial system message)
+    // Add system context as the first user message if this is the start of conversation
+    if (conversationHistory.length <= 1) {
+      contents.push({
+        role: 'user',
+        parts: [{ text: SYSTEM_CONTEXT }]
+      });
+      contents.push({
+        role: 'model',
+        parts: [{ text: 'I understand. I am a helpful BookVerse AI assistant ready to help users with book recommendations, literary discussions, and platform features. How can I assist you today?' }]
+      });
+    }
+    
+    // Add conversation history (excluding the initial greeting message)
     for (const msg of conversationHistory) {
       // Skip the initial greeting message
       if (msg.role === 'assistant' && msg.content.includes('BookVerse AI assistant')) {
@@ -77,14 +100,15 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
     const requestBody = {
       contents,
       generationConfig: {
-        temperature: 0.7,
+        temperature: 0.8,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 1024,
+        maxOutputTokens: 2048,
       }
     };
 
     console.log('Sending request to Gemini API...');
+    console.log('Request contents:', JSON.stringify(contents, null, 2));
     
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
@@ -97,12 +121,19 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
     console.log('Response status:', response.status);
 
     if (!response.ok) {
-      let errorMessage = `API Error: ${response.status}`;
+      const errorText = await response.text();
+      console.error('Gemini API error response:', errorText);
+      
       try {
-        const errorData = await response.json();
-        console.error('Gemini API error response:', errorData);
+        const errorData = JSON.parse(errorText);
         if (errorData.error?.message) {
-          errorMessage = errorData.error.message;
+          console.error('Error message:', errorData.error.message);
+          
+          // Check for specific errors
+          if (errorData.error.message.includes('API key')) {
+            console.error('API key is invalid or not authorized');
+            return getFallbackResponse(message);
+          }
         }
       } catch (e) {
         console.error('Could not parse error response');
@@ -115,18 +146,21 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
 
     const data = await response.json();
     console.log('Received response from Gemini API');
+    console.log('Response data:', JSON.stringify(data, null, 2));
     
     if (data.candidates && data.candidates.length > 0) {
       const candidate = data.candidates[0];
       if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
-        return candidate.content.parts[0].text;
+        const responseText = candidate.content.parts[0].text;
+        console.log('Successfully extracted response text');
+        return responseText;
       }
     }
 
     // Check if content was blocked
     if (data.promptFeedback?.blockReason) {
-      console.warn('Content blocked, using fallback response');
-      return getFallbackResponse(message);
+      console.warn('Content blocked:', data.promptFeedback.blockReason);
+      return "I apologize, but I cannot respond to that message due to content safety filters. Could you please rephrase your question?";
     }
 
     console.error('Unexpected API response structure:', data);
