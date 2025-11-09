@@ -22,6 +22,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        display: ['"Playfair Display"', 'serif'],
+        body: ['"PT Sans"', 'sans-serif'],
+      },
       colors: {
         border: 'hsl(var(--border))',
         borderColor: {
