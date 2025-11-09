@@ -47,7 +47,7 @@ export function PdfViewer({ pdfUrl, bookTitle, isOpen, onClose }: PdfViewerProps
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[90vw] w-full max-h-[85vh] h-[85vh] p-0 gap-0 flex flex-col">
+      <DialogContent className="max-w-[90vw] w-full max-h-[85vh] h-[85vh] p-0 gap-0 flex flex-col [&>button]:hidden">
         <DialogHeader className="px-3 sm:px-4 py-2 sm:py-3 border-b bg-card flex-shrink-0">
           <div className="flex items-center justify-between gap-2">
             <DialogTitle className="text-sm sm:text-base font-display truncate">

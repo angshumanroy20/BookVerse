@@ -162,6 +162,16 @@ export const api = {
     if (error) throw error;
   },
 
+  async getAllReviews() {
+    const { data, error } = await supabase
+      .from("reviews")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return Array.isArray(data) ? data : [];
+  },
+
   async getBookAverageRating(bookId: string) {
     const { data, error } = await supabase
       .from("reviews")
@@ -345,6 +355,11 @@ export const api = {
 
     if (error) throw error;
     return data;
+  },
+
+  async deleteProfile(userId: string) {
+    const { error } = await supabase.from("profiles").delete().eq("id", userId);
+    if (error) throw error;
   },
 
   // Storage
