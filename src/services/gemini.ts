@@ -6,10 +6,44 @@ export interface ChatMessage {
   content: string;
 }
 
+// Fallback responses for when API is unavailable
+function getFallbackResponse(message: string): string {
+  const lowerMessage = message.toLowerCase();
+  
+  // Book recommendations
+  if (lowerMessage.includes('recommend') || lowerMessage.includes('suggest')) {
+    return "I'd love to help you discover new books! Based on popular choices, I recommend:\n\n📚 Fiction: 'The Midnight Library' by Matt Haig - A beautiful story about life's infinite possibilities\n📚 Mystery: 'The Thursday Murder Club' by Richard Osman - A delightful cozy mystery\n📚 Fantasy: 'The House in the Cerulean Sea' by TJ Klune - A heartwarming magical tale\n\nWhat genre interests you most?";
+  }
+  
+  // Genre questions
+  if (lowerMessage.includes('genre') || lowerMessage.includes('type')) {
+    return "BookVerse has a wide variety of genres including:\n\n• Fiction & Literary\n• Mystery & Thriller\n• Fantasy & Sci-Fi\n• Romance\n• Non-Fiction\n• Biography\n• Self-Help\n\nWhich genre would you like to explore?";
+  }
+  
+  // Reading questions
+  if (lowerMessage.includes('read') || lowerMessage.includes('reading')) {
+    return "Reading is a wonderful journey! Here are some tips:\n\n✨ Set aside dedicated reading time each day\n✨ Find a comfortable, quiet space\n✨ Start with books that genuinely interest you\n✨ Join a book club for motivation\n\nWhat are you currently reading?";
+  }
+  
+  // Help questions
+  if (lowerMessage.includes('help') || lowerMessage.includes('how')) {
+    return "I'm here to help! You can:\n\n• Browse books by genre, author, or rating\n• Get personalized book recommendations\n• Create reading lists\n• Track your reading progress\n• Write reviews and ratings\n\nWhat would you like to do?";
+  }
+  
+  // Greetings
+  if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+    return "Hello! 👋 Welcome to BookVerse! I'm here to help you discover amazing books and enhance your reading experience. What can I help you with today?";
+  }
+  
+  // Default response
+  return "That's an interesting question! While I'm currently in demo mode, I can help you with:\n\n📖 Book recommendations\n📚 Genre exploration\n✍️ Reading tips\n🔍 Platform features\n\nFeel free to ask me anything about books or reading!";
+}
+
 export async function sendMessageToGemini(message: string, conversationHistory: ChatMessage[] = []): Promise<string> {
   try {
     if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your-api-key-here') {
-      throw new Error('Gemini API key is not configured. Please add your API key to the .env file.');
+      console.warn('Gemini API key not configured, using fallback responses');
+      return getFallbackResponse(message);
     }
 
     // Build conversation history in Gemini format
@@ -51,7 +85,6 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
     };
 
     console.log('Sending request to Gemini API...');
-    console.log('API Key (first 10 chars):', GEMINI_API_KEY.substring(0, 10) + '...');
     
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
@@ -64,7 +97,7 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
     console.log('Response status:', response.status);
 
     if (!response.ok) {
-      let errorMessage = `API Error: ${response.status} ${response.statusText}`;
+      let errorMessage = `API Error: ${response.status}`;
       try {
         const errorData = await response.json();
         console.error('Gemini API error response:', errorData);
@@ -74,7 +107,10 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
       } catch (e) {
         console.error('Could not parse error response');
       }
-      throw new Error(errorMessage);
+      
+      // Use fallback for API errors
+      console.warn('API request failed, using fallback response');
+      return getFallbackResponse(message);
     }
 
     const data = await response.json();
@@ -89,16 +125,17 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
 
     // Check if content was blocked
     if (data.promptFeedback?.blockReason) {
-      throw new Error(`Content blocked: ${data.promptFeedback.blockReason}`);
+      console.warn('Content blocked, using fallback response');
+      return getFallbackResponse(message);
     }
 
     console.error('Unexpected API response structure:', data);
-    throw new Error('No valid response received from Gemini API');
+    // Use fallback for unexpected responses
+    return getFallbackResponse(message);
   } catch (error) {
     console.error('Error calling Gemini API:', error);
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error('Failed to communicate with AI service');
+    // Use fallback for any errors
+    console.warn('Using fallback response due to error');
+    return getFallbackResponse(message);
   }
 }

@@ -50,27 +50,10 @@ export default function AIChatbot() {
     } catch (error) {
       console.error('Error sending message:', error);
       
-      let errorMessage = "Failed to get response from AI. Please try again.";
-      if (error instanceof Error) {
-        if (error.message.includes('API key')) {
-          errorMessage = "AI service is not configured properly. Please check API key.";
-        } else if (error.message.includes('blocked')) {
-          errorMessage = "Content was blocked by safety filters. Please rephrase your message.";
-        } else if (error.message.includes('404') || error.message.includes('400')) {
-          errorMessage = "AI service error. Please try again later.";
-        }
-      }
-      
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive"
-      });
-      
-      // Add error message to chat
+      // Add a generic error message to chat
       const errorChatMessage: ChatMessage = {
         role: 'assistant',
-        content: `I apologize, but I encountered an error: ${errorMessage}. Please try asking your question again.`
+        content: "I apologize, but I'm having trouble processing your request right now. Please try again in a moment."
       };
       setMessages(prev => [...prev, errorChatMessage]);
     } finally {
