@@ -14,18 +14,18 @@ interface Track {
 const tracks: Track[] = [
   {
     name: "Peaceful Reading",
-    url: "https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3",
-    duration: "2:30"
+    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    duration: "5:00"
   },
   {
     name: "Ambient Library",
-    url: "https://cdn.pixabay.com/audio/2023/03/10/audio_c8dbccbf54.mp3",
-    duration: "3:15"
+    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+    duration: "5:00"
   },
   {
     name: "Calm Study",
-    url: "https://cdn.pixabay.com/audio/2022/08/23/audio_d1718ab41b.mp3",
-    duration: "2:45"
+    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    duration: "5:00"
   }
 ];
 
