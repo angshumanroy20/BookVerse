@@ -1,5 +1,5 @@
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -35,7 +35,7 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
       parts: [{ text: message }]
     });
 
-    // Ensure we start with a user message
+    // Ensure we start with a user message (Gemini requirement)
     if (contents.length > 0 && contents[0].role === 'model') {
       contents.shift();
     }
@@ -43,32 +43,15 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
     const requestBody = {
       contents,
       generationConfig: {
-        temperature: 0.9,
+        temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 2048,
-      },
-      safetySettings: [
-        {
-          category: 'HARM_CATEGORY_HARASSMENT',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-        },
-        {
-          category: 'HARM_CATEGORY_HATE_SPEECH',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-        },
-        {
-          category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-        },
-        {
-          category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-        }
-      ]
+        maxOutputTokens: 1024,
+      }
     };
 
     console.log('Sending request to Gemini API...');
+    console.log('API Key (first 10 chars):', GEMINI_API_KEY.substring(0, 10) + '...');
     
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
@@ -77,6 +60,8 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
       },
       body: JSON.stringify(requestBody)
     });
+
+    console.log('Response status:', response.status);
 
     if (!response.ok) {
       let errorMessage = `API Error: ${response.status} ${response.statusText}`;
@@ -107,6 +92,7 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
       throw new Error(`Content blocked: ${data.promptFeedback.blockReason}`);
     }
 
+    console.error('Unexpected API response structure:', data);
     throw new Error('No valid response received from Gemini API');
   } catch (error) {
     console.error('Error calling Gemini API:', error);
