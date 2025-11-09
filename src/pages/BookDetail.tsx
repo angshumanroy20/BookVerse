@@ -297,6 +297,15 @@ export default function BookDetail() {
                       </>
                     )}
                   </Button>
+
+                  {book.created_by === user.id && (
+                    <Button asChild variant="outline">
+                      <Link to={`/book/${id}/edit`}>
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit Book
+                      </Link>
+                    </Button>
+                  )}
                 </>
               )}
 

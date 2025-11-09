@@ -67,6 +67,30 @@ export default function Header() {
                   {item.name}
                 </Link>
               ))}
+              {user && (
+                <>
+                  <Link
+                    to="/dashboard"
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                      location.pathname === "/dashboard"
+                        ? "bg-primary text-primary-foreground"
+                        : "text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    to="/my-library"
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                      location.pathname === "/my-library"
+                        ? "bg-primary text-primary-foreground"
+                        : "text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    My Library
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 

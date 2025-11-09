@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { X, Download, ZoomIn, ZoomOut } from "lucide-react";
+import { X, Download, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 
 interface PdfViewerProps {
   pdfUrl: string;
@@ -23,8 +23,8 @@ export function PdfViewer({ pdfUrl, bookTitle, isOpen, onClose }: PdfViewerProps
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl h-[90vh] p-0">
-        <DialogHeader className="px-6 py-4 border-b">
+      <DialogContent className="max-w-[95vw] w-full h-[95vh] p-0 gap-0">
+        <DialogHeader className="px-6 py-4 border-b bg-card">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-display">{bookTitle}</DialogTitle>
             <div className="flex items-center gap-2">
@@ -41,13 +41,21 @@ export function PdfViewer({ pdfUrl, bookTitle, isOpen, onClose }: PdfViewerProps
                   Download
                 </a>
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(pdfUrl, "_blank")}
+              >
+                <Maximize2 className="w-4 h-4 mr-2" />
+                Full Screen
+              </Button>
               <Button variant="ghost" size="icon" onClick={onClose}>
                 <X className="w-4 h-4" />
               </Button>
             </div>
           </div>
         </DialogHeader>
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden bg-muted">
           <iframe
             src={`${pdfUrl}#zoom=${zoom}`}
             className="w-full h-full border-0"

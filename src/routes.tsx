@@ -2,6 +2,7 @@ import Home from './pages/Home';
 import Browse from './pages/Browse';
 import BookDetail from './pages/BookDetail';
 import UploadBook from './pages/UploadBook';
+import EditBook from './pages/EditBook';
 import MyLibrary from './pages/MyLibrary';
 import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
@@ -42,6 +43,13 @@ const routes: RouteConfig[] = [
     name: 'Upload Book',
     path: '/upload',
     element: <UploadBook />,
+    visible: false,
+    requireAuth: true
+  },
+  {
+    name: 'Edit Book',
+    path: '/book/:id/edit',
+    element: <EditBook />,
     visible: false,
     requireAuth: true
   },
