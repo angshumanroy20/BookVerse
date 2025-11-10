@@ -1,5 +1,5 @@
-const APP_ID = import.meta.env.VITE_APP_ID;
-const AI_SEARCH_URL = "https://api-integrations.appmedo.com/app-7flusvzm3281/api-DLEOVEz2yxwa/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse";
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:streamGenerateContent?alt=sse';
 
 export interface AISearchChunk {
   text: string;
@@ -12,8 +12,11 @@ export interface AISearchChunk {
 
 export async function* streamAISearch(query: string): AsyncGenerator<AISearchChunk> {
   console.log("🔍 Starting AI Search for query:", query);
-  console.log("📱 APP_ID:", APP_ID);
-  console.log("🔗 API URL:", AI_SEARCH_URL);
+  console.log("🔑 Using Gemini API key:", GEMINI_API_KEY?.substring(0, 15) + "...");
+
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your-api-key-here') {
+    throw new Error("Gemini API key is not configured. Please add VITE_GEMINI_API_KEY to your .env file.");
+  }
 
   const bookContextPrompt = `You are a knowledgeable book expert and librarian. Help users find books based on their interests and queries. 
 
@@ -22,13 +25,13 @@ User query: ${query}
 Please provide book recommendations, insights, or answers related to books and literature. If the query is about finding specific types of books, suggest popular and well-regarded titles in that category. Include author names and brief descriptions when relevant.`;
 
   try {
-    console.log("📤 Sending request to AI Search API...");
+    const apiUrl = `${GEMINI_API_URL}&key=${GEMINI_API_KEY}`;
+    console.log("📤 Sending request to Gemini API...");
     
-    const response = await fetch(AI_SEARCH_URL, {
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-App-Id": APP_ID,
       },
       body: JSON.stringify({
         contents: [
@@ -41,6 +44,12 @@ Please provide book recommendations, insights, or answers related to books and l
             ],
           },
         ],
+        generationConfig: {
+          temperature: 0.9,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048,
+        },
       }),
     });
 
@@ -49,7 +58,19 @@ Please provide book recommendations, insights, or answers related to books and l
     if (!response.ok) {
       const errorText = await response.text();
       console.error("❌ API Error:", errorText);
-      throw new Error(`AI Search failed: ${response.status} ${response.statusText}\n${errorText}`);
+      
+      let errorMessage = `AI Search failed: ${response.status} ${response.statusText}`;
+      
+      try {
+        const errorJson = JSON.parse(errorText);
+        if (errorJson.error?.message) {
+          errorMessage = errorJson.error.message;
+        }
+      } catch (e) {
+        // Error text is not JSON, use as is
+      }
+      
+      throw new Error(errorMessage);
     }
 
     const reader = response.body?.getReader();
@@ -61,7 +82,6 @@ Please provide book recommendations, insights, or answers related to books and l
 
     let buffer = "";
     let accumulatedText = "";
-    let sources: Array<{ uri: string; title: string }> = [];
     let chunkCount = 0;
 
     try {
@@ -73,7 +93,6 @@ Please provide book recommendations, insights, or answers related to books and l
           yield {
             text: accumulatedText,
             isComplete: true,
-            sources: sources.length > 0 ? sources : undefined,
           };
           break;
         }
@@ -105,22 +124,9 @@ Please provide book recommendations, insights, or answers related to books and l
                   }
                 }
 
-                if (candidate.groundingMetadata?.groundingChunks) {
-                  const chunks = candidate.groundingMetadata.groundingChunks;
-                  for (const chunk of chunks) {
-                    if (chunk.web && !sources.some(s => s.uri === chunk.web.uri)) {
-                      sources.push({
-                        uri: chunk.web.uri,
-                        title: chunk.web.title,
-                      });
-                    }
-                  }
-                }
-
                 yield {
                   text: accumulatedText,
                   isComplete: false,
-                  sources: sources.length > 0 ? sources : undefined,
                 };
               }
             } catch (e) {

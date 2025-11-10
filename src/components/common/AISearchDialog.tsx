@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, Search, ExternalLink, Loader2 } from "lucide-react";
+import { Sparkles, Search, Loader2 } from "lucide-react";
 import { streamAISearch } from "@/services/aiSearch";
 import { useToast } from "@/hooks/use-toast";
 
@@ -25,7 +25,6 @@ export default function AISearchDialog({
 }: AISearchDialogProps) {
   const [query, setQuery] = useState(initialQuery);
   const [response, setResponse] = useState("");
-  const [sources, setSources] = useState<Array<{ uri: string; title: string }>>([]);
   const [isSearching, setIsSearching] = useState(false);
   const { toast } = useToast();
 
@@ -44,7 +43,6 @@ export default function AISearchDialog({
     console.log("🔍 Starting AI search for:", query);
     setIsSearching(true);
     setResponse("");
-    setSources([]);
 
     try {
       let hasReceivedData = false;
@@ -53,9 +51,6 @@ export default function AISearchDialog({
         hasReceivedData = true;
         console.log("📦 Received chunk:", chunk.text.substring(0, 50) + "...");
         setResponse(chunk.text);
-        if (chunk.sources) {
-          setSources(chunk.sources);
-        }
       }
 
       if (!hasReceivedData) {
@@ -87,7 +82,6 @@ export default function AISearchDialog({
     setTimeout(() => {
       setQuery("");
       setResponse("");
-      setSources([]);
     }, 300);
   };
 
@@ -152,30 +146,6 @@ export default function AISearchDialog({
                   </div>
                 )}
               </div>
-
-              {/* Sources */}
-              {sources.length > 0 && (
-                <div className="rounded-lg border bg-background p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <ExternalLink className="w-4 h-4 text-muted-foreground" />
-                    <h3 className="font-semibold text-sm">Sources</h3>
-                  </div>
-                  <div className="space-y-2">
-                    {sources.map((source, index) => (
-                      <a
-                        key={index}
-                        href={source.uri}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-sm text-primary hover:underline group"
-                      >
-                        <ExternalLink className="w-3 h-3 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" />
-                        <span className="truncate">{source.title}</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
