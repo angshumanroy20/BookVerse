@@ -7,11 +7,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookOpen, Search, Mic } from "lucide-react";
+import { BookOpen, Search, Mic, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BookDisplay from "@/components/common/BookDisplay";
 import ViewModeToggle from "@/components/common/ViewModeToggle";
 import VoiceSearchDialog from "@/components/common/VoiceSearchDialog";
+import AISearchDialog from "@/components/common/AISearchDialog";
 import { useViewMode } from "@/contexts/ViewModeContext";
 
 export default function Browse() {
@@ -22,6 +23,7 @@ export default function Browse() {
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const [searching, setSearching] = useState(false);
   const [voiceDialogOpen, setVoiceDialogOpen] = useState(false);
+  const [aiSearchDialogOpen, setAiSearchDialogOpen] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
   const { toast } = useToast();
   const { viewMode } = useViewMode();
@@ -193,6 +195,15 @@ export default function Browse() {
             <Button type="submit" disabled={searching}>
               {searching ? "Searching..." : "Search"}
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setAiSearchDialogOpen(true)}
+              className="gap-2"
+            >
+              <Sparkles className="w-4 h-4" />
+              AI Search
+            </Button>
           </form>
         </div>
 
@@ -251,6 +262,12 @@ export default function Browse() {
         open={voiceDialogOpen}
         onOpenChange={setVoiceDialogOpen}
         onTranscriptComplete={handleVoiceSearchComplete}
+      />
+
+      <AISearchDialog
+        open={aiSearchDialogOpen}
+        onOpenChange={setAiSearchDialogOpen}
+        initialQuery={searchQuery}
       />
     </div>
   );
