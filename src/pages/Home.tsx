@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen, Star, TrendingUp, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import BookDisplay from "@/components/common/BookDisplay";
 import ViewModeToggle from "@/components/common/ViewModeToggle";
+import RandomThought from "@/components/common/RandomThought";
 import { useViewMode } from "@/contexts/ViewModeContext";
 
 export default function Home() {
@@ -104,6 +105,12 @@ export default function Home() {
               </Link>
             </Button>
           </div>
+        </div>
+      </section>
+
+      <section className="py-12 xl:py-16 bg-background">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <RandomThought />
         </div>
       </section>
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/db/api";
 import type { Book } from "@/types/types";
@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookOpen, Search } from "lucide-react";
+import { BookOpen, Search, Mic, MicOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BookDisplay from "@/components/common/BookDisplay";
 import ViewModeToggle from "@/components/common/ViewModeToggle";
@@ -20,13 +20,114 @@ export default function Browse() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const [searching, setSearching] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const recognitionRef = useRef<any>(null);
   const { toast } = useToast();
   const { viewMode } = useViewMode();
 
   useEffect(() => {
     loadBooks();
     loadGenres();
+    initVoiceRecognition();
   }, []);
+
+  const initVoiceRecognition = () => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setSearchQuery(transcript);
+        
+        toast({
+          title: "Voice recognized",
+          description: `Searching for: "${transcript}"`,
+        });
+
+        setTimeout(() => {
+          handleVoiceSearch(transcript);
+        }, 500);
+      };
+
+      recognition.onerror = (event: any) => {
+        setIsListening(false);
+        
+        if (event.error === 'no-speech') {
+          toast({
+            title: "No speech detected",
+            description: "Please try again and speak clearly",
+            variant: "destructive",
+          });
+        } else if (event.error === 'not-allowed') {
+          toast({
+            title: "Microphone access denied",
+            description: "Please allow microphone access to use voice search",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Voice recognition error",
+            description: "Please try again",
+            variant: "destructive",
+          });
+        }
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      setVoiceSupported(true);
+    } else {
+      setVoiceSupported(false);
+    }
+  };
+
+  const handleVoiceSearch = async (query: string) => {
+    if (!query.trim()) return;
+
+    try {
+      setSearching(true);
+      const data = await api.searchBooks(query);
+      setBooks(data);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Search failed",
+        variant: "destructive",
+      });
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const toggleVoiceSearch = () => {
+    if (!voiceSupported) {
+      toast({
+        title: "Voice search not supported",
+        description: "Your browser doesn't support voice recognition",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      recognitionRef.current?.start();
+    }
+  };
 
   const loadBooks = async () => {
     try {
@@ -120,8 +221,22 @@ export default function Browse() {
                 placeholder="Search by title, author, or genre..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 pr-12"
               />
+              {voiceSupported && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleVoiceSearch}
+                  className={`absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 ${
+                    isListening ? 'text-red-500 animate-pulse' : 'text-muted-foreground hover:text-primary'
+                  }`}
+                  title={isListening ? "Stop listening" : "Voice search"}
+                >
+                  {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                </Button>
+              )}
             </div>
             <Select value={selectedGenre} onValueChange={handleGenreChange}>
               <SelectTrigger className="w-full sm:w-48">
