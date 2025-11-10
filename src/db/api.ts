@@ -415,7 +415,10 @@ export const api = {
 
   // Contact Submissions
   async createContactSubmission(submission: Omit<ContactSubmission, 'id' | 'status' | 'created_at'>) {
-    console.log('Creating contact submission:', submission);
+    console.log('=== API: Creating contact submission ===');
+    console.log('Submission data:', submission);
+    console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
+    
     const { data, error } = await supabase
       .from("contact_submissions")
       .insert([submission])
@@ -423,10 +426,19 @@ export const api = {
       .maybeSingle();
 
     if (error) {
-      console.error('Error creating contact submission:', error);
-      throw error;
+      console.error('=== API: Supabase error ===');
+      console.error('Error object:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      console.error('Error details:', error.details);
+      console.error('Error hint:', error.hint);
+      
+      // Throw a proper Error object with the Supabase error message
+      throw new Error(error.message || 'Failed to create contact submission');
     }
-    console.log('Contact submission created successfully:', data);
+    
+    console.log('=== API: Contact submission created successfully ===');
+    console.log('Result:', data);
     return data;
   },
 

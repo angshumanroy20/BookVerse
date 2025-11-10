@@ -35,13 +35,6 @@ export default function AIChatbot() {
   const handleModelChange = (model: AIModel) => {
     setSelectedModelState(model);
     setSelectedModel(model);
-    
-    // Add a system message about the model switch
-    const systemMessage: ChatMessage = {
-      role: 'assistant',
-      content: `Switched to ${getModelDisplayName(model)}. How can I assist you?`
-    };
-    setMessages(prev => [...prev, systemMessage]);
   };
 
   const scrollToBottom = () => {

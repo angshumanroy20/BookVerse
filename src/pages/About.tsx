@@ -33,16 +33,37 @@ export default function About() {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     try {
-      console.log('Submitting contact form with data:', data);
-      await api.createContactSubmission(data);
+      console.log('=== Contact Form Submission ===');
+      console.log('Form data:', data);
+      console.log('Calling API...');
+      
+      const result = await api.createContactSubmission(data);
+      
+      console.log('API call successful:', result);
+      
       toast({
         title: "Message Sent! ✉️",
         description: "Thank you for reaching out. We'll get back to you soon!",
       });
       form.reset();
     } catch (error) {
-      console.error("Error submitting contact form:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to send message. Please try again.";
+      console.error("=== Contact Form Error ===");
+      console.error("Error object:", error);
+      console.error("Error type:", typeof error);
+      
+      if (error && typeof error === 'object') {
+        console.error("Error keys:", Object.keys(error));
+        console.error("Error details:", JSON.stringify(error, null, 2));
+      }
+      
+      let errorMessage = "Failed to send message. Please try again.";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+      
       toast({
         title: "Error Sending Message",
         description: errorMessage,
