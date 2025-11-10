@@ -73,14 +73,14 @@ export default function AIChatbot() {
         <Button
           onClick={() => setIsOpen(true)}
           size="icon"
-          className="fixed bottom-6 right-6 w-16 h-16 rounded-full gradient-primary shadow-glow hover:scale-110 transition-all duration-300 z-50"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-14 h-14 sm:w-16 sm:h-16 rounded-full gradient-primary shadow-glow hover:scale-110 transition-all duration-300 z-50"
         >
-          <MessageCircle className="w-7 h-7 text-primary-foreground" />
+          <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 text-primary-foreground" />
         </Button>
       )}
 
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 w-[380px] h-[600px] flex flex-col shadow-2xl z-50 rounded-3xl border-2 border-border/50 overflow-hidden">
+        <Card className="fixed bottom-4 right-4 w-[calc(100vw-2rem)] max-w-[380px] h-[500px] max-h-[calc(100vh-2rem)] sm:bottom-6 sm:right-6 sm:h-[600px] flex flex-col shadow-2xl z-50 rounded-3xl border-2 border-border/50 overflow-hidden">
           <div className="gradient-primary p-4 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">

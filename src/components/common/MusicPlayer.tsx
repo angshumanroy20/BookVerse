@@ -122,9 +122,9 @@ export default function MusicPlayer() {
   };
 
   return (
-    <div className="fixed bottom-6 left-6 z-50">
+    <div className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-50">
       <Card className={`bg-card/95 backdrop-blur-sm border-2 border-border/50 shadow-2xl rounded-3xl transition-all duration-300 ${
-        isExpanded ? "w-80" : "w-16"
+        isExpanded ? "w-80" : "w-14 sm:w-16"
       }`}>
         <div className="p-3">
           {!isExpanded ? (
@@ -133,9 +133,9 @@ export default function MusicPlayer() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsExpanded(true)}
-                className="hover:bg-primary/10 transition-colors rounded-full"
+                className="hover:bg-primary/10 transition-colors rounded-full h-8 w-8 sm:h-10 sm:w-10"
               >
-                <Music className="w-5 h-5 text-primary" />
+                <Music className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               </Button>
               {isPlaying && (
                 <div className="flex gap-0.5">

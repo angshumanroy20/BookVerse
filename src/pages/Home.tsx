@@ -11,14 +11,24 @@ import BookDisplay from "@/components/common/BookDisplay";
 import ViewModeToggle from "@/components/common/ViewModeToggle";
 import { useViewMode } from "@/contexts/ViewModeContext";
 
-const BOOKS_PER_PAGE = 5;
-
 export default function Home() {
   const { profile } = useAuth();
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const { viewMode } = useViewMode();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     loadBooks();
@@ -35,6 +45,7 @@ export default function Home() {
     }
   };
 
+  const BOOKS_PER_PAGE = isMobile ? 6 : 5;
   const totalPages = Math.ceil(books.length / BOOKS_PER_PAGE);
   const startIndex = (currentPage - 1) * BOOKS_PER_PAGE;
   const endIndex = startIndex + BOOKS_PER_PAGE;
