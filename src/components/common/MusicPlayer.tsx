@@ -124,24 +124,24 @@ export default function MusicPlayer() {
   return (
     <div className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-50">
       <Card className={`bg-card/95 backdrop-blur-sm border-2 border-border/50 shadow-2xl rounded-3xl transition-all duration-300 ${
-        isExpanded ? "w-80" : "w-14 sm:w-16"
+        isExpanded ? "w-80" : "w-12"
       }`}>
-        <div className="p-3">
+        <div className={isExpanded ? "p-3" : "p-2"}>
           {!isExpanded ? (
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-1.5">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsExpanded(true)}
-                className="hover:bg-primary/10 transition-colors rounded-full h-8 w-8 sm:h-10 sm:w-10"
+                className="hover:bg-primary/10 transition-colors rounded-full h-8 w-8"
               >
-                <Music className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                <Music className="w-4 h-4 text-primary" />
               </Button>
               {isPlaying && (
                 <div className="flex gap-0.5">
-                  <div className="w-1 h-3 bg-primary animate-pulse" style={{ animationDelay: "0ms" }} />
-                  <div className="w-1 h-4 bg-primary animate-pulse" style={{ animationDelay: "150ms" }} />
-                  <div className="w-1 h-3 bg-primary animate-pulse" style={{ animationDelay: "300ms" }} />
+                  <div className="w-0.5 h-2 bg-primary animate-pulse" style={{ animationDelay: "0ms" }} />
+                  <div className="w-0.5 h-3 bg-primary animate-pulse" style={{ animationDelay: "150ms" }} />
+                  <div className="w-0.5 h-2 bg-primary animate-pulse" style={{ animationDelay: "300ms" }} />
                 </div>
               )}
             </div>

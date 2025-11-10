@@ -135,7 +135,7 @@ export default function About() {
 
             {/* Contact Form */}
             <div>
-              <Card className="border-2 border-primary/20 shadow-glow sticky top-6 z-10 bg-card">
+              <Card className="border-2 border-primary/20 shadow-glow">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MessageSquare className="w-5 h-5 text-primary" />
