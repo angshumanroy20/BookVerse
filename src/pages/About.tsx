@@ -33,6 +33,7 @@ export default function About() {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     try {
+      console.log('Submitting contact form with data:', data);
       await api.createContactSubmission(data);
       toast({
         title: "Message Sent! ✉️",
@@ -41,9 +42,10 @@ export default function About() {
       form.reset();
     } catch (error) {
       console.error("Error submitting contact form:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to send message. Please try again.";
       toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
+        title: "Error Sending Message",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

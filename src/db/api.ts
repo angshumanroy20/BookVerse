@@ -415,13 +415,18 @@ export const api = {
 
   // Contact Submissions
   async createContactSubmission(submission: Omit<ContactSubmission, 'id' | 'status' | 'created_at'>) {
+    console.log('Creating contact submission:', submission);
     const { data, error } = await supabase
       .from("contact_submissions")
       .insert([submission])
       .select()
       .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error creating contact submission:', error);
+      throw error;
+    }
+    console.log('Contact submission created successfully:', data);
     return data;
   },
 
