@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, User, LogOut, Library, Upload, Moon, Sun, LayoutDashboard, Menu, Sparkles } from "lucide-react";
+import { BookOpen, User, LogOut, Library, Upload, Moon, Sun, LayoutDashboard, Menu, Sparkles, Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -160,6 +160,12 @@ export default function Header() {
                         My Library
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/inbox" className="cursor-pointer py-3 px-4 hover:bg-muted/50 transition-colors">
+                        <Inbox className="w-4 h-4 mr-3" />
+                        Inbox
+                      </Link>
+                    </DropdownMenuItem>
                     {profile?.role === "admin" && (
                       <DropdownMenuItem asChild>
                         <Link to="/admin" className="cursor-pointer py-3 px-4 hover:bg-muted/50 transition-colors">
@@ -263,6 +269,18 @@ export default function Header() {
                         >
                           <Library className="w-4 h-4" />
                           My Library
+                        </Link>
+                        <Link
+                          to="/inbox"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`px-5 py-3.5 text-sm font-medium rounded-xl transition-all duration-300 flex items-center gap-3 ${
+                            location.pathname === "/inbox"
+                              ? "gradient-primary text-primary-foreground shadow-glow"
+                              : "text-foreground hover:bg-muted/50"
+                          }`}
+                        >
+                          <Inbox className="w-4 h-4" />
+                          Inbox
                         </Link>
                         {profile?.role === "admin" && (
                           <Link

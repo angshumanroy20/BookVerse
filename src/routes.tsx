@@ -9,6 +9,7 @@ import Admin from './pages/Admin';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import About from './pages/About';
+import Inbox from './pages/Inbox';
 import type { ReactNode } from 'react';
 
 export interface RouteConfig {
@@ -80,6 +81,13 @@ const routes: RouteConfig[] = [
     name: 'Profile',
     path: '/profile',
     element: <Profile />,
+    visible: false,
+    requireAuth: true
+  },
+  {
+    name: 'Inbox',
+    path: '/inbox',
+    element: <Inbox />,
     visible: false,
     requireAuth: true
   },

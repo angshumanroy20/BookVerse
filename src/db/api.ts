@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { Book, Review, ReadingList, Bookmark, Profile, ReadingStatus, ContactSubmission } from "@/types/types";
+import type { Book, Review, ReadingList, Bookmark, Profile, ReadingStatus, ContactSubmission, ContactReply, ContactSubmissionWithReplies } from "@/types/types";
 
 export const api = {
   // Books
@@ -463,5 +463,97 @@ export const api = {
 
     if (error) throw error;
     return data;
+  },
+
+  async getContactSubmissionWithReplies(id: string): Promise<ContactSubmissionWithReplies | null> {
+    const { data: submission, error: submissionError } = await supabase
+      .from("contact_submissions")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (submissionError) throw submissionError;
+    if (!submission) return null;
+
+    const { data: replies, error: repliesError } = await supabase
+      .from("contact_replies")
+      .select(`
+        *,
+        admin:profiles!admin_id(id, username, email)
+      `)
+      .eq("contact_submission_id", id)
+      .order("created_at", { ascending: true });
+
+    if (repliesError) throw repliesError;
+
+    return {
+      ...submission,
+      replies: Array.isArray(replies) ? replies : [],
+    };
+  },
+
+  async createContactReply(submissionId: string, adminId: string, replyMessage: string) {
+    const { data, error } = await supabase
+      .from("contact_replies")
+      .insert([{
+        contact_submission_id: submissionId,
+        admin_id: adminId,
+        reply_message: replyMessage,
+      }])
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async getContactReplies(submissionId: string) {
+    const { data, error } = await supabase
+      .from("contact_replies")
+      .select(`
+        *,
+        admin:profiles!admin_id(id, username, email)
+      `)
+      .eq("contact_submission_id", submissionId)
+      .order("created_at", { ascending: true });
+
+    if (error) throw error;
+    return Array.isArray(data) ? data : [];
+  },
+
+  async getUserContactSubmissions(userEmail: string): Promise<ContactSubmissionWithReplies[]> {
+    const { data: submissions, error: submissionsError } = await supabase
+      .from("contact_submissions")
+      .select("*")
+      .eq("email", userEmail)
+      .order("created_at", { ascending: false });
+
+    if (submissionsError) throw submissionsError;
+    if (!Array.isArray(submissions) || submissions.length === 0) return [];
+
+    const submissionsWithReplies = await Promise.all(
+      submissions.map(async (submission) => {
+        const { data: replies, error: repliesError } = await supabase
+          .from("contact_replies")
+          .select(`
+            *,
+            admin:profiles!admin_id(id, username, email)
+          `)
+          .eq("contact_submission_id", submission.id)
+          .order("created_at", { ascending: true });
+
+        if (repliesError) {
+          console.error("Error fetching replies:", repliesError);
+          return { ...submission, replies: [] };
+        }
+
+        return {
+          ...submission,
+          replies: Array.isArray(replies) ? replies : [],
+        };
+      })
+    );
+
+    return submissionsWithReplies;
   },
 };

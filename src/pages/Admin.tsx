@@ -2,15 +2,18 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/db/api";
 import { useAuth } from "@/contexts/AuthContext";
-import type { Profile, Book, ContactSubmission } from "@/types/types";
+import type { Profile, Book, ContactSubmission, ContactSubmissionWithReplies } from "@/types/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Users, BookOpen, Edit, Trash2, Eye, BarChart3, Library, MessageSquare } from "lucide-react";
+import { Shield, Users, BookOpen, Edit, Trash2, Eye, BarChart3, Library, MessageSquare, Reply, Mail } from "lucide-react";
 
 export default function Admin() {
   const { profile } = useAuth();
@@ -21,6 +24,11 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [booksLoading, setBooksLoading] = useState(true);
   const [contactsLoading, setContactsLoading] = useState(true);
+  const [selectedSubmission, setSelectedSubmission] = useState<ContactSubmissionWithReplies | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [replyDialogOpen, setReplyDialogOpen] = useState(false);
+  const [replyMessage, setReplyMessage] = useState("");
+  const [replyLoading, setReplyLoading] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalBooks: 0,
@@ -167,6 +175,76 @@ export default function Admin() {
         description: "Failed to delete user",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleViewSubmission = async (submissionId: string) => {
+    try {
+      const submission = await api.getContactSubmissionWithReplies(submissionId);
+      setSelectedSubmission(submission);
+      setViewDialogOpen(true);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load submission details",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleOpenReplyDialog = async (submissionId: string) => {
+    try {
+      const submission = await api.getContactSubmissionWithReplies(submissionId);
+      setSelectedSubmission(submission);
+      setReplyMessage("");
+      setReplyDialogOpen(true);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load submission details",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSendReply = async () => {
+    if (!selectedSubmission || !profile?.id || !replyMessage.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a reply message",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setReplyLoading(true);
+      await api.createContactReply(selectedSubmission.id, profile.id, replyMessage);
+      
+      await api.updateContactSubmissionStatus(selectedSubmission.id, "reviewed");
+      
+      setContactSubmissions(
+        contactSubmissions.map((c) =>
+          c.id === selectedSubmission.id ? { ...c, status: "reviewed" as any } : c
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: "Reply sent successfully",
+      });
+
+      setReplyDialogOpen(false);
+      setReplyMessage("");
+      setSelectedSubmission(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send reply",
+        variant: "destructive",
+      });
+    } finally {
+      setReplyLoading(false);
     }
   };
 
@@ -444,6 +522,7 @@ export default function Admin() {
                           <TableHead>Message</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead>Date</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -473,6 +552,26 @@ export default function Admin() {
                             <TableCell>
                               {new Date(submission.created_at).toLocaleDateString()}
                             </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleViewSubmission(submission.id)}
+                                  title="View full message"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleOpenReplyDialog(submission.id)}
+                                  title="Reply to message"
+                                >
+                                  <Reply className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -483,6 +582,146 @@ export default function Admin() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* View Submission Dialog */}
+        <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5" />
+                Contact Submission Details
+              </DialogTitle>
+              <DialogDescription>
+                Full message and conversation history
+              </DialogDescription>
+            </DialogHeader>
+            {selectedSubmission && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Name</Label>
+                    <p className="text-sm mt-1">{selectedSubmission.name}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Email</Label>
+                    <p className="text-sm mt-1">{selectedSubmission.email}</p>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Subject</Label>
+                  <p className="text-sm mt-1">{selectedSubmission.subject}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Status</Label>
+                  <p className="text-sm mt-1 capitalize">{selectedSubmission.status}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Date</Label>
+                  <p className="text-sm mt-1">
+                    {new Date(selectedSubmission.created_at).toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Message</Label>
+                  <div className="mt-2 p-4 bg-muted rounded-lg">
+                    <p className="text-sm whitespace-pre-wrap">{selectedSubmission.message}</p>
+                  </div>
+                </div>
+
+                {selectedSubmission.replies && selectedSubmission.replies.length > 0 && (
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      Admin Replies ({selectedSubmission.replies.length})
+                    </Label>
+                    <div className="mt-2 space-y-3">
+                      {selectedSubmission.replies.map((reply) => (
+                        <div key={reply.id} className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-medium text-primary">
+                              {reply.admin?.username || reply.admin?.email || "Admin"}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(reply.created_at).toLocaleString()}
+                            </span>
+                          </div>
+                          <p className="text-sm whitespace-pre-wrap">{reply.reply_message}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setViewDialogOpen(false)}>
+                Close
+              </Button>
+              <Button onClick={() => {
+                setViewDialogOpen(false);
+                if (selectedSubmission) {
+                  handleOpenReplyDialog(selectedSubmission.id);
+                }
+              }}>
+                <Reply className="w-4 h-4 mr-2" />
+                Reply
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reply Dialog */}
+        <Dialog open={replyDialogOpen} onOpenChange={setReplyDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Reply className="w-5 h-5" />
+                Reply to Contact Submission
+              </DialogTitle>
+              <DialogDescription>
+                Send a reply to {selectedSubmission?.name} ({selectedSubmission?.email})
+              </DialogDescription>
+            </DialogHeader>
+            {selectedSubmission && (
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Original Message</Label>
+                  <div className="mt-2 p-3 bg-muted rounded-lg">
+                    <p className="text-sm font-medium">{selectedSubmission.subject}</p>
+                    <p className="text-sm mt-1 text-muted-foreground line-clamp-3">
+                      {selectedSubmission.message}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="reply-message">Your Reply</Label>
+                  <Textarea
+                    id="reply-message"
+                    placeholder="Type your reply here..."
+                    value={replyMessage}
+                    onChange={(e) => setReplyMessage(e.target.value)}
+                    rows={6}
+                    className="mt-2"
+                  />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setReplyDialogOpen(false);
+                  setReplyMessage("");
+                }}
+                disabled={replyLoading}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleSendReply} disabled={replyLoading || !replyMessage.trim()}>
+                {replyLoading ? "Sending..." : "Send Reply"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

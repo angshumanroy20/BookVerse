@@ -62,6 +62,22 @@ export interface ContactSubmission {
   created_at: string;
 }
 
+export interface ContactReply {
+  id: string;
+  contact_submission_id: string;
+  admin_id: string;
+  reply_message: string;
+  created_at: string;
+}
+
+export interface ContactSubmissionWithReplies extends ContactSubmission {
+  replies?: ContactReplyWithAdmin[];
+}
+
+export interface ContactReplyWithAdmin extends ContactReply {
+  admin?: Profile;
+}
+
 export interface BookWithDetails extends Book {
   creator?: Profile;
   reviews?: ReviewWithUser[];
