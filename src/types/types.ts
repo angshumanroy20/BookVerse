@@ -1,5 +1,6 @@
 export type UserRole = 'user' | 'admin';
 export type ReadingStatus = 'want_to_read' | 'currently_reading' | 'read';
+export type ContactStatus = 'pending' | 'reviewed' | 'resolved';
 
 export interface Profile {
   id: string;
@@ -48,6 +49,16 @@ export interface Bookmark {
   book_id: string;
   page_number: number;
   note: string | null;
+  created_at: string;
+}
+
+export interface ContactSubmission {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: ContactStatus;
   created_at: string;
 }
 

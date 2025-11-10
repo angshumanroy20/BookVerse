@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
+import About from './pages/About';
 import type { ReactNode } from 'react';
 
 export interface RouteConfig {
@@ -30,6 +31,13 @@ const routes: RouteConfig[] = [
     name: 'Browse',
     path: '/browse',
     element: <Browse />,
+    visible: true,
+    requireAuth: false
+  },
+  {
+    name: 'About',
+    path: '/about',
+    element: <About />,
     visible: true,
     requireAuth: false
   },

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/db/api";
 import { useAuth } from "@/contexts/AuthContext";
-import type { Profile, Book } from "@/types/types";
+import type { Profile, Book, ContactSubmission } from "@/types/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,15 +10,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Users, BookOpen, Edit, Trash2, Eye, BarChart3, Library } from "lucide-react";
+import { Shield, Users, BookOpen, Edit, Trash2, Eye, BarChart3, Library, MessageSquare } from "lucide-react";
 
 export default function Admin() {
   const { profile } = useAuth();
   const { toast } = useToast();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
+  const [contactSubmissions, setContactSubmissions] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [booksLoading, setBooksLoading] = useState(true);
+  const [contactsLoading, setContactsLoading] = useState(true);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalBooks: 0,
@@ -30,6 +32,7 @@ export default function Admin() {
       loadProfiles();
       loadBooks();
       loadStats();
+      loadContactSubmissions();
     }
   }, [profile]);
 
@@ -75,6 +78,42 @@ export default function Admin() {
       });
     } catch (error) {
       console.error("Error loading stats:", error);
+    }
+  };
+
+  const loadContactSubmissions = async () => {
+    try {
+      setContactsLoading(true);
+      const data = await api.getContactSubmissions();
+      setContactSubmissions(data);
+    } catch (error) {
+      console.error("Error loading contact submissions:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load contact submissions",
+        variant: "destructive",
+      });
+    } finally {
+      setContactsLoading(false);
+    }
+  };
+
+  const handleContactStatusChange = async (id: string, status: string) => {
+    try {
+      await api.updateContactSubmissionStatus(id, status);
+      setContactSubmissions(
+        contactSubmissions.map((c) => (c.id === id ? { ...c, status: status as any } : c))
+      );
+      toast({
+        title: "Success",
+        description: "Contact status updated successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update contact status",
+        variant: "destructive",
+      });
     }
   };
 
@@ -195,9 +234,10 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="books" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className="grid w-full max-w-2xl grid-cols-3">
             <TabsTrigger value="books">Books Management</TabsTrigger>
             <TabsTrigger value="users">Users Management</TabsTrigger>
+            <TabsTrigger value="contacts">Contact Messages</TabsTrigger>
           </TabsList>
 
           <TabsContent value="books" className="space-y-4">
@@ -369,6 +409,69 @@ export default function Admin() {
                                   </AlertDialogContent>
                                 </AlertDialog>
                               )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="contacts" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" />
+                  Contact Submissions ({contactSubmissions.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {contactsLoading ? (
+                  <p className="text-muted-foreground">Loading contact submissions...</p>
+                ) : contactSubmissions.length === 0 ? (
+                  <p className="text-muted-foreground">No contact submissions found</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Subject</TableHead>
+                          <TableHead>Message</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {contactSubmissions.map((submission) => (
+                          <TableRow key={submission.id}>
+                            <TableCell className="font-medium">{submission.name}</TableCell>
+                            <TableCell>{submission.email}</TableCell>
+                            <TableCell>{submission.subject}</TableCell>
+                            <TableCell className="max-w-xs truncate">
+                              {submission.message}
+                            </TableCell>
+                            <TableCell>
+                              <Select
+                                value={submission.status}
+                                onValueChange={(value) => handleContactStatusChange(submission.id, value)}
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="pending">Pending</SelectItem>
+                                  <SelectItem value="reviewed">Reviewed</SelectItem>
+                                  <SelectItem value="resolved">Resolved</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                            <TableCell>
+                              {new Date(submission.created_at).toLocaleDateString()}
                             </TableCell>
                           </TableRow>
                         ))}

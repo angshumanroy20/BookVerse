@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { Book, Review, ReadingList, Bookmark, Profile, ReadingStatus } from "@/types/types";
+import type { Book, Review, ReadingList, Bookmark, Profile, ReadingStatus, ContactSubmission } from "@/types/types";
 
 export const api = {
   // Books
@@ -411,5 +411,40 @@ export const api = {
   async deleteFile(bucket: string, fileName: string) {
     const { error } = await supabase.storage.from(bucket).remove([fileName]);
     if (error) throw error;
+  },
+
+  // Contact Submissions
+  async createContactSubmission(submission: Omit<ContactSubmission, 'id' | 'status' | 'created_at'>) {
+    const { data, error } = await supabase
+      .from("contact_submissions")
+      .insert([submission])
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async getContactSubmissions(limit = 50) {
+    const { data, error } = await supabase
+      .from("contact_submissions")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return Array.isArray(data) ? data : [];
+  },
+
+  async updateContactSubmissionStatus(id: string, status: string) {
+    const { data, error } = await supabase
+      .from("contact_submissions")
+      .update({ status })
+      .eq("id", id)
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
   },
 };
