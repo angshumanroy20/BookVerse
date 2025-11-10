@@ -3,7 +3,6 @@ import { supabase } from "@/db/supabase";
 import type { User, Session } from "@supabase/supabase-js";
 import type { Profile } from "@/types/types";
 import { api } from "@/db/api";
-import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
   user: User | null;
@@ -22,7 +21,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasShownWelcome, setHasShownWelcome] = useState(false);
-  const { toast } = useToast();
 
   const refreshProfile = async () => {
     if (user) {
@@ -56,12 +54,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setProfile(profileData);
           
           if (event === "SIGNED_IN" && !hasShownWelcome) {
-            const displayName = profileData?.username || profileData?.email || session.user.email || "User";
-            toast({
-              title: `Welcome back, ${displayName}! 📚`,
-              description: "Ready to discover your next great read?",
-              duration: 4000,
-            });
             setHasShownWelcome(true);
           }
         }).catch(console.error);
@@ -72,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [hasShownWelcome, toast]);
+  }, [hasShownWelcome]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -80,10 +72,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
     setSession(null);
     setHasShownWelcome(false);
-    toast({
-      title: "Signed out successfully",
-      description: "See you next time!",
-    });
   };
 
   return (
