@@ -2,20 +2,47 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { MessageCircle, X, Send, Loader2, Bot, User } from "lucide-react";
-import { sendMessageToGemini, type ChatMessage } from "@/services/gemini";
+import { MessageCircle, X, Send, Loader2, Bot, User, Sparkles, Cpu } from "lucide-react";
+import { 
+  sendMessage, 
+  getSelectedModel, 
+  setSelectedModel, 
+  getModelDisplayName,
+  type AIModel,
+  type ChatMessage 
+} from "@/services/aiService";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedModel, setSelectedModelState] = useState<AIModel>(getSelectedModel());
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: 'Hello! I\'m your Biblios AI assistant. I can help you discover books, answer questions about literature, or just chat about your reading interests. How can I help you today?\n\n💡 Tip: If the AI service is temporarily unavailable, you can still browse books by genre, search by author, or explore the New Arrivals section!'
+      content: 'Hello! I\'m your Biblios AI assistant. I can help you discover books, answer questions about literature, or just chat about your reading interests. How can I help you today?\n\n💡 Tip: You can switch between AI models (Gemini or OpenAI) using the dropdown above. If one model is unavailable, try the other!'
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const handleModelChange = (model: AIModel) => {
+    setSelectedModelState(model);
+    setSelectedModel(model);
+    
+    // Add a system message about the model switch
+    const systemMessage: ChatMessage = {
+      role: 'assistant',
+      content: `Switched to ${getModelDisplayName(model)}. How can I assist you?`
+    };
+    setMessages(prev => [...prev, systemMessage]);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -38,7 +65,7 @@ export default function AIChatbot() {
     setIsLoading(true);
 
     try {
-      const response = await sendMessageToGemini(userMessage.content, messages);
+      const response = await sendMessage(userMessage.content, messages, selectedModel);
       
       const assistantMessage: ChatMessage = {
         role: 'assistant',
@@ -81,24 +108,50 @@ export default function AIChatbot() {
 
       {isOpen && (
         <Card className="fixed bottom-4 right-4 w-[calc(100vw-2rem)] max-w-[380px] h-[500px] max-h-[calc(100vh-2rem)] sm:bottom-6 sm:right-6 sm:h-[600px] flex flex-col shadow-2xl z-50 rounded-3xl border-2 border-border/50 overflow-hidden">
-          <div className="gradient-primary p-4 flex items-center justify-between flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                <Bot className="w-6 h-6 text-primary-foreground" />
+          <div className="gradient-primary p-4 flex flex-col gap-3 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                  <Bot className="w-6 h-6 text-primary-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-primary-foreground">Biblios AI</h3>
+                  <p className="text-xs text-primary-foreground/80">Your Literary Assistant</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-primary-foreground">Biblios AI</h3>
-                <p className="text-xs text-primary-foreground/80">Your Literary Assistant</p>
-              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(false)}
+                className="text-primary-foreground hover:bg-white/20 rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(false)}
-              className="text-primary-foreground hover:bg-white/20 rounded-full"
-            >
-              <X className="w-5 h-5" />
-            </Button>
+            
+            {/* Model Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-primary-foreground/80 whitespace-nowrap">AI Model:</span>
+              <Select value={selectedModel} onValueChange={(value) => handleModelChange(value as AIModel)}>
+                <SelectTrigger className="h-8 bg-white/20 border-white/30 text-primary-foreground text-xs hover:bg-white/30 transition-colors">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gemini">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" />
+                      <span>Google Gemini</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="openai">
+                    <div className="flex items-center gap-2">
+                      <Cpu className="w-4 h-4" />
+                      <span>OpenAI GPT</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
