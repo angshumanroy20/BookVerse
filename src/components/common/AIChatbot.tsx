@@ -10,7 +10,7 @@ export default function AIChatbot() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: 'Hello! I\'m your BookVerse AI assistant. I can help you discover books, answer questions about literature, or just chat about your reading interests. How can I help you today?'
+      content: 'Hello! I\'m your Biblios AI assistant. I can help you discover books, answer questions about literature, or just chat about your reading interests. How can I help you today?\n\n💡 Tip: If the AI service is temporarily unavailable, you can still browse books by genre, search by author, or explore the New Arrivals section!'
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
@@ -87,7 +87,7 @@ export default function AIChatbot() {
                 <Bot className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
-                <h3 className="font-semibold text-primary-foreground">BookVerse AI</h3>
+                <h3 className="font-semibold text-primary-foreground">Biblios AI</h3>
                 <p className="text-xs text-primary-foreground/80">Your Literary Assistant</p>
               </div>
             </div>

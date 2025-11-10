@@ -27,7 +27,7 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
     // Add conversation history (excluding the initial greeting message)
     for (const msg of conversationHistory) {
       // Skip the initial greeting message
-      if (msg.role === 'assistant' && msg.content.includes('BookVerse AI assistant')) {
+      if (msg.role === 'assistant' && (msg.content.includes('Biblios AI assistant') || msg.content.includes('BookVerse AI assistant'))) {
         continue;
       }
       
@@ -103,14 +103,18 @@ export async function sendMessageToGemini(message: string, conversationHistory: 
           } else if (errorData.error.message.includes('API key not found')) {
             errorMessage += '\n\n🔑 API key not found. Please check your .env file.';
           } else if (errorData.error.message.includes('billing')) {
-            errorMessage += '\n\n💳 Billing must be enabled for this API key.';
-          } else if (errorData.error.message.includes('quota')) {
-            errorMessage += '\n\n📊 API quota exceeded. Please check your usage limits.';
+            return "⚠️ AI Assistant Unavailable\n\nThe AI chatbot service requires billing to be enabled. The chatbot is temporarily unavailable, but you can still:\n\n• Browse and search books\n• Upload new books\n• Write reviews and ratings\n• Manage your reading lists\n\nBook recommendations will use genre-based matching instead of AI.";
+          } else if (errorData.error.message.includes('quota') || response.status === 429) {
+            return "⚠️ AI Service Temporarily Unavailable\n\nThe AI chatbot has reached its usage limit for today. Please try again later.\n\nIn the meantime, you can:\n• Use the search feature to find books\n• Browse by genre, author, or rating\n• Check out the 'New Arrivals' section\n• Explore books in your reading list\n\nBook recommendations will continue to work using genre-based matching.";
           }
         } else {
           errorMessage += errorText;
         }
       } catch (e) {
+        // Handle 429 status even if JSON parsing fails
+        if (response.status === 429) {
+          return "⚠️ AI Service Temporarily Unavailable\n\nThe AI chatbot has reached its usage limit. Please try again later.\n\nYou can still browse books, search by genre/author, and use all other features of the platform.";
+        }
         errorMessage += errorText;
         console.error('❌ Could not parse error response');
       }
