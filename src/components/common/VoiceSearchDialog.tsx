@@ -24,6 +24,7 @@ export default function VoiceSearchDialog({
   const [transcript, setTranscript] = useState("");
   const [interimTranscript, setInterimTranscript] = useState("");
   const [recognition, setRecognition] = useState<any>(null);
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     if (open) {
@@ -32,80 +33,113 @@ export default function VoiceSearchDialog({
       stopListening();
       setTranscript("");
       setInterimTranscript("");
+      setError("");
     }
 
     return () => {
       if (recognition) {
-        recognition.stop();
+        try {
+          recognition.stop();
+        } catch (e) {
+          console.log("Recognition already stopped");
+        }
       }
     };
   }, [open]);
 
   const initializeRecognition = () => {
+    console.log("🎤 Initializing voice recognition...");
+    
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      setError("Voice recognition is not supported in your browser. Please use Chrome, Edge, or Safari.");
+      console.error("❌ Speech recognition not supported");
       return;
     }
 
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const recognitionInstance = new SpeechRecognition();
+    try {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const recognitionInstance = new SpeechRecognition();
 
-    recognitionInstance.continuous = true;
-    recognitionInstance.interimResults = true;
-    recognitionInstance.lang = 'en-US';
-    recognitionInstance.maxAlternatives = 1;
+      recognitionInstance.continuous = true;
+      recognitionInstance.interimResults = true;
+      recognitionInstance.lang = 'en-US';
+      recognitionInstance.maxAlternatives = 1;
 
-    recognitionInstance.onstart = () => {
-      setIsListening(true);
-      setTranscript("");
-      setInterimTranscript("");
-    };
-
-    recognitionInstance.onresult = (event: any) => {
-      let interimText = "";
-      let finalText = "";
-
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcriptPart = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalText += transcriptPart + " ";
-        } else {
-          interimText += transcriptPart;
-        }
-      }
-
-      if (finalText) {
-        setTranscript((prev) => prev + finalText);
+      recognitionInstance.onstart = () => {
+        console.log("✅ Voice recognition started");
+        setIsListening(true);
+        setTranscript("");
         setInterimTranscript("");
-      } else {
-        setInterimTranscript(interimText);
-      }
-    };
+        setError("");
+      };
 
-    recognitionInstance.onerror = (event: any) => {
-      console.error("Speech recognition error:", event.error);
+      recognitionInstance.onresult = (event: any) => {
+        console.log("📝 Received speech result");
+        let interimText = "";
+        let finalText = "";
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcriptPart = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalText += transcriptPart + " ";
+          } else {
+            interimText += transcriptPart;
+          }
+        }
+
+        if (finalText) {
+          console.log("✅ Final text:", finalText);
+          setTranscript((prev) => prev + finalText);
+          setInterimTranscript("");
+        } else {
+          console.log("⏳ Interim text:", interimText);
+          setInterimTranscript(interimText);
+        }
+      };
+
+      recognitionInstance.onerror = (event: any) => {
+        console.error("❌ Speech recognition error:", event.error);
+        
+        if (event.error === 'no-speech') {
+          setError("No speech detected. Please try speaking again.");
+          return;
+        }
+        
+        if (event.error === 'aborted') {
+          console.log("Recognition aborted");
+          return;
+        }
+
+        if (event.error === 'not-allowed') {
+          setError("Microphone access denied. Please allow microphone access in your browser settings.");
+        } else {
+          setError(`Error: ${event.error}. Please try again.`);
+        }
+
+        setIsListening(false);
+      };
+
+      recognitionInstance.onend = () => {
+        console.log("🛑 Voice recognition ended");
+        setIsListening(false);
+      };
+
+      setRecognition(recognitionInstance);
       
-      if (event.error === 'no-speech') {
-        // Don't stop on no-speech, just continue listening
-        return;
-      }
-      
-      if (event.error === 'aborted') {
-        return;
-      }
-
-      setIsListening(false);
-    };
-
-    recognitionInstance.onend = () => {
-      setIsListening(false);
-    };
-
-    setRecognition(recognitionInstance);
-    
-    // Start listening automatically when dialog opens
-    setTimeout(() => {
-      recognitionInstance.start();
-    }, 300);
+      // Start listening automatically when dialog opens
+      setTimeout(() => {
+        try {
+          console.log("🎙️ Starting recognition...");
+          recognitionInstance.start();
+        } catch (e) {
+          console.error("Failed to start recognition:", e);
+          setError("Failed to start voice recognition. Please try again.");
+        }
+      }, 300);
+    } catch (e) {
+      console.error("Failed to initialize recognition:", e);
+      setError("Failed to initialize voice recognition. Please refresh and try again.");
+    }
   };
 
   const stopListening = () => {
@@ -171,14 +205,25 @@ export default function VoiceSearchDialog({
 
           {/* Status Text */}
           <div className="text-center">
-            <p className={`text-sm font-medium ${isListening ? 'text-red-500' : 'text-muted-foreground'}`}>
-              {isListening ? "Listening..." : "Click Start to begin"}
-            </p>
+            {error ? (
+              <p className="text-sm font-medium text-destructive">
+                {error}
+              </p>
+            ) : (
+              <p className={`text-sm font-medium ${isListening ? 'text-red-500' : 'text-muted-foreground'}`}>
+                {isListening ? "Listening..." : "Click Start to begin"}
+              </p>
+            )}
           </div>
 
           {/* Transcript Display */}
           <div className="min-h-[120px] max-h-[200px] overflow-y-auto rounded-lg border bg-muted/30 p-4">
-            {displayText ? (
+            {error ? (
+              <div className="text-center space-y-2">
+                <p className="text-destructive font-medium">⚠️ Error</p>
+                <p className="text-sm text-muted-foreground">{error}</p>
+              </div>
+            ) : displayText ? (
               <p className="text-base leading-relaxed">
                 <span className="text-foreground">{transcript}</span>
                 <span className="text-muted-foreground italic">{interimTranscript}</span>

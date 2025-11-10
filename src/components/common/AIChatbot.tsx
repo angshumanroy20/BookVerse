@@ -53,6 +53,9 @@ export default function AIChatbot() {
       content: inputMessage.trim()
     };
 
+    console.log("💬 Sending message to AI:", userMessage.content);
+    console.log("🤖 Using model:", selectedModel);
+
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
@@ -60,19 +63,23 @@ export default function AIChatbot() {
     try {
       const response = await sendMessage(userMessage.content, messages, selectedModel);
       
+      console.log("✅ Received AI response:", response.substring(0, 100) + "...");
+      
       const assistantMessage: ChatMessage = {
         role: 'assistant',
         content: response
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error('Error sending message:', error);
+    } catch (error: any) {
+      console.error('❌ Error sending message:', error);
       
-      // Add a generic error message to chat
+      const errorMessage = error?.message || "Unknown error";
+      
+      // Add a detailed error message to chat
       const errorChatMessage: ChatMessage = {
         role: 'assistant',
-        content: "I apologize, but I'm having trouble processing your request right now. Please try again in a moment."
+        content: `⚠️ I apologize, but I'm having trouble processing your request right now.\n\nError: ${errorMessage}\n\nPlease try:\n1. Switching to a different AI model using the dropdown above\n2. Checking your internet connection\n3. Refreshing the page\n\nIf the issue persists, check the browser console for more details.`
       };
       setMessages(prev => [...prev, errorChatMessage]);
     } finally {

@@ -41,24 +41,42 @@ export default function AISearchDialog({
       return;
     }
 
+    console.log("🔍 Starting AI search for:", query);
     setIsSearching(true);
     setResponse("");
     setSources([]);
 
     try {
+      let hasReceivedData = false;
+      
       for await (const chunk of streamAISearch(query)) {
+        hasReceivedData = true;
+        console.log("📦 Received chunk:", chunk.text.substring(0, 50) + "...");
         setResponse(chunk.text);
         if (chunk.sources) {
           setSources(chunk.sources);
         }
       }
-    } catch (error) {
-      console.error("AI Search error:", error);
+
+      if (!hasReceivedData) {
+        throw new Error("No data received from AI Search");
+      }
+
+      console.log("✅ AI search completed successfully");
+    } catch (error: any) {
+      console.error("❌ AI Search error:", error);
+      
+      const errorMessage = error?.message || "Unknown error occurred";
+      
       toast({
-        title: "Search failed",
-        description: "Unable to complete AI search. Please try again.",
+        title: "AI Search failed",
+        description: errorMessage.length > 200 
+          ? "Unable to complete AI search. Please check the console for details." 
+          : errorMessage,
         variant: "destructive",
       });
+
+      setResponse(`⚠️ Error: ${errorMessage}\n\nPlease try again or check your internet connection.`);
     } finally {
       setIsSearching(false);
     }
