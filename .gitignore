@@ -28,3 +28,9 @@ package-lock.json
 history/*.json
 .vite_cache
 TODO.md
+
+# Documentation files
+AI_SETUP.md
+CHATBOT_FEATURES.md
+IMPLEMENTATION_SUMMARY.md
+CONTACT_FORM_DEBUG_GUIDE.md
