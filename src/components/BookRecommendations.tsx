@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/db/api";
-import { getBookRecommendations } from "@/services/geminiService";
 import type { Book } from "@/types/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,10 +21,26 @@ export function BookRecommendations({ currentBook }: BookRecommendationsProps) {
   const loadRecommendations = async () => {
     try {
       setLoading(true);
-      const allBooks = await api.getBooks(100);
-      const filtered = allBooks.filter((b) => b.id !== currentBook.id);
-      const recommended = await getBookRecommendations(currentBook, filtered);
-      setRecommendations(recommended);
+      
+      // Get books from the same genre
+      let recommended: Book[] = [];
+      
+      if (currentBook.genre) {
+        const genreBooks = await api.getBooksByGenre(currentBook.genre, 20);
+        recommended = genreBooks.filter((b) => b.id !== currentBook.id);
+      }
+      
+      // If not enough books from the same genre, add random books
+      if (recommended.length < 5) {
+        const allBooks = await api.getBooks(50);
+        const otherBooks = allBooks.filter(
+          (b) => b.id !== currentBook.id && !recommended.find((r) => r.id === b.id)
+        );
+        recommended = [...recommended, ...otherBooks];
+      }
+      
+      // Limit to 5 recommendations
+      setRecommendations(recommended.slice(0, 5));
     } catch (error) {
       console.error("Error loading recommendations:", error);
     } finally {
