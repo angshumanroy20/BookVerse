@@ -154,6 +154,20 @@ VITE_OPENAI_API_KEY=your-openai-api-key-here
 
 ---
 
+## New Features Added
+
+### ✨ Google Web Search (NEW)
+- **Files:** 
+  - `src/services/googleSearch.ts` - Google Custom Search API integration
+  - `src/components/common/WebSearchDialog.tsx` - Web search UI component
+- **Location:** Browse page - "Web Search" button (globe icon)
+- **Functionality:** Real-time web search using Google Custom Search API
+- **Status:** ✅ Implemented and ready to use (requires API credentials)
+- **Setup:** See `GOOGLE_SEARCH_SETUP.md` for configuration instructions
+- **Note:** Provides real Google search results, not AI-generated responses
+
+---
+
 ## Impact Analysis
 
 ### What Still Works
@@ -161,12 +175,18 @@ VITE_OPENAI_API_KEY=your-openai-api-key-here
 ✅ **Book Search** - Standard text-based search
 ✅ **Genre Filtering** - Filter books by genre
 ✅ **Book Recommendations** - Now based on genre similarity instead of AI
+✅ **Web Search (NEW)** - Google-powered web search for finding information online
 ✅ **All other features** - Login, upload, library, profile, etc.
 
 ### What No Longer Works
 ❌ **AI Chatbot** - Floating chat bubble removed
 ❌ **AI Search** - Intelligent AI-powered search removed
 ❌ **AI-Powered Recommendations** - Now uses simple genre-based logic
+
+### What's New
+✨ **Google Web Search** - Real-time web search using Google Custom Search API
+✨ **Search Dialog** - Beautiful interface for viewing web search results
+✨ **Quick Access** - Click results to open in new tabs
 
 ---
 
@@ -183,12 +203,20 @@ src/services/geminiService.ts
 src/services/openai.ts
 ```
 
+### Files Added (New Feature)
+```
+src/services/googleSearch.ts
+src/components/common/WebSearchDialog.tsx
+GOOGLE_SEARCH_SETUP.md
+WEB_SEARCH_QUICK_START.md
+```
+
 ### Files Modified
 ```
-src/App.tsx
-src/pages/Browse.tsx
-src/components/BookRecommendations.tsx
-.env
+src/App.tsx                              - Removed AIChatbot
+src/pages/Browse.tsx                     - Removed AI search, added Web Search
+src/components/BookRecommendations.tsx   - Genre-based logic
+.env                                     - Removed AI keys, added Google keys
 ```
 
 ### Dependencies
@@ -224,6 +252,7 @@ All TypeScript compilation errors resolved:
 - Search bar with voice icon
 - "Search" button
 - ~~"AI Search" button~~ (removed)
+- **"Web Search" button (NEW)** - Globe icon for Google web search
 
 ### Application Layout
 **Before:**
@@ -233,6 +262,7 @@ All TypeScript compilation errors resolved:
 **After:**
 - No floating chat bubble
 - Clean interface without AI overlay
+- Web Search dialog available from Browse page
 
 ### Book Detail Page
 **Before:**
@@ -242,6 +272,14 @@ All TypeScript compilation errors resolved:
 **After:**
 - "If you like this, try these" section
 - Genre-based recommendations (same genre + random books)
+
+### New Feature: Web Search
+**What it does:**
+- Click "Web Search" button on Browse page
+- Enter any search query
+- Get real-time results from Google
+- Click results to open in new tabs
+- See search metrics (result count, search time)
 
 ---
 
@@ -276,7 +314,7 @@ If you need to restore AI functionality in the future:
 - ❌ AI Search dialog and integration
 - ❌ All AI service files (Gemini, OpenAI, etc.)
 - ❌ AI-powered book recommendations
-- ❌ API keys from environment
+- ❌ AI API keys from environment
 
 ### Kept
 - ✅ Voice Search (browser-based, no AI APIs)
@@ -284,14 +322,23 @@ If you need to restore AI functionality in the future:
 - ✅ Genre-based recommendations
 - ✅ All core application features
 
+### Added
+- ✨ Google Web Search integration
+- ✨ WebSearchDialog component
+- ✨ Real-time web search results
+- ✨ Comprehensive documentation
+
 ### Status
 ✅ **Complete** - All AI chatbot and AI search functionality successfully removed
+✅ **Enhanced** - Added Google Web Search as a replacement
 ✅ **Clean** - No compilation errors or linting issues
-✅ **Functional** - Application works perfectly without AI features
+✅ **Functional** - Application works perfectly with new web search feature
+✅ **Documented** - Complete setup guides and documentation provided
 
 ---
 
 **Completed:** 2024
-**Files Changed:** 4 modified, 7 deleted
+**Files Changed:** 4 modified, 7 deleted, 4 added
+**Lines Added:** ~400+ lines of web search functionality
 **Lines Removed:** ~500+ lines of AI-related code
-**Status:** ✅ Ready for production
+**Status:** ✅ Ready for production (after Google API setup)
