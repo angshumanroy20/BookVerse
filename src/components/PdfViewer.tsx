@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { X, Download, ZoomIn, ZoomOut, Maximize2, BookOpen, FileText } from "lucide-react";
+import { X, Download, ChevronLeft, ChevronRight, Maximize2, BookOpen, FileText, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface PdfViewerProps {
   pdfUrl: string;
@@ -11,9 +12,11 @@ interface PdfViewerProps {
 }
 
 export function PdfViewer({ pdfUrl, bookTitle, isOpen, onClose }: PdfViewerProps) {
-  const [zoom, setZoom] = useState(100);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [viewMode, setViewMode] = useState<"single" | "double">("double");
   const [isMobile, setIsMobile] = useState(false);
+  const [pageInput, setPageInput] = useState("1");
 
   useEffect(() => {
     const checkMobile = () => {
@@ -29,51 +32,78 @@ export function PdfViewer({ pdfUrl, bookTitle, isOpen, onClose }: PdfViewerProps
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const handleZoomIn = () => {
-    setZoom((prev) => Math.min(prev + 10, 200));
+  useEffect(() => {
+    setPageInput(currentPage.toString());
+  }, [currentPage]);
+
+  const handlePrevPage = () => {
+    if (viewMode === "double") {
+      setCurrentPage((prev) => Math.max(1, prev - 2));
+    } else {
+      setCurrentPage((prev) => Math.max(1, prev - 1));
+    }
   };
 
-  const handleZoomOut = () => {
-    setZoom((prev) => Math.max(prev - 10, 50));
+  const handleNextPage = () => {
+    if (viewMode === "double") {
+      setCurrentPage((prev) => prev + 2);
+    } else {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handleFirstPage = () => {
+    setCurrentPage(1);
+  };
+
+  const handleLastPage = () => {
+    if (totalPages > 0) {
+      if (viewMode === "double") {
+        setCurrentPage(totalPages % 2 === 0 ? totalPages - 1 : totalPages);
+      } else {
+        setCurrentPage(totalPages);
+      }
+    }
+  };
+
+  const handlePageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPageInput(e.target.value);
+  };
+
+  const handlePageInputSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const page = parseInt(pageInput);
+    if (!isNaN(page) && page >= 1) {
+      setCurrentPage(page);
+    } else {
+      setPageInput(currentPage.toString());
+    }
   };
 
   const toggleViewMode = () => {
-    setViewMode((prev) => (prev === "single" ? "double" : "single"));
+    setViewMode((prev) => {
+      const newMode = prev === "single" ? "double" : "single";
+      if (newMode === "double" && currentPage % 2 === 0) {
+        setCurrentPage(currentPage - 1);
+      }
+      return newMode;
+    });
   };
 
-  const pdfViewUrl = viewMode === "double" 
-    ? `${pdfUrl}#view=FitH&pagemode=none&scrollbar=1&toolbar=1&navpanes=0`
-    : `${pdfUrl}#view=FitH&pagemode=none&scrollbar=1&toolbar=1&navpanes=0`;
+  const pdfViewUrl = `${pdfUrl}#view=Fit&pagemode=none&scrollbar=0&toolbar=0&navpanes=0`;
+
+  const canGoPrev = currentPage > 1;
+  const canGoNext = viewMode === "double" ? currentPage + 1 < (totalPages || Infinity) : currentPage < (totalPages || Infinity);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[90vw] w-full max-h-[85vh] h-[85vh] p-0 gap-0 flex flex-col [&>button]:hidden">
+      <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-[95vh] p-0 gap-0 flex flex-col [&>button]:hidden">
         <DialogHeader className="px-3 sm:px-4 py-2 sm:py-3 border-b bg-card flex-shrink-0">
           <div className="flex items-center justify-between gap-2">
             <DialogTitle className="text-sm sm:text-base font-display truncate">
               {bookTitle}
             </DialogTitle>
             <div className="flex items-center gap-1 flex-shrink-0">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleZoomOut}
-                className="hidden sm:flex h-8"
-              >
-                <ZoomOut className="w-3 h-3" />
-              </Button>
-              <span className="text-xs font-medium min-w-[45px] text-center hidden sm:inline">
-                {zoom}%
-              </span>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleZoomIn}
-                className="hidden sm:flex h-8"
-              >
-                <ZoomIn className="w-3 h-3" />
-              </Button>
-              
               {!isMobile && (
                 <Button
                   variant="outline"
@@ -111,33 +141,104 @@ export function PdfViewer({ pdfUrl, bookTitle, isOpen, onClose }: PdfViewerProps
             </div>
           </div>
         </DialogHeader>
+        
         <div className="flex-1 overflow-hidden bg-muted relative">
           {viewMode === "double" && !isMobile ? (
-            <div className="w-full h-full flex items-center justify-center gap-1 p-2 overflow-auto">
-              <div className="flex gap-1 h-full">
-                <div className="flex-1 h-full bg-white shadow-lg overflow-hidden">
+            <div className="w-full h-full flex items-center justify-center p-4">
+              <div className="flex gap-4 h-full max-w-[1400px] w-full">
+                <div className="flex-1 h-full bg-white shadow-2xl rounded-sm overflow-hidden border border-border">
                   <iframe
-                    src={`${pdfViewUrl}&page=1`}
+                    src={`${pdfViewUrl}&page=${currentPage}`}
                     className="w-full h-full border-0"
-                    title={`${bookTitle} - Page 1`}
+                    title={`${bookTitle} - Page ${currentPage}`}
                   />
                 </div>
-                <div className="flex-1 h-full bg-white shadow-lg overflow-hidden">
+                <div className="flex-1 h-full bg-white shadow-2xl rounded-sm overflow-hidden border border-border">
                   <iframe
-                    src={`${pdfViewUrl}&page=2`}
+                    src={`${pdfViewUrl}&page=${currentPage + 1}`}
                     className="w-full h-full border-0"
-                    title={`${bookTitle} - Page 2`}
+                    title={`${bookTitle} - Page ${currentPage + 1}`}
                   />
                 </div>
               </div>
             </div>
           ) : (
-            <iframe
-              src={pdfViewUrl}
-              className="w-full h-full border-0"
-              title={bookTitle}
-            />
+            <div className="w-full h-full flex items-center justify-center p-4">
+              <div className="h-full w-full max-w-[900px] bg-white shadow-2xl rounded-sm overflow-hidden border border-border">
+                <iframe
+                  src={`${pdfViewUrl}&page=${currentPage}`}
+                  className="w-full h-full border-0"
+                  title={bookTitle}
+                />
+              </div>
+            </div>
           )}
+        </div>
+
+        <div className="px-3 sm:px-4 py-2 sm:py-3 border-t bg-card flex-shrink-0">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleFirstPage}
+                disabled={!canGoPrev}
+                className="h-8 w-8 p-0"
+                title="First page"
+              >
+                <ChevronsLeft className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrevPage}
+                disabled={!canGoPrev}
+                className="h-8 w-8 p-0"
+                title="Previous page"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <form onSubmit={handlePageInputSubmit} className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm text-muted-foreground">Page</span>
+              <Input
+                type="text"
+                value={pageInput}
+                onChange={handlePageInputChange}
+                className="h-8 w-12 sm:w-16 text-center text-xs sm:text-sm"
+              />
+              {viewMode === "double" && !isMobile && (
+                <>
+                  <span className="text-xs sm:text-sm text-muted-foreground">-</span>
+                  <span className="text-xs sm:text-sm font-medium">{currentPage + 1}</span>
+                </>
+              )}
+            </form>
+
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextPage}
+                disabled={!canGoNext}
+                className="h-8 w-8 p-0"
+                title="Next page"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLastPage}
+                disabled={!canGoNext}
+                className="h-8 w-8 p-0"
+                title="Last page"
+              >
+                <ChevronsRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
