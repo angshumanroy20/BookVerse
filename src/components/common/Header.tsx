@@ -42,16 +42,16 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-card/80 border-b border-border/50 sticky top-0 z-50 backdrop-blur-xl shadow-elegant">
+    <header className="glass-card border-b border-border/50 sticky top-0 z-50 shadow-lg">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
           <div className="flex items-center gap-12">
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-glow">
+              <div className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-xl animate-3d-tilt">
                 <BookOpen className="w-6 h-6 text-primary-foreground" />
               </div>
               <span className="text-2xl font-display font-bold gradient-text hidden sm:block">
-                BookVerse
+                Biblios
               </span>
             </Link>
 

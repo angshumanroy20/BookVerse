@@ -11,6 +11,7 @@ import BookDisplay from "@/components/common/BookDisplay";
 import ViewModeToggle from "@/components/common/ViewModeToggle";
 import RandomThought from "@/components/common/RandomThought";
 import { useViewMode } from "@/contexts/ViewModeContext";
+import { useFadeInOnScroll, useStaggerAnimation } from "@/hooks/use3DAnimation";
 
 export default function Home() {
   const { profile } = useAuth();
@@ -19,6 +20,8 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const { viewMode } = useViewMode();
   const [isMobile, setIsMobile] = useState(false);
+  const animatedItems = useStaggerAnimation(100);
+  const { ref: sectionRef, isVisible } = useFadeInOnScroll(0.1);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -69,41 +72,62 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Hero Section with 3D Effects */}
       <section 
-        className="relative bg-cover bg-center py-32 xl:py-40"
+        className="relative bg-cover bg-center py-32 xl:py-40 overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://miaoda-site-img.s3cdn.medo.dev/images/e2fe0e83-7631-42e2-97e4-15cddd1f8779.jpg')`,
+          backgroundImage: `linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(168, 85, 247, 0.8)), url('https://miaoda-site-img.s3cdn.medo.dev/images/e2fe0e83-7631-42e2-97e4-15cddd1f8779.jpg')`,
+          backgroundBlendMode: 'overlay',
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            <h1 className="text-5xl xl:text-7xl font-display font-bold mb-6 leading-tight text-white">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-3d-float" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-3d-float" style={{ animationDelay: '2s' }} />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="max-w-3xl animate-fade-in-up">
+            <div className="inline-block mb-4 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full text-white/90 text-sm font-medium animate-bounce-in">
+              ✨ Discover Your Next Great Read
+            </div>
+            <h1 className="text-5xl xl:text-7xl font-display font-bold mb-6 leading-tight text-white drop-shadow-2xl">
               {profile ? (
                 <>
                   Welcome back, {profile.username}! 📖
                   <br />
-                  Continue Your Journey
+                  <span className="inline-block animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
+                    Continue Your Journey
+                  </span>
                 </>
               ) : (
                 <>
                   Unravel the Unwritten.
                   <br />
-                  Explore Worlds Beyond
+                  <span className="inline-block animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
+                    Explore Worlds Beyond
+                  </span>
                 </>
               )}
             </h1>
-            <p className="text-xl xl:text-2xl mb-8 text-white/90">
+            <p className="text-xl xl:text-2xl mb-8 text-white/90 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               {profile 
                 ? "Ready to discover your next great read? Your literary adventure awaits."
                 : "A book is a dream that you hold in your hand. Discover your next literary obsession."
               }
             </p>
-            <Button asChild size="lg" className="text-base bg-primary hover:bg-primary/90">
-              <Link to="/browse">
-                <Sparkles className="w-5 h-5 mr-2" />
-                {profile ? "Explore Books" : "Discover Your Next Obsession"}
-              </Link>
-            </Button>
+            <div className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+              <Button 
+                asChild 
+                size="lg" 
+                className="text-base bg-white text-primary hover:bg-white/90 hover-lift shadow-xl"
+              >
+                <Link to="/browse">
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  {profile ? "Explore Books" : "Discover Your Next Obsession"}
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -114,16 +138,16 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-16 xl:py-20 bg-muted/30">
+      <section ref={sectionRef} className="py-16 xl:py-20 bg-gradient-to-b from-background to-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
+          <div className={`flex items-center justify-between mb-8 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
             <div>
-              <h2 className="text-3xl xl:text-4xl font-display font-bold mb-2">New Arrivals</h2>
+              <h2 className="text-3xl xl:text-4xl font-display font-bold mb-2 gradient-text">New Arrivals</h2>
               <p className="text-muted-foreground">Recently added to our collection</p>
             </div>
             <div className="flex items-center gap-4">
               <ViewModeToggle />
-              <Button asChild variant="ghost">
+              <Button asChild variant="ghost" className="hover-lift">
                 <Link to="/browse">View All</Link>
               </Button>
             </div>
