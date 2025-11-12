@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X, Download, ChevronLeft, ChevronRight, Maximize2, BookOpen, FileText, ChevronsLeft, ChevronsRight } from "lucide-react";
@@ -13,10 +13,11 @@ interface PdfViewerProps {
 
 export function PdfViewer({ pdfUrl, bookTitle, isOpen, onClose }: PdfViewerProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [viewMode, setViewMode] = useState<"single" | "double">("double");
+  const [viewMode, setViewMode] = useState<"single" | "double">("single");
   const [isMobile, setIsMobile] = useState(false);
   const [pageInput, setPageInput] = useState("1");
+  const [iframeKey, setIframeKey] = useState(0);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -34,6 +35,8 @@ export function PdfViewer({ pdfUrl, bookTitle, isOpen, onClose }: PdfViewerProps
 
   useEffect(() => {
     setPageInput(currentPage.toString());
+    // Force iframe reload when page changes
+    setIframeKey(prev => prev + 1);
   }, [currentPage]);
 
   const handlePrevPage = () => {
@@ -57,13 +60,8 @@ export function PdfViewer({ pdfUrl, bookTitle, isOpen, onClose }: PdfViewerProps
   };
 
   const handleLastPage = () => {
-    if (totalPages > 0) {
-      if (viewMode === "double") {
-        setCurrentPage(totalPages % 2 === 0 ? totalPages - 1 : totalPages);
-      } else {
-        setCurrentPage(totalPages);
-      }
-    }
+    // For now, just go forward - user can keep clicking next
+    setCurrentPage((prev) => prev + (viewMode === "double" ? 2 : 1));
   };
 
   const handlePageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,14 +88,11 @@ export function PdfViewer({ pdfUrl, bookTitle, isOpen, onClose }: PdfViewerProps
     });
   };
 
-  const pdfViewUrl = `${pdfUrl}#view=Fit&pagemode=none&scrollbar=0&toolbar=0&navpanes=0`;
-
   const canGoPrev = currentPage > 1;
-  const canGoNext = viewMode === "double" ? currentPage + 1 < (totalPages || Infinity) : currentPage < (totalPages || Infinity);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-[95vh] p-0 gap-0 flex flex-col [&>button]:hidden">
+      <DialogContent className="max-w-[98vw] w-full h-[98vh] p-0 gap-0 flex flex-col [&>button]:hidden">
         <DialogHeader className="px-3 sm:px-4 py-2 sm:py-3 border-b bg-card flex-shrink-0">
           <div className="flex items-center justify-between gap-2">
             <DialogTitle className="text-sm sm:text-base font-display truncate">
@@ -144,18 +139,21 @@ export function PdfViewer({ pdfUrl, bookTitle, isOpen, onClose }: PdfViewerProps
         
         <div className="flex-1 overflow-hidden bg-muted relative">
           {viewMode === "double" && !isMobile ? (
-            <div className="w-full h-full flex items-center justify-center p-4">
-              <div className="flex gap-4 h-full max-w-[1400px] w-full">
-                <div className="flex-1 h-full bg-white shadow-2xl rounded-sm overflow-hidden border border-border">
+            <div className="w-full h-full flex items-center justify-center p-2 sm:p-4">
+              <div className="flex gap-2 sm:gap-4 h-full w-full max-w-[1600px]">
+                <div className="flex-1 h-full bg-white shadow-2xl overflow-hidden border border-border">
                   <iframe
-                    src={`${pdfViewUrl}&page=${currentPage}`}
+                    key={`left-${iframeKey}`}
+                    ref={iframeRef}
+                    src={`${pdfUrl}#page=${currentPage}&view=FitV&pagemode=none&scrollbar=0&toolbar=0&navpanes=0&statusbar=0`}
                     className="w-full h-full border-0"
                     title={`${bookTitle} - Page ${currentPage}`}
                   />
                 </div>
-                <div className="flex-1 h-full bg-white shadow-2xl rounded-sm overflow-hidden border border-border">
+                <div className="flex-1 h-full bg-white shadow-2xl overflow-hidden border border-border">
                   <iframe
-                    src={`${pdfViewUrl}&page=${currentPage + 1}`}
+                    key={`right-${iframeKey}`}
+                    src={`${pdfUrl}#page=${currentPage + 1}&view=FitV&pagemode=none&scrollbar=0&toolbar=0&navpanes=0&statusbar=0`}
                     className="w-full h-full border-0"
                     title={`${bookTitle} - Page ${currentPage + 1}`}
                   />
@@ -163,10 +161,12 @@ export function PdfViewer({ pdfUrl, bookTitle, isOpen, onClose }: PdfViewerProps
               </div>
             </div>
           ) : (
-            <div className="w-full h-full flex items-center justify-center p-4">
-              <div className="h-full w-full max-w-[900px] bg-white shadow-2xl rounded-sm overflow-hidden border border-border">
+            <div className="w-full h-full flex items-center justify-center p-2 sm:p-4">
+              <div className="h-full w-full max-w-[1000px] bg-white shadow-2xl overflow-hidden border border-border">
                 <iframe
-                  src={`${pdfViewUrl}&page=${currentPage}`}
+                  key={`single-${iframeKey}`}
+                  ref={iframeRef}
+                  src={`${pdfUrl}#page=${currentPage}&view=FitV&pagemode=none&scrollbar=0&toolbar=0&navpanes=0&statusbar=0`}
                   className="w-full h-full border-0"
                   title={bookTitle}
                 />
@@ -221,7 +221,6 @@ export function PdfViewer({ pdfUrl, bookTitle, isOpen, onClose }: PdfViewerProps
                 variant="outline"
                 size="sm"
                 onClick={handleNextPage}
-                disabled={!canGoNext}
                 className="h-8 w-8 p-0"
                 title="Next page"
               >
@@ -231,7 +230,6 @@ export function PdfViewer({ pdfUrl, bookTitle, isOpen, onClose }: PdfViewerProps
                 variant="outline"
                 size="sm"
                 onClick={handleLastPage}
-                disabled={!canGoNext}
                 className="h-8 w-8 p-0"
                 title="Last page"
               >
