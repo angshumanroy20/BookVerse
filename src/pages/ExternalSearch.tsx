@@ -123,41 +123,41 @@ export default function ExternalSearch() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 xl:py-12">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 xl:py-12 w-full">
         <div
           ref={headerRef}
-          className={`mb-8 ${headerVisible ? 'animate-fade-in-up' : 'opacity-0'}`}
+          className={`mb-6 sm:mb-8 ${headerVisible ? 'animate-fade-in-up' : 'opacity-0'}`}
         >
-          <h1 className="text-4xl xl:text-5xl font-display font-bold mb-3 gradient-text">
+          <h1 className="text-3xl sm:text-4xl xl:text-5xl font-display font-bold mb-3 gradient-text">
             Discover Books
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-base sm:text-lg text-muted-foreground">
             Search millions of books from Google Books and Open Library
           </p>
         </div>
 
-        <Card className="glass-card mb-8 shadow-lg">
-          <CardContent className="p-6">
-            <form onSubmit={handleSearch} className="space-y-4">
-              <div className="flex flex-col xl:flex-row gap-4">
-                <div className="flex-1">
+        <Card className="glass-card mb-6 sm:mb-8 shadow-lg">
+          <CardContent className="p-4 sm:p-6">
+            <form onSubmit={handleSearch} className="space-y-3 sm:space-y-4 w-full">
+              <div className="flex flex-col gap-3 w-full">
+                <div className="w-full">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 sm:w-5 h-4 sm:h-5" />
                     <Input
                       type="text"
                       placeholder="Search by title, author, or ISBN..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 h-12 text-base"
+                      className="pl-9 sm:pl-10 h-11 sm:h-12 text-sm sm:text-base w-full"
                     />
                   </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
                   <Select value={searchType} onValueChange={(value: any) => setSearchType(value)}>
-                    <SelectTrigger className="w-[140px] h-12">
-                      <Filter className="w-4 h-4 mr-2" />
+                    <SelectTrigger className="w-full sm:w-[140px] h-11 sm:h-12 text-sm sm:text-base">
+                      <Filter className="w-4 h-4 mr-2 flex-shrink-0" />
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -169,7 +169,7 @@ export default function ExternalSearch() {
                   </Select>
 
                   <Select value={source} onValueChange={(value: any) => setSource(value)}>
-                    <SelectTrigger className="w-[160px] h-12">
+                    <SelectTrigger className="w-full sm:w-[160px] h-11 sm:h-12 text-sm sm:text-base">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -179,16 +179,16 @@ export default function ExternalSearch() {
                     </SelectContent>
                   </Select>
 
-                  <Button type="submit" disabled={loading} className="h-12 px-6 hover-lift">
+                  <Button type="submit" disabled={loading} className="h-11 sm:h-12 px-4 sm:px-6 hover-lift w-full sm:w-auto text-sm sm:text-base">
                     {loading ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Searching...
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin flex-shrink-0" />
+                        <span>Searching...</span>
                       </>
                     ) : (
                       <>
-                        <Search className="w-4 h-4 mr-2" />
-                        Search
+                        <Search className="w-4 h-4 mr-2 flex-shrink-0" />
+                        <span>Search</span>
                       </>
                     )}
                   </Button>

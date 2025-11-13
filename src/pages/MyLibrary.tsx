@@ -91,26 +91,30 @@ export default function MyLibrary() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-display font-bold">My Library</h1>
+    <div className="min-h-screen bg-background py-6 sm:py-8 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+          <h1 className="text-2xl sm:text-3xl xl:text-4xl font-display font-bold">My Library</h1>
           <ViewModeToggle />
         </div>
 
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="mb-8">
-            <TabsTrigger value="all">All ({readingLists.length})</TabsTrigger>
-            <TabsTrigger value="want_to_read">
-              Want to Read ({filterByStatus("want_to_read").length})
-            </TabsTrigger>
-            <TabsTrigger value="currently_reading">
-              Currently Reading ({filterByStatus("currently_reading").length})
-            </TabsTrigger>
-            <TabsTrigger value="read">
-              Read ({filterByStatus("read").length})
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 mb-6 sm:mb-8">
+            <TabsList className="inline-flex w-auto min-w-full sm:min-w-0">
+              <TabsTrigger value="all" className="text-xs sm:text-sm whitespace-nowrap">
+                All ({readingLists.length})
+              </TabsTrigger>
+              <TabsTrigger value="want_to_read" className="text-xs sm:text-sm whitespace-nowrap">
+                Want to Read ({filterByStatus("want_to_read").length})
+              </TabsTrigger>
+              <TabsTrigger value="currently_reading" className="text-xs sm:text-sm whitespace-nowrap">
+                Currently Reading ({filterByStatus("currently_reading").length})
+              </TabsTrigger>
+              <TabsTrigger value="read" className="text-xs sm:text-sm whitespace-nowrap">
+                Read ({filterByStatus("read").length})
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="all">{renderBookGrid(readingLists)}</TabsContent>
           <TabsContent value="want_to_read">
