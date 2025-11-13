@@ -83,12 +83,12 @@ export default function Home() {
                 <span className="text-sm font-medium text-foreground">Your Literary Journey Starts Here</span>
               </div>
               
-              <h1 className="text-5xl xl:text-7xl font-display font-bold leading-tight">
+              <h1 className="text-4xl sm:text-5xl xl:text-6xl font-display font-bold leading-tight">
                 {profile ? (
                   <>
                     <span className="gradient-text">Welcome back,</span>
                     <br />
-                    <span className="text-foreground">{profile.username}! 📚</span>
+                    <span className="text-foreground break-words">{profile.username}! 📚</span>
                   </>
                 ) : (
                   <>
@@ -101,7 +101,7 @@ export default function Home() {
                 )}
               </h1>
 
-              <p className="text-xl text-muted-foreground max-w-xl">
+              <p className="text-lg xl:text-xl text-muted-foreground max-w-xl">
                 {profile 
                   ? "Continue your reading adventure with personalized recommendations and your curated collection."
                   : "Join thousands of book lovers discovering, sharing, and celebrating the magic of reading."
@@ -133,31 +133,6 @@ export default function Home() {
                     </Link>
                   </Button>
                 )}
-              </div>
-
-              {/* Stats */}
-              <div className="flex flex-wrap gap-8 pt-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Library className="w-5 h-5 text-primary" />
-                    <span className="text-3xl font-bold font-display text-foreground">{books.length}+</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Books Available</p>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-secondary" />
-                    <span className="text-3xl font-bold font-display text-foreground">1K+</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Active Readers</p>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-pink" />
-                    <span className="text-3xl font-bold font-display text-foreground">5K+</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Books Loved</p>
-                </div>
               </div>
             </div>
 
@@ -212,10 +187,10 @@ export default function Home() {
       <section className="py-16 xl:py-20 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 animate-fade-in-up">
-            <h2 className="text-3xl xl:text-5xl font-display font-bold mb-4">
+            <h2 className="text-3xl sm:text-4xl xl:text-5xl font-display font-bold mb-4">
               Why Choose <span className="gradient-text">BookVerse</span>?
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
               Everything you need to discover, organize, and enjoy your reading journey
             </p>
           </div>
@@ -226,8 +201,8 @@ export default function Home() {
                 <div className="w-16 h-16 mx-auto bg-primary rounded-2xl flex items-center justify-center shadow-glow-primary">
                   <BookOpen className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-display font-bold">Vast Library</h3>
-                <p className="text-muted-foreground">
+                <h3 className="text-xl sm:text-2xl font-display font-bold">Vast Library</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   Access thousands of books across all genres. From classics to contemporary bestsellers.
                 </p>
               </CardContent>
@@ -238,8 +213,8 @@ export default function Home() {
                 <div className="w-16 h-16 mx-auto bg-secondary rounded-2xl flex items-center justify-center shadow-glow-secondary">
                   <Sparkles className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-display font-bold">Smart Recommendations</h3>
-                <p className="text-muted-foreground">
+                <h3 className="text-xl sm:text-2xl font-display font-bold">Smart Recommendations</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   AI-powered suggestions based on your reading history and preferences.
                 </p>
               </CardContent>
@@ -250,8 +225,8 @@ export default function Home() {
                 <div className="w-16 h-16 mx-auto bg-accent rounded-2xl flex items-center justify-center shadow-glow-accent">
                   <Users className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-display font-bold">Community</h3>
-                <p className="text-muted-foreground">
+                <h3 className="text-xl sm:text-2xl font-display font-bold">Community</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   Connect with fellow readers, share reviews, and discover hidden gems.
                 </p>
               </CardContent>
@@ -265,10 +240,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`flex items-center justify-between mb-8 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
             <div>
-              <h2 className="text-3xl xl:text-5xl font-display font-bold mb-2">
+              <h2 className="text-3xl sm:text-4xl xl:text-5xl font-display font-bold mb-2">
                 <span className="gradient-text">New Arrivals</span>
               </h2>
-              <p className="text-lg text-muted-foreground">Recently added to our collection</p>
+              <p className="text-base sm:text-lg text-muted-foreground">Recently added to our collection</p>
             </div>
             <div className="flex items-center gap-4">
               <ViewModeToggle />
@@ -388,10 +363,10 @@ export default function Home() {
           </div>
           
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <h2 className="text-4xl xl:text-6xl font-display font-bold text-white mb-6">
+            <h2 className="text-3xl sm:text-4xl xl:text-6xl font-display font-bold text-white mb-6">
               Ready to Start Your Reading Journey?
             </h2>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
               Join our community of passionate readers and unlock a world of literary adventures.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
