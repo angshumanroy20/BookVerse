@@ -6,7 +6,7 @@ import type { Book } from "@/types/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookOpen, Star, TrendingUp, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { BookOpen, Star, TrendingUp, Sparkles, ChevronLeft, ChevronRight, ArrowRight, Library, Users, Heart } from "lucide-react";
 import BookDisplay from "@/components/common/BookDisplay";
 import ViewModeToggle from "@/components/common/ViewModeToggle";
 import RandomThought from "@/components/common/RandomThought";
@@ -72,83 +72,211 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section with 3D Effects */}
-      <section 
-        className="relative bg-cover bg-center py-32 xl:py-40 overflow-hidden"
-        style={{
-          backgroundImage: `linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(168, 85, 247, 0.8)), url('https://miaoda-site-img.s3cdn.medo.dev/images/e2fe0e83-7631-42e2-97e4-15cddd1f8779.jpg')`,
-          backgroundBlendMode: 'overlay',
-        }}
-      >
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-3d-float" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-3d-float" style={{ animationDelay: '2s' }} />
-        </div>
+      {/* Modern Hero Section - Split Layout */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-coral-soft via-purple-soft to-blue-soft">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 xl:py-24">
+          <div className="grid xl:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="space-y-8 animate-fade-in-left">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-foreground">Your Literary Journey Starts Here</span>
+              </div>
+              
+              <h1 className="text-5xl xl:text-7xl font-display font-bold leading-tight">
+                {profile ? (
+                  <>
+                    <span className="gradient-text">Welcome back,</span>
+                    <br />
+                    <span className="text-foreground">{profile.username}! 📚</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="gradient-text">Discover</span>
+                    <br />
+                    <span className="text-foreground">Your Next</span>
+                    <br />
+                    <span className="gradient-text-warm">Great Read</span>
+                  </>
+                )}
+              </h1>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="max-w-3xl animate-fade-in-up">
-            <div className="inline-block mb-4 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full text-white/90 text-sm font-medium animate-bounce-in">
-              ✨ Discover Your Next Great Read
+              <p className="text-xl text-muted-foreground max-w-xl">
+                {profile 
+                  ? "Continue your reading adventure with personalized recommendations and your curated collection."
+                  : "Join thousands of book lovers discovering, sharing, and celebrating the magic of reading."
+                }
+              </p>
+
+              <div className="flex flex-wrap gap-4">
+                <Button 
+                  asChild 
+                  size="lg" 
+                  className="gradient-primary text-white hover-lift shadow-glow-primary rounded-2xl text-base px-8"
+                >
+                  <Link to="/browse">
+                    <BookOpen className="w-5 h-5 mr-2" />
+                    {profile ? "Browse Library" : "Start Exploring"}
+                  </Link>
+                </Button>
+                
+                {!profile && (
+                  <Button 
+                    asChild 
+                    size="lg" 
+                    variant="outline"
+                    className="rounded-2xl text-base px-8 border-2 hover-lift"
+                  >
+                    <Link to="/login">
+                      <ArrowRight className="w-5 h-5 mr-2" />
+                      Join Now
+                    </Link>
+                  </Button>
+                )}
+              </div>
+
+              {/* Stats */}
+              <div className="flex flex-wrap gap-8 pt-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Library className="w-5 h-5 text-primary" />
+                    <span className="text-3xl font-bold font-display text-foreground">{books.length}+</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Books Available</p>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-secondary" />
+                    <span className="text-3xl font-bold font-display text-foreground">1K+</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Active Readers</p>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-pink" />
+                    <span className="text-3xl font-bold font-display text-foreground">5K+</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Books Loved</p>
+                </div>
+              </div>
             </div>
-            <h1 className="text-5xl xl:text-7xl font-display font-bold mb-6 leading-tight text-white drop-shadow-2xl">
-              {profile ? (
-                <>
-                  Welcome back, {profile.username}! 📖
-                  <br />
-                  <span className="inline-block animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
-                    Continue Your Journey
-                  </span>
-                </>
-              ) : (
-                <>
-                  Unravel the Unwritten.
-                  <br />
-                  <span className="inline-block animate-fade-in-right" style={{ animationDelay: '0.2s' }}>
-                    Explore Worlds Beyond
-                  </span>
-                </>
-              )}
-            </h1>
-            <p className="text-xl xl:text-2xl mb-8 text-white/90 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              {profile 
-                ? "Ready to discover your next great read? Your literary adventure awaits."
-                : "A book is a dream that you hold in your hand. Discover your next literary obsession."
-              }
-            </p>
-            <div className="animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-              <Button 
-                asChild 
-                size="lg" 
-                className="text-base bg-white text-primary hover:bg-white/90 hover-lift shadow-xl"
-              >
-                <Link to="/browse">
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  {profile ? "Explore Books" : "Discover Your Next Obsession"}
-                </Link>
-              </Button>
+
+            {/* Right Image */}
+            <div className="relative animate-fade-in-right">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl hover-lift">
+                <img 
+                  src="https://miaoda-site-img.s3cdn.medo.dev/images/845502f2-3391-44bb-81c5-fce390c05642.jpg"
+                  alt="Person reading book in cozy setting"
+                  className="w-full h-[500px] xl:h-[600px] object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+              </div>
+              
+              {/* Floating Cards */}
+              <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl p-4 shadow-xl animate-3d-float hidden xl:block">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-16 bg-gradient-primary rounded-lg" />
+                  <div>
+                    <p className="font-semibold text-sm">Currently Reading</p>
+                    <p className="text-xs text-muted-foreground">The Great Gatsby</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="absolute -top-6 -right-6 bg-white rounded-2xl p-4 shadow-xl animate-3d-float hidden xl:block" style={{ animationDelay: '1s' }}>
+                <div className="flex items-center gap-2">
+                  <Star className="w-5 h-5 text-yellow fill-yellow" />
+                  <div>
+                    <p className="font-semibold text-sm">4.8 Rating</p>
+                    <p className="text-xs text-muted-foreground">2.5K Reviews</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Decorative Elements */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl animate-3d-float pointer-events-none" />
+        <div className="absolute bottom-20 right-10 w-48 h-48 bg-secondary/10 rounded-full blur-3xl animate-3d-float pointer-events-none" style={{ animationDelay: '2s' }} />
       </section>
 
+      {/* Random Thought Section */}
       <section className="py-12 xl:py-16 bg-background">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <RandomThought />
         </div>
       </section>
 
-      <section ref={sectionRef} className="py-16 xl:py-20 bg-gradient-to-b from-background to-muted/30">
+      {/* Features Section */}
+      <section className="py-16 xl:py-20 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 animate-fade-in-up">
+            <h2 className="text-3xl xl:text-5xl font-display font-bold mb-4">
+              Why Choose <span className="gradient-text">BookVerse</span>?
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Everything you need to discover, organize, and enjoy your reading journey
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className="card-coral hover-lift border-0">
+              <CardContent className="p-8 text-center space-y-4">
+                <div className="w-16 h-16 mx-auto bg-primary rounded-2xl flex items-center justify-center shadow-glow-primary">
+                  <BookOpen className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-display font-bold">Vast Library</h3>
+                <p className="text-muted-foreground">
+                  Access thousands of books across all genres. From classics to contemporary bestsellers.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="card-purple hover-lift border-0">
+              <CardContent className="p-8 text-center space-y-4">
+                <div className="w-16 h-16 mx-auto bg-secondary rounded-2xl flex items-center justify-center shadow-glow-secondary">
+                  <Sparkles className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-display font-bold">Smart Recommendations</h3>
+                <p className="text-muted-foreground">
+                  AI-powered suggestions based on your reading history and preferences.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="card-mint hover-lift border-0">
+              <CardContent className="p-8 text-center space-y-4">
+                <div className="w-16 h-16 mx-auto bg-accent rounded-2xl flex items-center justify-center shadow-glow-accent">
+                  <Users className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-display font-bold">Community</h3>
+                <p className="text-muted-foreground">
+                  Connect with fellow readers, share reviews, and discover hidden gems.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* New Arrivals Section */}
+      <section ref={sectionRef} className="py-16 xl:py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`flex items-center justify-between mb-8 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
             <div>
-              <h2 className="text-3xl xl:text-4xl font-display font-bold mb-2 gradient-text">New Arrivals</h2>
-              <p className="text-muted-foreground">Recently added to our collection</p>
+              <h2 className="text-3xl xl:text-5xl font-display font-bold mb-2">
+                <span className="gradient-text">New Arrivals</span>
+              </h2>
+              <p className="text-lg text-muted-foreground">Recently added to our collection</p>
             </div>
             <div className="flex items-center gap-4">
               <ViewModeToggle />
-              <Button asChild variant="ghost" className="hover-lift">
-                <Link to="/browse">View All</Link>
+              <Button asChild variant="outline" className="hover-lift rounded-2xl border-2">
+                <Link to="/browse">
+                  View All
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
               </Button>
             </div>
           </div>
@@ -157,7 +285,7 @@ export default function Home() {
             viewMode === "grid" ? (
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Card key={i} className="overflow-hidden">
+                  <Card key={i} className="overflow-hidden rounded-2xl border-0 shadow-lg">
                     <Skeleton className="w-full aspect-[2/3] bg-muted" />
                     <CardContent className="p-4">
                       <Skeleton className="h-5 w-3/4 mb-2 bg-muted" />
@@ -169,9 +297,9 @@ export default function Home() {
             ) : (
               <div className="space-y-4">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Card key={i} className="overflow-hidden">
+                  <Card key={i} className="overflow-hidden rounded-2xl border-0 shadow-lg">
                     <div className="flex gap-4 p-4">
-                      <Skeleton className="w-24 xl:w-32 aspect-[2/3] flex-shrink-0 bg-muted rounded-md" />
+                      <Skeleton className="w-24 xl:w-32 aspect-[2/3] flex-shrink-0 bg-muted rounded-xl" />
                       <div className="flex-1 space-y-2">
                         <Skeleton className="h-6 w-3/4 bg-muted" />
                         <Skeleton className="h-4 w-1/2 bg-muted" />
@@ -194,7 +322,7 @@ export default function Home() {
                     size="icon"
                     onClick={handlePreviousPage}
                     disabled={currentPage === 1}
-                    className="rounded-xl border-2 hover:bg-muted/50 transition-all duration-300 disabled:opacity-50"
+                    className="rounded-2xl border-2 hover:bg-muted/50 transition-all duration-300 disabled:opacity-50"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </Button>
@@ -212,9 +340,9 @@ export default function Home() {
                             variant={currentPage === page ? "default" : "outline"}
                             size="icon"
                             onClick={() => handlePageClick(page)}
-                            className={`rounded-xl transition-all duration-300 ${
+                            className={`rounded-2xl transition-all duration-300 ${
                               currentPage === page
-                                ? "gradient-primary text-primary-foreground shadow-glow"
+                                ? "gradient-primary text-white shadow-glow-primary"
                                 : "border-2 hover:bg-muted/50"
                             }`}
                           >
@@ -240,7 +368,7 @@ export default function Home() {
                     size="icon"
                     onClick={handleNextPage}
                     disabled={currentPage === totalPages}
-                    className="rounded-xl border-2 hover:bg-muted/50 transition-all duration-300 disabled:opacity-50"
+                    className="rounded-2xl border-2 hover:bg-muted/50 transition-all duration-300 disabled:opacity-50"
                   >
                     <ChevronRight className="w-5 h-5" />
                   </Button>
@@ -251,71 +379,47 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-16 xl:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl xl:text-4xl font-display font-bold mb-4">
-              Curated Collections
+      {/* CTA Section */}
+      {!profile && (
+        <section className="py-20 xl:py-28 bg-gradient-to-br from-primary via-pink to-secondary relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-10 left-10 w-64 h-64 bg-white rounded-full blur-3xl animate-3d-float" />
+            <div className="absolute bottom-10 right-10 w-96 h-96 bg-white rounded-full blur-3xl animate-3d-float" style={{ animationDelay: '2s' }} />
+          </div>
+          
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <h2 className="text-4xl xl:text-6xl font-display font-bold text-white mb-6">
+              Ready to Start Your Reading Journey?
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Explore handpicked selections across genres and discover hidden literary gems
+            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+              Join our community of passionate readers and unlock a world of literary adventures.
             </p>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Button 
+                asChild 
+                size="lg" 
+                className="bg-white text-primary hover:bg-white/90 hover-lift shadow-2xl rounded-2xl text-base px-8"
+              >
+                <Link to="/signup">
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Get Started Free
+                </Link>
+              </Button>
+              <Button 
+                asChild 
+                size="lg" 
+                variant="outline"
+                className="border-2 border-white text-white hover:bg-white/10 rounded-2xl text-base px-8"
+              >
+                <Link to="/browse">
+                  <BookOpen className="w-5 h-5 mr-2" />
+                  Explore Books
+                </Link>
+              </Button>
+            </div>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="text-center p-8 hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="w-8 h-8 text-primary-foreground" />
-              </div>
-              <h3 className="text-xl font-display font-bold mb-2">Vast Collection</h3>
-              <p className="text-muted-foreground">
-                Explore thousands of books across all genres and discover hidden literary gems
-              </p>
-            </Card>
-
-            <Card className="text-center p-8 hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <Star className="w-8 h-8 text-primary-foreground" />
-              </div>
-              <h3 className="text-xl font-display font-bold mb-2">Community Reviews</h3>
-              <p className="text-muted-foreground">
-                Read authentic reviews from fellow readers and share your own insights
-              </p>
-            </Card>
-
-            <Card className="text-center p-8 hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <TrendingUp className="w-8 h-8 text-primary-foreground" />
-              </div>
-              <h3 className="text-xl font-display font-bold mb-2">Smart Recommendations</h3>
-              <p className="text-muted-foreground">
-                Get personalized book suggestions powered by AI based on your reading history
-              </p>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      <section 
-        className="relative bg-cover bg-center py-20"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('https://miaoda-site-img.s3cdn.medo.dev/images/632c160d-5b7b-4cf7-a108-126499cccd81.jpg')`,
-        }}
-      >
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-display font-bold mb-4 text-white">
-            Join Our Literary Circle
-          </h2>
-          <p className="text-xl text-white/90 mb-8">
-            Connect with fellow book lovers, share your thoughts, and discover your next favorite read
-          </p>
-          <Button asChild size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/30">
-            <Link to="/browse">
-              Explore Books
-            </Link>
-          </Button>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }
