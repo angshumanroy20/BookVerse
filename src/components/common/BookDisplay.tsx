@@ -1,8 +1,15 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { BookOpen, Star, Plus } from "lucide-react";
 import { useViewMode } from "@/contexts/ViewModeContext";
-import type { Book, BookWithDetails } from "@/types/types";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { api } from "@/db/api";
+import type { Book, BookWithDetails, ReadingStatus } from "@/types/types";
 import { use3DTilt } from "@/hooks/use3DAnimation";
 
 interface BookDisplayProps {
@@ -52,14 +59,59 @@ function BookCard({ book, index }: { book: Book | BookWithDetails; index: number
 
 export default function BookDisplay({ books }: BookDisplayProps) {
   const { viewMode } = useViewMode();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [selectedBook, setSelectedBook] = useState<Book | BookWithDetails | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [addingToLibrary, setAddingToLibrary] = useState(false);
+
+  const handleAddToLibrary = async (bookId: string, status: ReadingStatus) => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setAddingToLibrary(true);
+      await api.addToReadingList(user.id, bookId, status);
+      toast({
+        title: "Success",
+        description: "Book added to your library",
+      });
+      setDialogOpen(false);
+      setSelectedBook(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add book to library",
+        variant: "destructive",
+      });
+    } finally {
+      setAddingToLibrary(false);
+    }
+  };
+
+  const openAddDialog = (e: React.MouseEvent, book: Book | BookWithDetails) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    
+    setSelectedBook(book);
+    setDialogOpen(true);
+  };
 
   if (viewMode === "list") {
     return (
-      <div className="space-y-4">
-        {books.map((book) => (
-          <Link key={book.id} to={`/book/${book.id}`}>
-            <Card className="overflow-hidden hover-lift group cursor-pointer border border-border/30 hover:border-primary/50 transition-all duration-300 bg-card/50 backdrop-blur-sm">
-              <div className="flex gap-4 sm:gap-6 p-4 sm:p-6">
+      <>
+        <div className="space-y-6">
+          {books.map((book) => (
+            <Card key={book.id} className="overflow-hidden hover-lift group cursor-pointer border border-border/30 hover:border-primary/50 transition-all duration-300 bg-card/50 backdrop-blur-sm">
+              <Link to={`/book/${book.id}`} className="flex gap-4 sm:gap-6 p-4 sm:p-6">
                 {/* Book Cover Thumbnail */}
                 <div className="relative w-20 sm:w-24 aspect-[2/3] flex-shrink-0 overflow-hidden rounded-lg shadow-lg">
                   {book.cover_image_url ? (
@@ -92,15 +144,56 @@ export default function BookDisplay({ books }: BookDisplayProps) {
 
                 {/* Add Button */}
                 <div className="flex items-center justify-center flex-shrink-0">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-border/50 hover:border-primary/50 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/10">
-                    <span className="text-2xl text-muted-foreground group-hover:text-primary transition-colors">+</span>
-                  </div>
+                  <button
+                    onClick={(e) => openAddDialog(e, book)}
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-border/50 hover:border-primary/50 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/10"
+                  >
+                    <Plus className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </button>
                 </div>
-              </div>
+              </Link>
             </Card>
-          </Link>
-        ))}
-      </div>
+          ))}
+        </div>
+
+        {/* Add to Library Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add to Library</DialogTitle>
+              <DialogDescription>
+                Choose a reading status for "{selectedBook?.title}"
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <Button
+                onClick={() => handleAddToLibrary(selectedBook?.id || "", "want_to_read")}
+                disabled={addingToLibrary}
+                className="w-full"
+                variant="outline"
+              >
+                Want to Read
+              </Button>
+              <Button
+                onClick={() => handleAddToLibrary(selectedBook?.id || "", "currently_reading")}
+                disabled={addingToLibrary}
+                className="w-full"
+                variant="outline"
+              >
+                Currently Reading
+              </Button>
+              <Button
+                onClick={() => handleAddToLibrary(selectedBook?.id || "", "read")}
+                disabled={addingToLibrary}
+                className="w-full"
+                variant="outline"
+              >
+                Read
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 

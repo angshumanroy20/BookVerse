@@ -227,7 +227,7 @@ export default function Browse() {
               ))}
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Card key={i} className="overflow-hidden border border-border/30 bg-card/50">
                   <div className="flex gap-4 sm:gap-6 p-4 sm:p-6">
