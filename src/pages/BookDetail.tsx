@@ -10,8 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { BookOpen, Star, Edit, Trash2, Download, Bookmark, BookmarkCheck, BookOpenCheck, User as UserIcon, Clock } from "lucide-react";
+import { BookOpen, Star, Edit, Trash2, Download, Bookmark, BookmarkCheck, BookOpenCheck, User as UserIcon, Clock, Upload } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { BookRecommendations } from "@/components/BookRecommendations";
 import { PdfViewer } from "@/components/PdfViewer";
 
@@ -30,6 +31,9 @@ export default function BookDetail() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const [newRating, setNewRating] = useState(5);
   const [newReviewText, setNewReviewText] = useState("");
@@ -164,6 +168,67 @@ export default function BookDetail() {
         description: "Failed to update reading list",
         variant: "destructive",
       });
+    }
+  };
+
+  const handlePdfFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.type !== "application/pdf") {
+        toast({
+          title: "Invalid file type",
+          description: "Please select a PDF file",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (file.size > 50 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "PDF file must be less than 50MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      setPdfFile(file);
+    }
+  };
+
+  const sanitizeFileName = (fileName: string): string => {
+    return fileName
+      .toLowerCase()
+      .replace(/[^a-z0-9.-]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "");
+  };
+
+  const handleUploadPdf = async () => {
+    if (!pdfFile || !id || !book) return;
+
+    try {
+      setUploading(true);
+      const pdfFileName = sanitizeFileName(`${Date.now()}_${pdfFile.name}`);
+      const pdfUrl = await api.uploadBookPdf(pdfFile, pdfFileName);
+
+      await api.updateBook(id, { pdf_url: pdfUrl });
+
+      setBook({ ...book, pdf_url: pdfUrl });
+      setPdfFile(null);
+      setIsUploadDialogOpen(false);
+
+      toast({
+        title: "Success",
+        description: "PDF uploaded successfully",
+      });
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to upload PDF",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -326,6 +391,65 @@ export default function BookDetail() {
                     </a>
                   </Button>
                 </>
+              )}
+
+              {!book.pdf_url && canEdit && (
+                <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload PDF
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Upload PDF</DialogTitle>
+                      <DialogDescription>
+                        Add a PDF file for this book to enable reading functionality
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="flex flex-col gap-2">
+                        <label
+                          htmlFor="pdf-upload"
+                          className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground">
+                              {pdfFile ? pdfFile.name : "Click to upload PDF (max 50MB)"}
+                            </p>
+                          </div>
+                          <input
+                            id="pdf-upload"
+                            type="file"
+                            className="hidden"
+                            accept="application/pdf"
+                            onChange={handlePdfFileChange}
+                          />
+                        </label>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setIsUploadDialogOpen(false);
+                            setPdfFile(null);
+                          }}
+                          disabled={uploading}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={handleUploadPdf}
+                          disabled={!pdfFile || uploading}
+                        >
+                          {uploading ? "Uploading..." : "Upload"}
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               )}
 
               {canEdit && (

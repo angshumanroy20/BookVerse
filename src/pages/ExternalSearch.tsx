@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Search, BookOpen, Plus, Loader2, Filter } from "lucide-react";
+import { Search, BookOpen, Plus, Loader2, Filter, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -196,6 +197,14 @@ export default function ExternalSearch() {
             </form>
           </CardContent>
         </Card>
+
+        <Alert className="mb-6 border-primary/20 bg-primary/5">
+          <Info className="h-4 w-4 text-primary" />
+          <AlertDescription className="text-sm">
+            <strong>Note:</strong> Imported books will include metadata (title, author, cover, description) only. 
+            PDF files need to be uploaded separately from the book detail page after importing.
+          </AlertDescription>
+        </Alert>
 
         {totalResults > 0 && (
           <div className="mb-6">
