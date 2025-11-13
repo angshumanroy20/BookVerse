@@ -36,26 +36,28 @@ function BookCard({ book, index }: { book: Book | BookWithDetails; index: number
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
-        <CardContent className="p-4">
-          <h3 className="font-display font-bold text-base xl:text-lg mb-1 line-clamp-2 group-hover:text-primary transition-colors">
+        <CardContent className="p-3 sm:p-4 flex flex-col">
+          <h3 className="font-display font-bold text-sm sm:text-base xl:text-lg mb-1 line-clamp-2 group-hover:text-primary transition-colors min-h-[2.5rem] sm:min-h-[3rem]">
             {book.title}
           </h3>
-          <p className="text-sm text-muted-foreground mb-2">
+          <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-1">
             {book.author}
           </p>
-          {book.genre && (
-            <div className="inline-block px-2 py-1 bg-primary/10 rounded-full text-xs text-primary font-medium">
-              {book.genre}
-            </div>
-          )}
-          {"avg_rating" in book && book.avg_rating !== null && book.avg_rating !== undefined && (
-            <div className="flex items-center gap-1 mt-2">
-              <Star className="w-3 h-3 fill-primary text-primary" />
-              <span className="text-xs font-semibold text-primary">
-                {book.avg_rating.toFixed(1)}
-              </span>
-            </div>
-          )}
+          <div className="mt-auto">
+            {book.genre && (
+              <div className="inline-block px-2 py-1 bg-primary/10 rounded-full text-xs text-primary font-medium mb-2">
+                {book.genre}
+              </div>
+            )}
+            {"avg_rating" in book && book.avg_rating !== null && book.avg_rating !== undefined && (
+              <div className="flex items-center gap-1">
+                <Star className="w-3 h-3 fill-primary text-primary" />
+                <span className="text-xs font-semibold text-primary">
+                  {book.avg_rating.toFixed(1)}
+                </span>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </Link>
@@ -127,7 +129,7 @@ export default function BookDisplay({ books }: BookDisplayProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
+    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
       {books.map((book, index) => (
         <BookCard key={book.id} book={book} index={index} />
       ))}
