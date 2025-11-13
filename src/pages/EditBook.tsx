@@ -14,7 +14,7 @@ import { compressImage } from "@/utils/imageCompression";
 
 export default function EditBook() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -51,7 +51,9 @@ export default function EditBook() {
         return;
       }
 
-      if (bookData.created_by !== user?.id) {
+      // Check if user has permission to edit (creator or admin)
+      const canEdit = bookData.created_by === user?.id || profile?.role === "admin";
+      if (!canEdit) {
         toast({
           title: "Error",
           description: "You don't have permission to edit this book",
