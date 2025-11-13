@@ -78,11 +78,6 @@ export default function Home() {
           <div className="grid xl:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div className="space-y-8 animate-fade-in-left">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-foreground">Your Literary Journey Starts Here</span>
-              </div>
-              
               <h1 className="text-4xl sm:text-5xl xl:text-6xl font-display font-bold leading-tight">
                 {profile ? (
                   <>
@@ -145,27 +140,6 @@ export default function Home() {
                   className="w-full h-[500px] xl:h-[600px] object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-              </div>
-              
-              {/* Floating Cards */}
-              <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl p-4 shadow-xl animate-3d-float hidden xl:block">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-16 bg-gradient-primary rounded-lg" />
-                  <div>
-                    <p className="font-semibold text-sm">Currently Reading</p>
-                    <p className="text-xs text-muted-foreground">The Great Gatsby</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="absolute -top-6 -right-6 bg-white rounded-2xl p-4 shadow-xl animate-3d-float hidden xl:block" style={{ animationDelay: '1s' }}>
-                <div className="flex items-center gap-2">
-                  <Star className="w-5 h-5 text-yellow fill-yellow" />
-                  <div>
-                    <p className="font-semibold text-sm">4.8 Rating</p>
-                    <p className="text-xs text-muted-foreground">2.5K Reviews</p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
