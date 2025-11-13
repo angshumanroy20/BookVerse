@@ -5,7 +5,6 @@ import { RequireAuth } from '@/components/auth/RequireAuth';
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
-import MusicPlayer from '@/components/common/MusicPlayer';
 import routes from './routes';
 
 export default function App() {
@@ -36,7 +35,6 @@ export default function App() {
             </main>
             <Footer />
           </div>
-          <MusicPlayer />
           <Toaster />
         </ViewModeProvider>
       </AuthProvider>

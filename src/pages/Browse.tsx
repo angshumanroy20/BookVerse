@@ -148,7 +148,7 @@ export default function Browse() {
     <div className="min-h-screen bg-background py-6 sm:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row items-start justify-between mb-4 gap-4">
+          <div className="flex flex-col sm:flex-row items-start justify-between mb-6 gap-4">
             <div className="w-full sm:w-auto">
               <h1 className="text-2xl sm:text-3xl xl:text-4xl font-display font-bold mb-2">Browse Books</h1>
               <p className="text-sm sm:text-base text-muted-foreground">
@@ -160,57 +160,61 @@ export default function Browse() {
             </div>
           </div>
 
-          <form onSubmit={handleSearch} className="flex flex-col gap-3">
-            <div className="flex flex-col sm:flex-row gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search by title, author, or genre..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 sm:pl-10 pr-10 sm:pr-12 text-sm sm:text-base"
-                />
+          {/* Search Section */}
+          <div className="space-y-3">
+            <h2 className="text-lg sm:text-xl font-display font-semibold">Search & Filter</h2>
+            <form onSubmit={handleSearch} className="flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative flex-1 min-w-0">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground pointer-events-none" />
+                  <Input
+                    type="text"
+                    placeholder="Search by title, author, or genre..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 sm:pl-10 pr-10 sm:pr-12 text-sm sm:text-base w-full"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={openVoiceSearch}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 sm:h-8 sm:w-8 p-0 text-muted-foreground hover:text-primary flex-shrink-0"
+                    title="Voice search"
+                  >
+                    <Mic className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                  </Button>
+                </div>
+                <Select value={selectedGenre} onValueChange={handleGenreChange}>
+                  <SelectTrigger className="w-full sm:w-48 text-sm sm:text-base flex-shrink-0">
+                    <SelectValue placeholder="All Genres" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Genres</SelectItem>
+                    {genres.map((genre) => (
+                      <SelectItem key={genre} value={genre}>
+                        {genre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button type="submit" disabled={searching} className="w-full sm:w-auto text-sm sm:text-base flex-shrink-0">
+                  {searching ? "Searching..." : "Search"}
+                </Button>
                 <Button
                   type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={openVoiceSearch}
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 sm:h-8 sm:w-8 p-0 text-muted-foreground hover:text-primary"
-                  title="Voice search"
+                  variant="outline"
+                  onClick={() => setWebSearchDialogOpen(true)}
+                  className="gap-2 w-full sm:w-auto text-sm sm:text-base flex-shrink-0"
                 >
-                  <Mic className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                  <Globe className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">Web Search</span>
                 </Button>
               </div>
-              <Select value={selectedGenre} onValueChange={handleGenreChange}>
-                <SelectTrigger className="w-full sm:w-48 text-sm sm:text-base">
-                  <SelectValue placeholder="All Genres" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Genres</SelectItem>
-                  {genres.map((genre) => (
-                    <SelectItem key={genre} value={genre}>
-                      {genre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button type="submit" disabled={searching} className="w-full sm:w-auto text-sm sm:text-base">
-                {searching ? "Searching..." : "Search"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setWebSearchDialogOpen(true)}
-                className="gap-2 w-full sm:w-auto text-sm sm:text-base"
-              >
-                <Globe className="w-4 h-4" />
-                <span className="truncate">Web Search</span>
-              </Button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
 
         {loading ? (
