@@ -184,24 +184,29 @@ export default function MusicPlayerContent() {
   const changeTrack = (index: number) => {
     setCurrentTrackIndex(index);
     setIsPlaying(false);
-    if (audioRef.current) {
-      audioRef.current.load();
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch((error) => {
-        console.error("Error playing track:", error);
-        toast({
-          title: "Playback Error",
-          description: "Unable to play this track. Please try another.",
-          variant: "destructive",
+    
+    // Small delay to ensure audio element updates
+    setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.load();
+        audioRef.current.play().then(() => {
+          setIsPlaying(true);
+          toast({
+            title: "Track Changed",
+            description: `Now playing: ${tracks[index].title}`,
+            duration: 2000,
+          });
+        }).catch((error) => {
+          console.error("Error playing track:", error);
+          setIsPlaying(false);
+          toast({
+            title: "Playback Error",
+            description: "Unable to play this track. Please try another.",
+            variant: "destructive",
+          });
         });
-      });
-    }
-    toast({
-      title: "Track Changed",
-      description: `Now playing: ${tracks[index].title}`,
-      duration: 2000,
-    });
+      }
+    }, 100);
   };
 
   const handleTrackEnd = () => {
@@ -246,7 +251,7 @@ export default function MusicPlayerContent() {
     : getStreamUrl(currentTrack?.id || "");
 
   return (
-    <div className="space-y-6 py-4">
+    <div className="space-y-4 sm:space-y-6 py-2 sm:py-4">
       <form onSubmit={handleSearch} className="space-y-2">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -255,14 +260,14 @@ export default function MusicPlayerContent() {
             placeholder="Search for music..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-20"
+            className="pl-9 pr-20 h-9 sm:h-10 text-sm"
             disabled={isSampleTrack}
           />
           <Button
             type="submit"
             size="sm"
             disabled={searching || isSampleTrack}
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-8"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 sm:h-8 text-xs"
           >
             {searching ? (
               <Loader2 className="w-3 h-3 animate-spin" />
@@ -292,31 +297,31 @@ export default function MusicPlayerContent() {
         )}
       </form>
 
-      <div className="space-y-2 p-4 bg-muted/30 rounded-xl">
+      <div className="space-y-2 p-3 sm:p-4 bg-muted/30 rounded-xl">
         <p className="text-xs text-muted-foreground">Now Playing:</p>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center flex-shrink-0">
-            <Music className="w-5 h-5 text-primary-foreground" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full gradient-primary flex items-center justify-center flex-shrink-0">
+            <Music className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{currentTrack.title}</p>
+            <p className="text-xs sm:text-sm font-medium truncate">{currentTrack.title}</p>
             <p className="text-xs text-muted-foreground truncate">{currentTrack.user.name}</p>
             <p className="text-xs text-muted-foreground">{formatDuration(currentTrack.duration)}</p>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <Button
           variant="outline"
           size="icon"
           onClick={togglePlay}
-          className="h-12 w-12 rounded-xl gradient-primary text-primary-foreground hover:scale-105 transition-all duration-300 border-0 flex-shrink-0"
+          className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl gradient-primary text-primary-foreground hover:scale-105 transition-all duration-300 border-0 flex-shrink-0"
         >
           {isPlaying ? (
-            <Pause className="w-5 h-5" />
+            <Pause className="w-4 h-4 sm:w-5 sm:h-5" />
           ) : (
-            <Play className="w-5 h-5 ml-0.5" />
+            <Play className="w-4 h-4 sm:w-5 sm:h-5 ml-0.5" />
           )}
         </Button>
 
@@ -325,12 +330,12 @@ export default function MusicPlayerContent() {
             variant="ghost"
             size="icon"
             onClick={toggleMute}
-            className="h-8 w-8 rounded-full flex-shrink-0"
+            className="h-7 w-7 sm:h-8 sm:w-8 rounded-full flex-shrink-0"
           >
             {isMuted || volume === 0 ? (
-              <VolumeX className="w-4 h-4" />
+              <VolumeX className="w-3 h-3 sm:w-4 sm:h-4" />
             ) : (
-              <Volume2 className="w-4 h-4" />
+              <Volume2 className="w-3 h-3 sm:w-4 sm:h-4" />
             )}
           </Button>
           <Slider
@@ -340,13 +345,13 @@ export default function MusicPlayerContent() {
             step={1}
             className="flex-1"
           />
-          <span className="text-xs text-muted-foreground w-10 text-right flex-shrink-0">
+          <span className="text-xs text-muted-foreground w-8 sm:w-10 text-right flex-shrink-0">
             {isMuted ? 0 : volume}%
           </span>
         </div>
       </div>
 
-      <div className="space-y-2 max-h-64 overflow-y-auto">
+      <div className="space-y-2 max-h-[40vh] sm:max-h-64 overflow-y-auto">
         <p className="text-xs text-muted-foreground font-medium">
           {isSampleTrack ? "Sample Tracks:" : searchQuery ? "Search Results:" : "Trending Tracks:"}
         </p>
@@ -355,7 +360,7 @@ export default function MusicPlayerContent() {
             <button
               key={track.id}
               onClick={() => changeTrack(index)}
-              className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-300 ${
+              className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-sm transition-all duration-300 ${
                 currentTrackIndex === index
                   ? "gradient-primary text-primary-foreground shadow-glow"
                   : "hover:bg-muted/50 border border-border/50"
@@ -363,7 +368,7 @@ export default function MusicPlayerContent() {
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{track.title}</p>
+                  <p className="font-medium truncate text-xs sm:text-sm">{track.title}</p>
                   <p className="text-xs opacity-70 truncate">{track.user.name}</p>
                 </div>
                 <span className="text-xs opacity-70 flex-shrink-0">
