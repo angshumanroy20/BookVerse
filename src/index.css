@@ -95,43 +95,43 @@ All colors MUST be HSL.
   .dark {
     --background: 220 13% 9%;
     --foreground: 220 13% 95%;
-    --card: 220 13% 11%;
+    --card: 220 13% 13%;
     --card-foreground: 220 13% 95%;
-    --popover: 220 13% 11%;
+    --popover: 220 13% 13%;
     --popover-foreground: 220 13% 95%;
     --primary: 6 93% 71%;
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 220 13% 9%;
     --primary-glow: 6 93% 81%;
     --secondary: 262 80% 70%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 220 13% 15%;
-    --muted-foreground: 220 9% 60%;
+    --secondary-foreground: 220 13% 9%;
+    --muted: 220 13% 18%;
+    --muted-foreground: 220 9% 70%;
     --accent: 142 76% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 220 13% 9%;
     --yellow: 48 96% 65%;
     --yellow-foreground: 220 13% 9%;
     --blue: 217 91% 65%;
-    --blue-foreground: 0 0% 100%;
+    --blue-foreground: 220 13% 9%;
     --pink: 340 82% 70%;
-    --pink-foreground: 0 0% 100%;
+    --pink-foreground: 220 13% 9%;
     --orange: 25 95% 65%;
-    --orange-foreground: 0 0% 100%;
+    --orange-foreground: 220 13% 9%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 18%;
-    --input: 220 13% 18%;
+    --destructive-foreground: 220 13% 9%;
+    --border: 220 13% 25%;
+    --input: 220 13% 25%;
     --ring: 6 93% 71%;
-    --sidebar: 220 13% 11%;
+    --sidebar: 220 13% 13%;
     --sidebar-foreground: 220 13% 95%;
     --sidebar-primary: 6 93% 71%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 13% 15%;
+    --sidebar-primary-foreground: 220 13% 9%;
+    --sidebar-accent: 220 13% 18%;
     --sidebar-accent-foreground: 220 13% 95%;
-    --sidebar-border: 220 13% 18%;
+    --sidebar-border: 220 13% 25%;
     --sidebar-ring: 6 93% 71%;
-    --success: 142 76% 45%;
-    --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
+    --success: 142 76% 55%;
+    --success-foreground: 220 13% 9%;
+    --warning: 38 92% 60%;
     --warning-foreground: 220 13% 9%;
   }
 }
@@ -206,28 +206,56 @@ All colors MUST be HSL.
     background-color: hsl(6 93% 95%);
   }
 
+  .dark .bg-coral-soft {
+    background-color: hsl(6 93% 25%);
+  }
+
   .bg-purple-soft {
     background-color: hsl(262 80% 95%);
+  }
+
+  .dark .bg-purple-soft {
+    background-color: hsl(262 80% 25%);
   }
 
   .bg-mint-soft {
     background-color: hsl(142 76% 95%);
   }
 
+  .dark .bg-mint-soft {
+    background-color: hsl(142 76% 25%);
+  }
+
   .bg-yellow-soft {
     background-color: hsl(48 96% 95%);
+  }
+
+  .dark .bg-yellow-soft {
+    background-color: hsl(48 96% 25%);
   }
 
   .bg-blue-soft {
     background-color: hsl(217 91% 95%);
   }
 
+  .dark .bg-blue-soft {
+    background-color: hsl(217 91% 25%);
+  }
+
   .bg-pink-soft {
     background-color: hsl(340 82% 95%);
   }
 
+  .dark .bg-pink-soft {
+    background-color: hsl(340 82% 25%);
+  }
+
   .bg-orange-soft {
     background-color: hsl(25 95% 95%);
+  }
+
+  .dark .bg-orange-soft {
+    background-color: hsl(25 95% 25%);
   }
 
   /* Hover Effects - Playful */
@@ -355,8 +383,8 @@ All colors MUST be HSL.
   }
 
   .dark .glass-effect {
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(40, 40, 45, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
   }
 
   .glass-card {
@@ -368,8 +396,9 @@ All colors MUST be HSL.
   }
 
   .dark .glass-card {
-    background: rgba(30, 30, 30, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(40, 40, 45, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   }
 
   /* Shadow Utilities */
