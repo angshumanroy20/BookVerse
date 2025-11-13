@@ -145,9 +145,9 @@ export default function Browse() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-6 sm:py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-6 sm:mb-8">
+    <div className="min-h-screen bg-background py-6 sm:py-8 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="mb-6 sm:mb-8 w-full">
           <div className="flex flex-col sm:flex-row items-start justify-between mb-6 gap-4">
             <div className="w-full sm:w-auto">
               <h1 className="text-2xl sm:text-3xl xl:text-4xl font-display font-bold mb-2">Browse Books</h1>
@@ -161,18 +161,18 @@ export default function Browse() {
           </div>
 
           {/* Search Section */}
-          <div className="space-y-3 overflow-hidden">
+          <div className="space-y-3 w-full">
             <h2 className="text-lg sm:text-xl font-display font-semibold">Search & Filter</h2>
-            <form onSubmit={handleSearch} className="flex flex-col gap-3 w-full">
-              <div className="flex flex-col gap-2 w-full">
-                <div className="relative w-full">
+            <form onSubmit={handleSearch} className="flex flex-col gap-3 w-full max-w-full">
+              <div className="flex flex-col gap-2 w-full max-w-full">
+                <div className="relative w-full max-w-full">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground pointer-events-none z-10" />
                   <Input
                     type="text"
                     placeholder="Search by title, author..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 sm:pl-10 pr-10 sm:pr-12 text-sm sm:text-base w-full"
+                    className="pl-9 sm:pl-10 pr-10 sm:pr-12 text-sm sm:text-base w-full max-w-full"
                   />
                   <Button
                     type="button"
@@ -186,7 +186,7 @@ export default function Browse() {
                   </Button>
                 </div>
                 <Select value={selectedGenre} onValueChange={handleGenreChange}>
-                  <SelectTrigger className="w-full text-sm sm:text-base">
+                  <SelectTrigger className="w-full max-w-full text-sm sm:text-base">
                     <SelectValue placeholder="All Genres" />
                   </SelectTrigger>
                   <SelectContent>
@@ -199,18 +199,18 @@ export default function Browse() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2 w-full">
-                <Button type="submit" disabled={searching} className="w-full sm:flex-1 text-sm sm:text-base">
+              <div className="flex flex-col sm:flex-row gap-2 w-full max-w-full">
+                <Button type="submit" disabled={searching} className="w-full sm:flex-1 text-sm sm:text-base min-w-0">
                   {searching ? "Searching..." : "Search"}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setWebSearchDialogOpen(true)}
-                  className="gap-2 w-full sm:flex-1 text-sm sm:text-base"
+                  className="gap-2 w-full sm:flex-1 text-sm sm:text-base min-w-0"
                 >
                   <Globe className="w-4 h-4 flex-shrink-0" />
-                  <span>Web Search</span>
+                  <span className="truncate">Web Search</span>
                 </Button>
               </div>
             </form>
