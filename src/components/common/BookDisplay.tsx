@@ -72,9 +72,9 @@ export default function BookDisplay({ books }: BookDisplayProps) {
       <div className="space-y-4">
         {books.map((book) => (
           <Link key={book.id} to={`/book/${book.id}`}>
-            <Card className="overflow-hidden hover-lift group cursor-pointer border-2 border-border/50 hover:border-primary/30 transition-all duration-300 shadow-elegant">
-              <div className="flex gap-6 p-5">
-                <div className="relative w-28 xl:w-36 aspect-[2/3] flex-shrink-0 overflow-hidden bg-muted rounded-2xl shadow-elegant">
+            <Card className="overflow-hidden hover-lift group cursor-pointer border-2 border-border/50 hover:border-primary/30 transition-all duration-300 shadow-elegant h-full">
+              <div className="flex gap-3 sm:gap-6 p-3 sm:p-5 min-h-[180px] sm:min-h-[200px]">
+                <div className="relative w-24 sm:w-28 xl:w-36 aspect-[2/3] flex-shrink-0 overflow-hidden bg-muted rounded-xl sm:rounded-2xl shadow-elegant">
                   {book.cover_image_url ? (
                     <img
                       src={book.cover_image_url}
@@ -83,37 +83,37 @@ export default function BookDisplay({ books }: BookDisplayProps) {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center gradient-primary">
-                      <BookOpen className="w-10 h-10 text-primary-foreground" />
+                      <BookOpen className="w-8 sm:w-10 h-8 sm:h-10 text-primary-foreground" />
                     </div>
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-display font-bold text-xl xl:text-2xl mb-2 group-hover:text-primary transition-colors">
+                <div className="flex-1 min-w-0 flex flex-col">
+                  <h3 className="font-display font-bold text-base sm:text-xl xl:text-2xl mb-1 sm:mb-2 group-hover:text-primary transition-colors line-clamp-2">
                     {book.title}
                   </h3>
-                  <p className="text-base xl:text-lg text-muted-foreground mb-3 font-medium">
+                  <p className="text-sm sm:text-base xl:text-lg text-muted-foreground mb-2 sm:mb-3 font-medium line-clamp-1">
                     by {book.author}
                   </p>
                   {book.genre && (
-                    <div className="inline-block px-3 py-1 bg-muted/50 rounded-full text-xs xl:text-sm text-muted-foreground mb-3">
+                    <div className="inline-block px-2 sm:px-3 py-1 bg-muted/50 rounded-full text-xs xl:text-sm text-muted-foreground mb-2 sm:mb-3 w-fit">
                       {book.genre}
                     </div>
                   )}
                   {book.synopsis && (
-                    <p className="text-sm xl:text-base text-muted-foreground line-clamp-2 xl:line-clamp-3 leading-relaxed">
+                    <p className="text-xs sm:text-sm xl:text-base text-muted-foreground line-clamp-2 leading-relaxed mb-2 sm:mb-3 flex-grow">
                       {book.synopsis}
                     </p>
                   )}
                   {"avg_rating" in book && book.avg_rating !== null && book.avg_rating !== undefined && (
-                    <div className="flex items-center gap-2 mt-3">
-                      <div className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 rounded-full">
-                        <Star className="w-4 h-4 fill-primary text-primary" />
-                        <span className="text-sm font-semibold text-primary">
+                    <div className="flex items-center gap-2 mt-auto">
+                      <div className="flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 bg-primary/10 rounded-full">
+                        <Star className="w-3 sm:w-4 h-3 sm:h-4 fill-primary text-primary" />
+                        <span className="text-xs sm:text-sm font-semibold text-primary">
                           {book.avg_rating.toFixed(1)}
                         </span>
                       </div>
                       {"review_count" in book && book.review_count !== undefined && book.review_count > 0 && (
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-xs sm:text-sm text-muted-foreground">
                           {book.review_count} {book.review_count === 1 ? "review" : "reviews"}
                         </span>
                       )}
