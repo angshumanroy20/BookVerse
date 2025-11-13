@@ -10,6 +10,7 @@ import Login from './pages/Login';
 import Profile from './pages/Profile';
 import About from './pages/About';
 import Inbox from './pages/Inbox';
+import ExternalSearch from './pages/ExternalSearch';
 import type { ReactNode } from 'react';
 
 export interface RouteConfig {
@@ -32,6 +33,13 @@ const routes: RouteConfig[] = [
     name: 'Browse',
     path: '/browse',
     element: <Browse />,
+    visible: true,
+    requireAuth: false
+  },
+  {
+    name: 'Discover',
+    path: '/discover',
+    element: <ExternalSearch />,
     visible: true,
     requireAuth: false
   },
