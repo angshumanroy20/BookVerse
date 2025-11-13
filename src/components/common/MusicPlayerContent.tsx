@@ -42,21 +42,68 @@ export default function MusicPlayerContent() {
   const loadTrendingTracks = async () => {
     setLoading(true);
     try {
-      const trendingTracks = await getTrendingTracks(10);
-      setTracks(trendingTracks);
+      const trendingTracks = await getTrendingTracks(15);
+      
       if (trendingTracks.length === 0) {
+        // Fallback to sample tracks if API fails
+        const fallbackTracks: AudiusTrack[] = [
+          {
+            id: "sample-1",
+            title: "Relaxing Piano Music",
+            user: { name: "Sample Artist" },
+            duration: 180,
+          },
+          {
+            id: "sample-2",
+            title: "Ambient Study Music",
+            user: { name: "Sample Artist" },
+            duration: 240,
+          },
+          {
+            id: "sample-3",
+            title: "Peaceful Reading",
+            user: { name: "Sample Artist" },
+            duration: 200,
+          }
+        ];
+        
+        setTracks(fallbackTracks);
         toast({
-          title: "No Tracks Found",
-          description: "Unable to load music tracks. Please try again later.",
-          variant: "destructive",
+          title: "Using Sample Tracks",
+          description: "Unable to connect to music service. Showing sample tracks.",
         });
+      } else {
+        setTracks(trendingTracks);
       }
     } catch (error) {
       console.error("Error loading tracks:", error);
+      
+      // Set fallback tracks on error
+      const fallbackTracks: AudiusTrack[] = [
+        {
+          id: "sample-1",
+          title: "Relaxing Piano Music",
+          user: { name: "Sample Artist" },
+          duration: 180,
+        },
+        {
+          id: "sample-2",
+          title: "Ambient Study Music",
+          user: { name: "Sample Artist" },
+          duration: 240,
+        },
+        {
+          id: "sample-3",
+          title: "Peaceful Reading",
+          user: { name: "Sample Artist" },
+          duration: 200,
+        }
+      ];
+      
+      setTracks(fallbackTracks);
       toast({
-        title: "Error",
-        description: "Failed to load music tracks.",
-        variant: "destructive",
+        title: "Connection Error",
+        description: "Using sample tracks. Music service unavailable.",
       });
     } finally {
       setLoading(false);
@@ -193,6 +240,10 @@ export default function MusicPlayerContent() {
   }
 
   const currentTrack = tracks[currentTrackIndex];
+  const isSampleTrack = currentTrack?.id.startsWith("sample-");
+  const audioSrc = isSampleTrack 
+    ? "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" 
+    : getStreamUrl(currentTrack?.id || "");
 
   return (
     <div className="space-y-6 py-4">
@@ -205,11 +256,12 @@ export default function MusicPlayerContent() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 pr-20"
+            disabled={isSampleTrack}
           />
           <Button
             type="submit"
             size="sm"
-            disabled={searching}
+            disabled={searching || isSampleTrack}
             className="absolute right-1 top-1/2 -translate-y-1/2 h-8"
           >
             {searching ? (
@@ -219,7 +271,12 @@ export default function MusicPlayerContent() {
             )}
           </Button>
         </div>
-        {searchQuery && (
+        {isSampleTrack && (
+          <p className="text-xs text-muted-foreground text-center">
+            Music service unavailable. Using sample tracks.
+          </p>
+        )}
+        {searchQuery && !isSampleTrack && (
           <Button
             type="button"
             variant="ghost"
@@ -291,7 +348,7 @@ export default function MusicPlayerContent() {
 
       <div className="space-y-2 max-h-64 overflow-y-auto">
         <p className="text-xs text-muted-foreground font-medium">
-          {searchQuery ? "Search Results:" : "Trending Tracks:"}
+          {isSampleTrack ? "Sample Tracks:" : searchQuery ? "Search Results:" : "Trending Tracks:"}
         </p>
         <div className="space-y-1.5">
           {tracks.map((track, index) => (
@@ -320,7 +377,7 @@ export default function MusicPlayerContent() {
 
       <audio
         ref={audioRef}
-        src={currentTrack ? getStreamUrl(currentTrack.id) : ""}
+        src={audioSrc}
         loop={false}
         onEnded={handleTrackEnd}
         preload="metadata"
