@@ -221,27 +221,24 @@ export default function Browse() {
           viewMode === "grid" ? (
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
               {Array.from({ length: 10 }).map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <Skeleton className="w-full aspect-[2/3] bg-muted" />
-                  <CardContent className="p-3 sm:p-4">
-                    <Skeleton className="h-4 sm:h-5 w-3/4 mb-2 bg-muted" />
-                    <Skeleton className="h-3 sm:h-4 w-1/2 bg-muted" />
-                  </CardContent>
-                </Card>
+                <div key={i} className="overflow-hidden rounded-lg">
+                  <Skeleton className="w-full aspect-[2/3] bg-muted rounded-lg" />
+                </div>
               ))}
             </div>
           ) : (
             <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <div className="flex gap-3 sm:gap-6 p-3 sm:p-5">
-                    <Skeleton className="w-24 sm:w-28 xl:w-32 aspect-[2/3] flex-shrink-0 bg-muted rounded-md" />
-                    <div className="flex-1 space-y-2">
+                <Card key={i} className="overflow-hidden border border-border/30 bg-card/50">
+                  <div className="flex gap-4 sm:gap-6 p-4 sm:p-6">
+                    <Skeleton className="w-20 sm:w-24 aspect-[2/3] flex-shrink-0 bg-muted rounded-lg" />
+                    <div className="flex-1 space-y-2 flex flex-col justify-center">
                       <Skeleton className="h-5 sm:h-6 w-3/4 bg-muted" />
-                      <Skeleton className="h-3 sm:h-4 w-1/2 bg-muted" />
-                      <Skeleton className="h-3 sm:h-4 w-1/3 bg-muted" />
-                      <Skeleton className="h-12 sm:h-16 w-full bg-muted" />
+                      <Skeleton className="h-4 w-1/2 bg-muted" />
+                      <Skeleton className="h-3 w-full bg-muted" />
+                      <Skeleton className="h-3 w-4/5 bg-muted" />
                     </div>
+                    <Skeleton className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-muted flex-shrink-0" />
                   </div>
                 </Card>
               ))}
