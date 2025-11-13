@@ -111,14 +111,16 @@ export default function Header() {
                   <Music className="w-5 h-5" />
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto overflow-x-hidden">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
                     <Music className="w-5 h-5 text-primary" />
                     Reading Music
                   </DialogTitle>
                 </DialogHeader>
-                <MusicPlayerContent />
+                <div className="w-full overflow-hidden">
+                  <MusicPlayerContent />
+                </div>
               </DialogContent>
             </Dialog>
 

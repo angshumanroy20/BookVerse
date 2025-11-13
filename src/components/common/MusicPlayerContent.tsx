@@ -251,23 +251,23 @@ export default function MusicPlayerContent() {
     : getStreamUrl(currentTrack?.id || "");
 
   return (
-    <div className="space-y-4 sm:space-y-6 py-2 sm:py-4">
-      <form onSubmit={handleSearch} className="space-y-2">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+    <div className="space-y-4 sm:space-y-6 py-2 sm:py-4 w-full overflow-hidden">
+      <form onSubmit={handleSearch} className="space-y-2 w-full">
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground flex-shrink-0" />
           <Input
             type="text"
             placeholder="Search for music..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-20 h-9 sm:h-10 text-sm"
+            className="pl-9 pr-20 h-9 sm:h-10 text-sm w-full"
             disabled={isSampleTrack}
           />
           <Button
             type="submit"
             size="sm"
             disabled={searching || isSampleTrack}
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 sm:h-8 text-xs"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 sm:h-8 text-xs flex-shrink-0"
           >
             {searching ? (
               <Loader2 className="w-3 h-3 animate-spin" />
@@ -297,21 +297,21 @@ export default function MusicPlayerContent() {
         )}
       </form>
 
-      <div className="space-y-2 p-3 sm:p-4 bg-muted/30 rounded-xl">
+      <div className="space-y-2 p-3 sm:p-4 bg-muted/30 rounded-xl w-full overflow-hidden">
         <p className="text-xs text-muted-foreground">Now Playing:</p>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 w-full min-w-0">
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full gradient-primary flex items-center justify-center flex-shrink-0">
             <Music className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs sm:text-sm font-medium truncate">{currentTrack.title}</p>
-            <p className="text-xs text-muted-foreground truncate">{currentTrack.user.name}</p>
+          <div className="flex-1 min-w-0 overflow-hidden">
+            <p className="text-xs sm:text-sm font-medium truncate break-all">{currentTrack.title}</p>
+            <p className="text-xs text-muted-foreground truncate break-all">{currentTrack.user.name}</p>
             <p className="text-xs text-muted-foreground">{formatDuration(currentTrack.duration)}</p>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 w-full">
         <Button
           variant="outline"
           size="icon"
@@ -325,7 +325,7 @@ export default function MusicPlayerContent() {
           )}
         </Button>
 
-        <div className="flex-1 flex items-center gap-2 min-w-0">
+        <div className="flex-1 flex items-center gap-2 min-w-0 overflow-hidden">
           <Button
             variant="ghost"
             size="icon"
@@ -343,7 +343,7 @@ export default function MusicPlayerContent() {
             onValueChange={handleVolumeChange}
             max={100}
             step={1}
-            className="flex-1"
+            className="flex-1 min-w-0"
           />
           <span className="text-xs text-muted-foreground w-8 sm:w-10 text-right flex-shrink-0">
             {isMuted ? 0 : volume}%
@@ -351,27 +351,27 @@ export default function MusicPlayerContent() {
         </div>
       </div>
 
-      <div className="space-y-2 max-h-[40vh] sm:max-h-64 overflow-y-auto">
+      <div className="space-y-2 max-h-[40vh] sm:max-h-64 overflow-y-auto w-full overflow-x-hidden">
         <p className="text-xs text-muted-foreground font-medium">
           {isSampleTrack ? "Sample Tracks:" : searchQuery ? "Search Results:" : "Trending Tracks:"}
         </p>
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 w-full">
           {tracks.map((track, index) => (
             <button
               key={track.id}
               onClick={() => changeTrack(index)}
-              className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-sm transition-all duration-300 ${
+              className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-sm transition-all duration-300 overflow-hidden ${
                 currentTrackIndex === index
                   ? "gradient-primary text-primary-foreground shadow-glow"
                   : "hover:bg-muted/50 border border-border/50"
               }`}
             >
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate text-xs sm:text-sm">{track.title}</p>
-                  <p className="text-xs opacity-70 truncate">{track.user.name}</p>
+              <div className="flex items-center justify-between gap-2 w-full min-w-0">
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <p className="font-medium truncate text-xs sm:text-sm break-all">{track.title}</p>
+                  <p className="text-xs opacity-70 truncate break-all">{track.user.name}</p>
                 </div>
-                <span className="text-xs opacity-70 flex-shrink-0">
+                <span className="text-xs opacity-70 flex-shrink-0 whitespace-nowrap">
                   {formatDuration(track.duration)}
                 </span>
               </div>
