@@ -162,15 +162,48 @@ async function uploadBook(book: BookData, botUserId: string): Promise<boolean> {
 }
 
 Deno.serve(async (req: Request) => {
+  // Handle CORS preflight requests
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+      },
+    });
+  }
+
   try {
     // Parse request body to get admin ID
-    const body = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch (e) {
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON in request body" }),
+        { 
+          status: 400, 
+          headers: { 
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+          } 
+        }
+      );
+    }
+
     const adminId = body.adminId;
 
     if (!adminId) {
       return new Response(
         JSON.stringify({ error: "Admin ID is required" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        { 
+          status: 400, 
+          headers: { 
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+          } 
+        }
       );
     }
 
@@ -237,7 +270,8 @@ Deno.serve(async (req: Request) => {
         status: 200, 
         headers: { 
           "Content-Type": "application/json",
-          "Connection": "keep-alive"
+          "Connection": "keep-alive",
+          "Access-Control-Allow-Origin": "*"
         } 
       }
     );
@@ -253,7 +287,8 @@ Deno.serve(async (req: Request) => {
         status: 500, 
         headers: { 
           "Content-Type": "application/json",
-          "Connection": "keep-alive"
+          "Connection": "keep-alive",
+          "Access-Control-Allow-Origin": "*"
         } 
       }
     );

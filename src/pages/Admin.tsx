@@ -260,12 +260,27 @@ export default function Admin() {
         throw new Error("Admin profile not found");
       }
 
+      console.log("Invoking bot with admin ID:", profile.id);
+
       const { data, error } = await supabase.functions.invoke("book-upload-bot", {
         body: { adminId: profile.id }
       });
       
+      console.log("Bot response:", { data, error });
+
       if (error) {
+        console.error("Bot invocation error:", error);
+        setBotLogs((prev) => [
+          ...prev, 
+          `Error: ${error.message || JSON.stringify(error)}`
+        ]);
         throw error;
+      }
+
+      if (!data || !data.success) {
+        const errorMsg = data?.error || "Unknown error occurred";
+        setBotLogs((prev) => [...prev, `Error: ${errorMsg}`]);
+        throw new Error(errorMsg);
       }
 
       setBotLogs((prev) => [
@@ -288,10 +303,11 @@ export default function Admin() {
       loadStats();
     } catch (error) {
       console.error("Error running bot:", error);
-      setBotLogs((prev) => [...prev, `Error: ${error instanceof Error ? error.message : "Unknown error"}`]);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      setBotLogs((prev) => [...prev, `Error: ${errorMessage}`]);
       toast({
         title: "Error",
-        description: "Failed to run book upload bot",
+        description: errorMessage || "Failed to run book upload bot",
         variant: "destructive",
       });
     } finally {
