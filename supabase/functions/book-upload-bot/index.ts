@@ -56,14 +56,31 @@ async function fetchBooksFromOpenLibrary(subject: string, limit = 5): Promise<Bo
         const workResponse = await fetch(`${OPEN_LIBRARY_API}${work.key}.json`);
         const workData = await workResponse.json();
 
+        // Get the highest quality cover image
+        let coverUrl = "https://via.placeholder.com/400x600?text=No+Cover";
+        if (work.cover_id) {
+          // Try to get original size first (highest quality)
+          coverUrl = `https://covers.openlibrary.org/b/id/${work.cover_id}.jpg`;
+          
+          // Verify the image exists and is high quality
+          try {
+            const imgResponse = await fetch(coverUrl, { method: 'HEAD' });
+            if (!imgResponse.ok) {
+              // Fallback to large size if original doesn't exist
+              coverUrl = `https://covers.openlibrary.org/b/id/${work.cover_id}-L.jpg`;
+            }
+          } catch {
+            // If fetch fails, use large size as fallback
+            coverUrl = `https://covers.openlibrary.org/b/id/${work.cover_id}-L.jpg`;
+          }
+        }
+
         const book: BookData = {
           title: work.title || "Unknown Title",
           author: work.authors?.[0]?.name || "Unknown Author",
           genre: subject.replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()),
           synopsis: workData.description?.value || workData.description || work.first_sentence?.value || "No description available.",
-          cover_url: work.cover_id 
-            ? `https://covers.openlibrary.org/b/id/${work.cover_id}-L.jpg`
-            : "https://via.placeholder.com/400x600?text=No+Cover",
+          cover_url: coverUrl,
           isbn: work.isbn?.[0]
         };
 

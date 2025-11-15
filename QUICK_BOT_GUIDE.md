@@ -22,10 +22,11 @@
 ## What the Bot Does
 
 - Fetches 15 books per run (from 5 random genres)
-- Downloads book covers automatically
+- Downloads **high-quality book covers** automatically (original size with fallback)
 - Adds books to your library
 - Skips duplicates
 - No login required for the bot itself
+- Intelligent image quality verification
 
 ## Key Features
 

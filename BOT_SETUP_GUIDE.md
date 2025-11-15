@@ -33,10 +33,18 @@ Each time the bot runs, it:
    - Author
    - Genre
    - Synopsis
-   - Cover image URL
+   - **High-quality cover image** (original size with fallback to large)
    - ISBN (if available)
 
-### 3. Upload Process
+### 3. Image Quality Enhancement
+
+The bot uses an intelligent image fetching strategy:
+- **First attempt**: Fetches original size images (highest quality available)
+- **Verification**: Checks if the original image exists
+- **Fallback**: Uses large size (-L) if original is unavailable
+- **Result**: Clear, high-resolution book covers for the best visual experience
+
+### 4. Upload Process
 
 For each book:
 1. Checks if the book already exists (by title and author)

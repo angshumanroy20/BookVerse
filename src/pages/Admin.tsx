@@ -648,9 +648,10 @@ export default function Admin() {
                     </p>
                     <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
                       <li>Fetches 15 books per run (3 books from 5 random genres)</li>
-                      <li>Automatically downloads book covers</li>
+                      <li>Automatically downloads high-quality book covers (original size)</li>
                       <li>Skips books that already exist in the database</li>
                       <li>Runs without requiring authentication</li>
+                      <li>Intelligent image quality with fallback support</li>
                     </ul>
                   </div>
 
