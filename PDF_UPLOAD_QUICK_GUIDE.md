@@ -3,7 +3,7 @@
 ## ✅ Requirements
 
 - **File Type**: PDF only (.pdf)
-- **Max Size**: 10MB
+- **Max Size**: 50MB
 - **Login**: Must be logged in
 - **Format**: Not password-protected
 
@@ -24,7 +24,7 @@
 
 ### File Too Large
 **Error**: "PDF file is too large"
-**Fix**: Compress PDF to under 10MB
+**Fix**: Compress PDF to under 50MB
 - Use https://www.ilovepdf.com/compress_pdf
 - Or https://smallpdf.com/compress-pdf
 
@@ -50,11 +50,11 @@
 - Compress large PDFs before uploading
 - Test PDF opens locally first
 - Use stable internet connection
-- Keep file size under 5MB for best results
+- Keep file size under 20MB for best results
 
 ❌ **DON'T**:
 - Upload password-protected PDFs
-- Upload files over 10MB
+- Upload files over 50MB
 - Upload non-PDF files
 - Upload copyrighted material without permission
 
@@ -74,8 +74,9 @@
 | Book Type | Typical Size |
 |-----------|--------------|
 | Text novel | 500KB - 2MB |
-| Novel with images | 2MB - 5MB |
-| Illustrated book | 5MB - 10MB |
+| Novel with images | 2MB - 10MB |
+| Illustrated book | 10MB - 30MB |
+| Graphic novel | 20MB - 50MB |
 
 ---
 

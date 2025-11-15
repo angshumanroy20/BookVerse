@@ -381,10 +381,10 @@ export const api = {
   },
 
   async uploadBookPdf(file: File, fileName: string) {
-    // Validate file size (10MB limit)
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    // Validate file size (50MB limit)
+    const maxSize = 50 * 1024 * 1024; // 50MB
     if (file.size > maxSize) {
-      throw new Error(`PDF file is too large. Maximum size is 10MB, but file is ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+      throw new Error(`PDF file is too large. Maximum size is 50MB, but file is ${(file.size / 1024 / 1024).toFixed(2)}MB`);
     }
 
     // Validate file type

@@ -63,10 +63,10 @@ export default function UploadBook() {
         });
         return;
       }
-      if (file.size > 10 * 1024 * 1024) {
+      if (file.size > 50 * 1024 * 1024) {
         toast({
           title: "File Too Large",
-          description: "PDF file must be less than 10MB",
+          description: "PDF file must be less than 50MB",
           variant: "destructive",
         });
         return;

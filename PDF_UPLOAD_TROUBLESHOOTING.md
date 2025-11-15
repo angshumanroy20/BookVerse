@@ -12,10 +12,10 @@ This guide helps you troubleshoot issues when uploading PDF files to Biblios.
 
 **Error Message**: 
 ```
-PDF file is too large. Maximum size is 10MB, but file is XX.XXMB
+PDF file is too large. Maximum size is 50MB, but file is XX.XXMB
 ```
 
-**Cause**: The PDF file exceeds the 10MB size limit.
+**Cause**: The PDF file exceeds the 50MB size limit.
 
 **Solutions**:
 
@@ -151,7 +151,7 @@ Please select a PDF file
 
 Before uploading:
 - ✅ Verify file is actually a PDF (.pdf extension)
-- ✅ Check file size is under 10MB
+- ✅ Check file size is under 50MB
 - ✅ Test opening the PDF locally
 - ✅ Ensure PDF is not password-protected
 - ✅ Remove any sensitive information
@@ -195,7 +195,7 @@ Before uploading:
 
 | File Type | Maximum Size | Recommended Size |
 |-----------|--------------|------------------|
-| PDF | 10MB | 2-5MB |
+| PDF | 50MB | 5-20MB |
 | Cover Image | 1MB | 100-500KB |
 
 ### Why These Limits?
@@ -210,10 +210,10 @@ Before uploading:
 | Book Type | Typical Size | Notes |
 |-----------|--------------|-------|
 | Text-only novel | 500KB - 2MB | Small, efficient |
-| Novel with images | 2MB - 5MB | Moderate size |
-| Illustrated book | 5MB - 10MB | Near limit |
-| Comic/Graphic novel | 10MB+ | May need compression |
-| Technical manual | 5MB - 15MB | Often needs compression |
+| Novel with images | 2MB - 10MB | Moderate size |
+| Illustrated book | 10MB - 30MB | Larger files |
+| Comic/Graphic novel | 20MB - 50MB | Near limit |
+| Technical manual | 10MB - 40MB | Often needs compression |
 
 ---
 
@@ -290,7 +290,7 @@ Try uploading a small test PDF:
 ### Before Uploading
 
 1. **Test Locally**: Open PDF on your computer first
-2. **Check Size**: Verify file is under 10MB
+2. **Check Size**: Verify file is under 50MB
 3. **Stable Connection**: Use reliable internet
 4. **Valid Format**: Ensure file is actually PDF
 5. **No Passwords**: Remove password protection
@@ -309,7 +309,7 @@ Try uploading a small test PDF:
 
 | Error Code | Meaning | Solution |
 |------------|---------|----------|
-| 413 | Payload too large | File exceeds 10MB limit |
+| 413 | Payload too large | File exceeds 50MB limit |
 | 401 | Unauthorized | Not logged in |
 | 403 | Forbidden | No upload permission |
 | 404 | Not found | Bucket doesn't exist |
@@ -347,7 +347,7 @@ When reporting PDF upload issues:
 Try these in order:
 
 - [ ] Verify file is actually a PDF (.pdf extension)
-- [ ] Check file size is under 10MB
+- [ ] Check file size is under 50MB
 - [ ] Compress PDF if too large
 - [ ] Ensure you're logged in
 - [ ] Refresh the page
@@ -368,7 +368,7 @@ Try these in order:
 ```
 Bucket Name: app-7flusvzm3281_book_pdfs
 Public Access: Yes (read-only)
-File Size Limit: 10MB (10,485,760 bytes)
+File Size Limit: 50MB (52,428,800 bytes)
 Allowed MIME Types: application/pdf
 ```
 
@@ -376,7 +376,7 @@ Allowed MIME Types: application/pdf
 
 1. **Frontend Validation**:
    - File type check (must be PDF)
-   - File size check (must be ≤ 10MB)
+   - File size check (must be ≤ 50MB)
    - Filename sanitization
 
 2. **Backend Upload**:
