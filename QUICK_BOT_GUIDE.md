@@ -23,9 +23,9 @@
 
 - Fetches 15 books per run (from 5 random genres)
 - Downloads **high-quality book covers** automatically (original size with fallback)
-- Adds books to your library
+- Adds books to your library **under your admin account**
 - Skips duplicates
-- No login required for the bot itself
+- Uses your admin identity for all uploads
 - Intelligent image quality verification
 
 ## Key Features
@@ -42,7 +42,8 @@
 
 ```
 Starting book upload bot...
-Bot user ID: abc-123-def
+Admin ID: abc-123-def
+Admin username: john_admin
 Fetching books for subject: science_fiction
 Fetching books for subject: fantasy
 Fetching books for subject: mystery
@@ -54,6 +55,7 @@ Successfully uploaded: Dune
 Book already exists: 1984
 ...
 Bot completed successfully!
+Uploaded by: john_admin
 Total fetched: 15
 Uploaded: 12
 Skipped: 3

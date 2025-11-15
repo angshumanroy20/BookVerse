@@ -15,13 +15,13 @@ The Biblios Book Upload Bot is an automated system that fetches book data from t
 
 ## How It Works
 
-### 1. Bot User Creation
+### 1. Admin Identity Usage
 
-The bot automatically creates a special "biblios_bot" user account with the following properties:
-- **Username**: `biblios_bot`
-- **Email**: `bot@biblios.internal`
-- **Role**: `bot`
-- **Privileges**: Can create books without authentication
+The bot uses the admin's identity when uploading books:
+- **No Separate Bot User**: Books are uploaded under the admin's account
+- **Username**: Uses the admin's username as the uploader
+- **Permissions**: Leverages admin privileges for uploads
+- **Transparency**: All books appear as if manually uploaded by the admin
 
 ### 2. Book Fetching Process
 

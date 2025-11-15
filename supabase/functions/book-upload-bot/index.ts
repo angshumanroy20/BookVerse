@@ -102,49 +102,22 @@ async function fetchBooksFromOpenLibrary(subject: string, limit = 5): Promise<Bo
   }
 }
 
-async function getBotUserId(): Promise<string> {
-  // Check if bot user exists
-  const { data: existingBot } = await supabase
+async function getAdminProfile(adminId: string) {
+  const { data: profile, error } = await supabase
     .from("profiles")
-    .select("id")
-    .eq("username", "biblios_bot")
+    .select("id, username, role")
+    .eq("id", adminId)
     .maybeSingle();
 
-  if (existingBot) {
-    return existingBot.id;
+  if (error || !profile) {
+    throw new Error("Admin profile not found");
   }
 
-  // Create a bot user if it doesn't exist
-  // First create auth user
-  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-    email: "bot@biblios.internal",
-    password: crypto.randomUUID(),
-    email_confirm: true,
-    user_metadata: {
-      username: "biblios_bot",
-      role: "bot"
-    }
-  });
-
-  if (authError || !authData.user) {
-    throw new Error(`Failed to create bot user: ${authError?.message}`);
+  if (profile.role !== "admin") {
+    throw new Error("User is not an admin");
   }
 
-  // Create profile
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .insert({
-      id: authData.user.id,
-      username: "biblios_bot",
-      email: "bot@biblios.internal",
-      role: "bot"
-    });
-
-  if (profileError) {
-    console.error("Error creating bot profile:", profileError);
-  }
-
-  return authData.user.id;
+  return profile;
 }
 
 async function uploadBook(book: BookData, botUserId: string): Promise<boolean> {
@@ -190,22 +163,23 @@ async function uploadBook(book: BookData, botUserId: string): Promise<boolean> {
 
 Deno.serve(async (req: Request) => {
   try {
-    // Verify request is from cron or has valid authorization
-    const authHeader = req.headers.get("authorization");
-    const cronHeader = req.headers.get("x-supabase-cron");
-    
-    if (!cronHeader && authHeader !== `Bearer ${Deno.env.get("FUNCTION_SECRET")}`) {
+    // Parse request body to get admin ID
+    const body = await req.json();
+    const adminId = body.adminId;
+
+    if (!adminId) {
       return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Admin ID is required" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
     console.log("Starting book upload bot...");
+    console.log(`Admin ID: ${adminId}`);
 
-    // Get or create bot user
-    const botUserId = await getBotUserId();
-    console.log(`Bot user ID: ${botUserId}`);
+    // Verify admin profile
+    const adminProfile = await getAdminProfile(adminId);
+    console.log(`Admin username: ${adminProfile.username}`);
 
     // Fetch books from multiple subjects
     const booksPerSubject = 3; // Adjust this number
@@ -227,12 +201,12 @@ Deno.serve(async (req: Request) => {
 
     console.log(`Fetched ${allBooks.length} books total`);
 
-    // Upload books
+    // Upload books using admin's ID
     let uploadedCount = 0;
     let skippedCount = 0;
 
     for (const book of allBooks) {
-      const uploaded = await uploadBook(book, botUserId);
+      const uploaded = await uploadBook(book, adminProfile.id);
       if (uploaded) {
         uploadedCount++;
       } else {
@@ -250,7 +224,8 @@ Deno.serve(async (req: Request) => {
         total_fetched: allBooks.length,
         uploaded: uploadedCount,
         skipped: skippedCount,
-        subjects_processed: selectedSubjects
+        subjects_processed: selectedSubjects,
+        uploaded_by: adminProfile.username
       }
     };
 

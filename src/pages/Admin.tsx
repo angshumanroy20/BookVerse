@@ -256,7 +256,13 @@ export default function Admin() {
       setBotRunning(true);
       setBotLogs(["Starting book upload bot..."]);
       
-      const { data, error } = await supabase.functions.invoke("book-upload-bot");
+      if (!profile?.id) {
+        throw new Error("Admin profile not found");
+      }
+
+      const { data, error } = await supabase.functions.invoke("book-upload-bot", {
+        body: { adminId: profile.id }
+      });
       
       if (error) {
         throw error;
@@ -265,6 +271,7 @@ export default function Admin() {
       setBotLogs((prev) => [
         ...prev,
         `Bot completed successfully!`,
+        `Uploaded by: ${data.stats.uploaded_by}`,
         `Total fetched: ${data.stats.total_fetched}`,
         `Uploaded: ${data.stats.uploaded}`,
         `Skipped: ${data.stats.skipped}`,
@@ -644,13 +651,13 @@ export default function Admin() {
                     </h3>
                     <p className="text-sm text-muted-foreground">
                       The book upload bot automatically fetches book data from Open Library API and adds them to your library.
-                      It fetches books from various genres including fiction, science fiction, fantasy, mystery, thriller, and more.
+                      Books will be uploaded under your admin account, so they will appear as if you uploaded them manually.
                     </p>
                     <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
                       <li>Fetches 15 books per run (3 books from 5 random genres)</li>
                       <li>Automatically downloads high-quality book covers (original size)</li>
                       <li>Skips books that already exist in the database</li>
-                      <li>Runs without requiring authentication</li>
+                      <li>Books are uploaded using your admin identity</li>
                       <li>Intelligent image quality with fallback support</li>
                     </ul>
                   </div>
