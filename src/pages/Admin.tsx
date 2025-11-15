@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/db/api";
+import { supabase } from "@/db/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Profile, Book, ContactSubmission, ContactSubmissionWithReplies } from "@/types/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Users, BookOpen, Edit, Trash2, Eye, BarChart3, Library, MessageSquare, Reply, Mail } from "lucide-react";
+import { Shield, Users, BookOpen, Edit, Trash2, Eye, BarChart3, Library, MessageSquare, Reply, Mail, Bot, Play, RefreshCw } from "lucide-react";
 
 export default function Admin() {
   const { profile } = useAuth();
@@ -29,6 +30,8 @@ export default function Admin() {
   const [replyDialogOpen, setReplyDialogOpen] = useState(false);
   const [replyMessage, setReplyMessage] = useState("");
   const [replyLoading, setReplyLoading] = useState(false);
+  const [botRunning, setBotRunning] = useState(false);
+  const [botLogs, setBotLogs] = useState<string[]>([]);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalBooks: 0,
@@ -248,6 +251,47 @@ export default function Admin() {
     }
   };
 
+  const handleRunBot = async () => {
+    try {
+      setBotRunning(true);
+      setBotLogs(["Starting book upload bot..."]);
+      
+      const { data, error } = await supabase.functions.invoke("book-upload-bot");
+      
+      if (error) {
+        throw error;
+      }
+
+      setBotLogs((prev) => [
+        ...prev,
+        `Bot completed successfully!`,
+        `Total fetched: ${data.stats.total_fetched}`,
+        `Uploaded: ${data.stats.uploaded}`,
+        `Skipped: ${data.stats.skipped}`,
+        `Subjects: ${data.stats.subjects_processed.join(", ")}`
+      ]);
+
+      toast({
+        title: "Success",
+        description: `Bot uploaded ${data.stats.uploaded} new books!`,
+      });
+
+      // Reload books to show new ones
+      loadBooks();
+      loadStats();
+    } catch (error) {
+      console.error("Error running bot:", error);
+      setBotLogs((prev) => [...prev, `Error: ${error instanceof Error ? error.message : "Unknown error"}`]);
+      toast({
+        title: "Error",
+        description: "Failed to run book upload bot",
+        variant: "destructive",
+      });
+    } finally {
+      setBotRunning(false);
+    }
+  };
+
   if (profile?.role !== "admin") {
     return (
       <div className="min-h-screen bg-background py-8">
@@ -312,10 +356,11 @@ export default function Admin() {
         </div>
 
         <Tabs defaultValue="books" className="space-y-6">
-          <TabsList className="grid w-full max-w-2xl grid-cols-3">
+          <TabsList className="grid w-full max-w-3xl grid-cols-4">
             <TabsTrigger value="books">Books Management</TabsTrigger>
             <TabsTrigger value="users">Users Management</TabsTrigger>
             <TabsTrigger value="contacts">Contact Messages</TabsTrigger>
+            <TabsTrigger value="bot">Upload Bot</TabsTrigger>
           </TabsList>
 
           <TabsContent value="books" className="space-y-4">
@@ -578,6 +623,78 @@ export default function Admin() {
                     </Table>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="bot" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bot className="w-5 h-5" />
+                  Automated Book Upload Bot
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <RefreshCw className="w-4 h-4" />
+                      About the Bot
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      The book upload bot automatically fetches book data from Open Library API and adds them to your library.
+                      It fetches books from various genres including fiction, science fiction, fantasy, mystery, thriller, and more.
+                    </p>
+                    <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                      <li>Fetches 15 books per run (3 books from 5 random genres)</li>
+                      <li>Automatically downloads book covers</li>
+                      <li>Skips books that already exist in the database</li>
+                      <li>Runs without requiring authentication</li>
+                    </ul>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <Button 
+                      onClick={handleRunBot} 
+                      disabled={botRunning}
+                      size="lg"
+                      className="gap-2"
+                    >
+                      {botRunning ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          Running Bot...
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4" />
+                          Run Bot Now
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {botLogs.length > 0 && (
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-sm">Bot Logs:</h3>
+                      <div className="bg-black/90 text-green-400 p-4 rounded-lg font-mono text-xs space-y-1 max-h-64 overflow-y-auto">
+                        {botLogs.map((log, index) => (
+                          <div key={index}>{log}</div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
+                    <h3 className="font-semibold text-sm text-blue-900 dark:text-blue-100 mb-2">
+                      💡 Pro Tip
+                    </h3>
+                    <p className="text-sm text-blue-800 dark:text-blue-200">
+                      You can run the bot manually anytime using the button above. The bot will automatically skip any books that already exist in your library, so you can run it multiple times without creating duplicates.
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
