@@ -381,11 +381,25 @@ export const api = {
   },
 
   async uploadBookPdf(file: File, fileName: string) {
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      throw new Error(`PDF file is too large. Maximum size is 10MB, but file is ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+    }
+
+    // Validate file type
+    if (file.type !== "application/pdf") {
+      throw new Error("Invalid file type. Only PDF files are allowed.");
+    }
+
     const { data, error } = await supabase.storage
       .from("app-7flusvzm3281_book_pdfs")
       .upload(fileName, file, { upsert: true });
 
-    if (error) throw error;
+    if (error) {
+      console.error("PDF upload error:", error);
+      throw new Error(`Failed to upload PDF: ${error.message}`);
+    }
 
     const { data: urlData } = supabase.storage
       .from("app-7flusvzm3281_book_pdfs")
