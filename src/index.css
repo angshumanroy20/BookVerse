@@ -750,6 +750,16 @@ All colors MUST be HSL.
   -webkit-backface-visibility: hidden;
 }
 
+/* Hide scrollbars in PDF iframes */
+iframe {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+iframe::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 /* Smooth Scroll */
 html {
   scroll-behavior: smooth;

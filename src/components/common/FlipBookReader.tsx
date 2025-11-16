@@ -98,71 +98,69 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
 
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 flex flex-col">
-      {/* Header Controls */}
-      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-900 via-orange-900 to-amber-900 shadow-xl border-b-4 border-amber-700">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-lg flex items-center justify-center shadow-lg">
-              <span className="text-2xl">📖</span>
-            </div>
-            <div>
-              <h2 className="text-xl font-display font-bold text-white truncate max-w-md">
-                {bookTitle}
-              </h2>
-              <p className="text-xs text-amber-200">
-                Pages {leftPageNum}-{rightPageNum} of {numPages}
-              </p>
-            </div>
+      {/* Minimal Header Controls */}
+      <div className="flex items-center justify-between px-6 py-2 bg-gradient-to-r from-amber-900/90 via-orange-900/90 to-amber-900/90 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-lg flex items-center justify-center shadow-lg">
+            <span className="text-xl">📖</span>
+          </div>
+          <div>
+            <h2 className="text-base font-display font-bold text-white truncate max-w-md">
+              {bookTitle}
+            </h2>
+            <p className="text-xs text-amber-200">
+              Pages {leftPageNum}-{rightPageNum} of {numPages}
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="icon"
             onClick={zoomOut}
             disabled={scale <= 0.7}
-            className="text-white hover:bg-white/20 rounded-xl"
+            className="text-white hover:bg-white/20 rounded-lg h-8 w-8"
             title="Zoom Out"
           >
-            <ZoomOut className="w-5 h-5" />
+            <ZoomOut className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={zoomIn}
             disabled={scale >= 1.5}
-            className="text-white hover:bg-white/20 rounded-xl"
+            className="text-white hover:bg-white/20 rounded-lg h-8 w-8"
             title="Zoom In"
           >
-            <ZoomIn className="w-5 h-5" />
+            <ZoomIn className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => window.open(pdfUrl, '_blank')}
-            className="text-white hover:bg-white/20 rounded-xl"
+            className="text-white hover:bg-white/20 rounded-lg h-8 w-8"
             title="Download PDF"
           >
-            <Download className="w-5 h-5" />
+            <Download className="w-4 h-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleFullscreen}
-            className="text-white hover:bg-white/20 rounded-xl"
+            className="text-white hover:bg-white/20 rounded-lg h-8 w-8"
             title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
-            {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="text-white hover:bg-white/20 rounded-xl"
+            className="text-white hover:bg-white/20 rounded-lg h-8 w-8"
             title="Close Reader"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </Button>
         </div>
       </div>
@@ -216,17 +214,19 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
                 <iframe
                   key={`left-${leftPageNum}`}
                   src={`${pdfUrl}#page=${leftPageNum}&view=FitV&toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit`}
-                  className="w-full h-full border-0 pointer-events-none"
+                  className="w-full h-full border-0"
                   title={`Page ${leftPageNum}`}
+                  scrolling="no"
                   style={{
                     background: 'linear-gradient(to bottom, #fffbeb, #fef3c7)',
                     overflow: 'hidden',
+                    pointerEvents: 'none',
                   }}
                 />
               </div>
 
-              {/* Page Number */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm text-amber-900 font-serif z-10">
+              {/* Page Number - More Visible */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-3 py-1 bg-amber-900/80 backdrop-blur-sm rounded-full text-sm text-amber-50 font-serif shadow-lg z-20">
                 {leftPageNum}
               </div>
 
@@ -262,11 +262,13 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
                 <iframe
                   key={`right-${rightPageNum}`}
                   src={`${pdfUrl}#page=${rightPageNum}&view=FitV&toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit`}
-                  className="w-full h-full border-0 pointer-events-none"
+                  className="w-full h-full border-0"
                   title={`Page ${rightPageNum}`}
+                  scrolling="no"
                   style={{
                     background: 'linear-gradient(to bottom, #fffbeb, #fef3c7)',
                     overflow: 'hidden',
+                    pointerEvents: 'none',
                   }}
                 />
               </div>
@@ -284,8 +286,8 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
                 </div>
               </div>
 
-              {/* Page Number */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm text-amber-900 font-serif backface-hidden z-10">
+              {/* Page Number - More Visible */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-3 py-1 bg-amber-900/80 backdrop-blur-sm rounded-full text-sm text-amber-50 font-serif shadow-lg backface-hidden z-20">
                 {rightPageNum}
               </div>
 
@@ -326,30 +328,30 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
         </Button>
       </div>
 
-      {/* Footer with Navigation */}
-      <div className="flex items-center justify-center gap-6 p-4 bg-gradient-to-r from-amber-900 via-orange-900 to-amber-900 shadow-xl border-t-4 border-amber-700">
+      {/* Minimal Footer with Navigation */}
+      <div className="flex items-center justify-center gap-4 px-6 py-2 bg-gradient-to-r from-amber-900/90 via-orange-900/90 to-amber-900/90 backdrop-blur-sm">
         <Button
-          variant="outline"
+          variant="ghost"
           onClick={previousPage}
           disabled={currentPage === 0 || isFlipping}
-          className="text-white border-white/30 hover:bg-white/20 disabled:opacity-30"
+          className="text-white hover:bg-white/20 disabled:opacity-30 h-8 px-3 text-sm"
         >
-          <ChevronLeft className="w-4 h-4 mr-2" />
+          <ChevronLeft className="w-4 h-4 mr-1" />
           Previous
         </Button>
 
-        <div className="flex items-center gap-4 text-amber-100 text-sm">
-          <span className="font-medium">💡 Tip: Click arrows or use ← → keys to flip pages</span>
+        <div className="text-amber-100 text-xs">
+          💡 Use ← → keys to flip pages
         </div>
 
         <Button
-          variant="outline"
+          variant="ghost"
           onClick={nextPage}
           disabled={currentPage >= numPages - 2 || isFlipping}
-          className="text-white border-white/30 hover:bg-white/20 disabled:opacity-30"
+          className="text-white hover:bg-white/20 disabled:opacity-30 h-8 px-3 text-sm"
         >
           Next
-          <ChevronRight className="w-4 h-4 ml-2" />
+          <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
       </div>
     </div>
