@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/db/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,8 +20,10 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const { viewMode } = useViewMode();
   const [isMobile, setIsMobile] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const animatedItems = useStaggerAnimation(100);
   const { ref: sectionRef, isVisible } = useFadeInOnScroll(0.1);
+  const booksContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -56,18 +58,45 @@ export default function Home() {
   const currentBooks = books.slice(startIndex, endIndex);
 
   const handlePreviousPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1));
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentPage((prev) => Math.max(prev - 1, 1));
+      setIsTransitioning(false);
+      
+      if (booksContainerRef.current) {
+        const yOffset = -100;
+        const y = booksContainerRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
+    }, 150);
   };
 
   const handleNextPage = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+      setIsTransitioning(false);
+      
+      if (booksContainerRef.current) {
+        const yOffset = -100;
+        const y = booksContainerRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
+    }, 150);
   };
 
   const handlePageClick = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentPage(page);
+      setIsTransitioning(false);
+      
+      if (booksContainerRef.current) {
+        const yOffset = -100;
+        const y = booksContainerRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
+    }, 150);
   };
 
   return (
@@ -262,7 +291,14 @@ export default function Home() {
             )
           ) : (
             <>
-              <BookDisplay books={currentBooks} />
+              <div 
+                ref={booksContainerRef}
+                className={`transition-all duration-300 ${
+                  isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
+                }`}
+              >
+                <BookDisplay books={currentBooks} />
+              </div>
               
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 mt-12">
