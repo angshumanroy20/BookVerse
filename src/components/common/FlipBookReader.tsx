@@ -32,19 +32,61 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Load PDF and convert to images
+  // Load PDF and detect page count
   useEffect(() => {
     loadPdfPages();
   }, [pdfUrl]);
 
   const loadPdfPages = async () => {
     try {
-      // For now, we'll use the PDF directly in iframes for each page
-      // In a production app, you'd use pdf.js to render pages as images
-      setLoading(false);
-      setNumPages(100); // Placeholder - would be determined from PDF
+      // Create a hidden iframe to load the PDF and detect page count
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = pdfUrl;
+      document.body.appendChild(iframe);
+
+      // Wait for PDF to load and try to get page count
+      iframe.onload = () => {
+        try {
+          // Try to access PDF page count from the iframe
+          // This is a workaround - in production, use pdf.js library
+          const pdfDoc = (iframe.contentWindow as any)?.PDFViewerApplication?.pdfDocument;
+          if (pdfDoc && pdfDoc.numPages) {
+            setNumPages(pdfDoc.numPages);
+          } else {
+            // Fallback: Set a large number so users can navigate through all pages
+            // The PDF viewer will handle invalid page numbers gracefully
+            setNumPages(9999); // Large number to allow full navigation
+          }
+        } catch (e) {
+          console.warn("Could not detect PDF page count, using fallback:", e);
+          setNumPages(9999); // Fallback to large number
+        }
+        
+        // Clean up
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        }, 1000);
+        
+        setLoading(false);
+      };
+
+      // Fallback timeout
+      setTimeout(() => {
+        if (loading) {
+          console.warn("PDF load timeout, using fallback page count");
+          setNumPages(9999); // Fallback to large number
+          setLoading(false);
+          try {
+            document.body.removeChild(iframe);
+          } catch (e) {
+            // Ignore cleanup errors
+          }
+        }
+      }, 5000);
     } catch (error) {
       console.error("Error loading PDF:", error);
+      setNumPages(9999); // Fallback to large number
       setLoading(false);
     }
   };
@@ -128,10 +170,17 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
               {bookTitle}
             </h2>
             <p className="text-xs text-amber-200">
-              {isMobile 
-                ? `Page ${currentSinglePageNum} of ${numPages}`
-                : `Pages ${leftPageNum}-${rightPageNum} of ${numPages}`
-              }
+              {loading ? (
+                "Loading pages..."
+              ) : numPages === 9999 ? (
+                isMobile 
+                  ? `Page ${currentSinglePageNum}`
+                  : `Pages ${leftPageNum}-${rightPageNum}`
+              ) : (
+                isMobile 
+                  ? `Page ${currentSinglePageNum} of ${numPages}`
+                  : `Pages ${leftPageNum}-${rightPageNum} of ${numPages}`
+              )}
             </p>
           </div>
         </div>
