@@ -39,6 +39,11 @@ export default function BookDetail() {
   const [newReviewText, setNewReviewText] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Scroll to top when component mounts or ID changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [id]);
+
   useEffect(() => {
     if (id) {
       loadBookData();

@@ -17,6 +17,11 @@ export default function MyLibrary() {
   const [loading, setLoading] = useState(true);
   const { viewMode } = useViewMode();
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
   useEffect(() => {
     if (user) {
       loadReadingLists();

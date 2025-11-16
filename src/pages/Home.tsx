@@ -25,6 +25,11 @@ export default function Home() {
   const { ref: sectionRef, isVisible } = useFadeInOnScroll(0.1);
   const booksContainerRef = useRef<HTMLDivElement>(null);
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 640);

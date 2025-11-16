@@ -28,6 +28,11 @@ export default function Browse() {
   const { toast } = useToast();
   const { viewMode } = useViewMode();
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
   useEffect(() => {
     loadBooks();
     loadGenres();
