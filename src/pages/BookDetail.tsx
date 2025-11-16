@@ -14,7 +14,7 @@ import { BookOpen, Star, Edit, Trash2, Download, Bookmark, BookmarkCheck, BookOp
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { BookRecommendations } from "@/components/BookRecommendations";
-import { PdfViewer } from "@/components/PdfViewer";
+import BookReader from "@/components/common/BookReader";
 
 export default function BookDetail() {
   const { id } = useParams<{ id: string }>();
@@ -608,11 +608,10 @@ export default function BookDetail() {
         <BookRecommendations currentBook={book} />
       </div>
 
-      {book.pdf_url && (
-        <PdfViewer
+      {book.pdf_url && isPdfViewerOpen && (
+        <BookReader
           pdfUrl={book.pdf_url}
           bookTitle={book.title}
-          isOpen={isPdfViewerOpen}
           onClose={() => setIsPdfViewerOpen(false)}
         />
       )}

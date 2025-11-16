@@ -1,13 +1,29 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ViewModeProvider } from '@/contexts/ViewModeContext';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
+import LoadingScreen from '@/components/common/LoadingScreen';
 import routes from './routes';
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <Router>
       <AuthProvider>
