@@ -212,24 +212,26 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
               }}
             >
               {/* Page Content */}
-              <div className="absolute inset-0 p-8 overflow-hidden">
+              <div className="absolute inset-0 overflow-hidden">
                 <iframe
-                  src={`${pdfUrl}#page=${leftPageNum}&view=FitH&toolbar=0&navpanes=0&scrollbar=0`}
+                  key={`left-${leftPageNum}`}
+                  src={`${pdfUrl}#page=${leftPageNum}&view=FitV&toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit`}
                   className="w-full h-full border-0 pointer-events-none"
                   title={`Page ${leftPageNum}`}
                   style={{
                     background: 'linear-gradient(to bottom, #fffbeb, #fef3c7)',
+                    overflow: 'hidden',
                   }}
                 />
               </div>
 
               {/* Page Number */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm text-amber-900 font-serif">
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm text-amber-900 font-serif z-10">
                 {leftPageNum}
               </div>
 
               {/* Left Page Shadow */}
-              <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-black/10 to-transparent pointer-events-none" />
+              <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-black/10 to-transparent pointer-events-none z-10" />
             </div>
 
             {/* Center Spine */}
@@ -254,22 +256,24 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
             >
               {/* Front of Page */}
               <div 
-                className="absolute inset-0 p-8 overflow-hidden backface-hidden"
+                className="absolute inset-0 overflow-hidden backface-hidden"
                 style={{ backfaceVisibility: 'hidden' }}
               >
                 <iframe
-                  src={`${pdfUrl}#page=${rightPageNum}&view=FitH&toolbar=0&navpanes=0&scrollbar=0`}
+                  key={`right-${rightPageNum}`}
+                  src={`${pdfUrl}#page=${rightPageNum}&view=FitV&toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit`}
                   className="w-full h-full border-0 pointer-events-none"
                   title={`Page ${rightPageNum}`}
                   style={{
                     background: 'linear-gradient(to bottom, #fffbeb, #fef3c7)',
+                    overflow: 'hidden',
                   }}
                 />
               </div>
 
               {/* Back of Page (for flip effect) */}
               <div 
-                className="absolute inset-0 p-8 overflow-hidden backface-hidden"
+                className="absolute inset-0 overflow-hidden backface-hidden"
                 style={{ 
                   backfaceVisibility: 'hidden',
                   transform: 'rotateY(180deg)',
@@ -281,12 +285,12 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
               </div>
 
               {/* Page Number */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm text-amber-900 font-serif backface-hidden">
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm text-amber-900 font-serif backface-hidden z-10">
                 {rightPageNum}
               </div>
 
               {/* Right Page Shadow */}
-              <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-black/10 to-transparent pointer-events-none backface-hidden" />
+              <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-black/10 to-transparent pointer-events-none backface-hidden z-10" />
 
               {/* Page Curl Effect */}
               {!isFlipping && (
