@@ -750,14 +750,40 @@ All colors MUST be HSL.
   -webkit-backface-visibility: hidden;
 }
 
-/* Hide scrollbars in PDF iframes */
+/* Hide scrollbars in PDF iframes - More Aggressive */
 iframe {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE and Edge */
 }
 
 iframe::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none !important; /* Chrome, Safari, Opera */
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Additional scrollbar hiding */
+.no-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Book background texture */
+.book-background {
+  background: linear-gradient(
+    135deg,
+    #f5deb3 0%,
+    #deb887 25%,
+    #d2b48c 50%,
+    #deb887 75%,
+    #f5deb3 100%
+  );
 }
 
 /* Smooth Scroll */

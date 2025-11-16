@@ -166,13 +166,36 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
       </div>
 
       {/* Book Display Area with Page Flip Effect */}
-      <div className="flex-1 flex items-center justify-center p-8 overflow-hidden relative">
-        {/* Decorative Background */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <div className="absolute top-10 left-10 w-32 h-32 bg-amber-400 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-10 w-40 h-40 bg-orange-400 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-yellow-400 rounded-full blur-3xl" />
-        </div>
+      <div className="flex-1 flex items-center justify-center py-12 px-8 overflow-hidden relative book-background">
+        {/* Book Texture Background */}
+        <div 
+          className="absolute inset-0 opacity-30 pointer-events-none"
+          style={{
+            backgroundImage: `
+              repeating-linear-gradient(
+                0deg,
+                rgba(139, 92, 46, 0.03) 0px,
+                transparent 1px,
+                transparent 2px,
+                rgba(139, 92, 46, 0.03) 3px
+              ),
+              repeating-linear-gradient(
+                90deg,
+                rgba(139, 92, 46, 0.03) 0px,
+                transparent 1px,
+                transparent 2px,
+                rgba(139, 92, 46, 0.03) 3px
+              ),
+              radial-gradient(
+                ellipse at center,
+                rgba(245, 222, 179, 0.4) 0%,
+                rgba(222, 184, 135, 0.3) 50%,
+                rgba(210, 180, 140, 0.2) 100%
+              )
+            `,
+            backgroundSize: '100% 100%, 100% 100%, 100% 100%',
+          }}
+        />
 
         {/* Navigation Buttons */}
         <Button
@@ -209,33 +232,44 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
                 transformStyle: 'preserve-3d',
               }}
             >
-              {/* Page Content */}
+              {/* Page Content with Scrollbar Hidden */}
               <div className="absolute inset-0 overflow-hidden">
-                <iframe
-                  key={`left-${leftPageNum}`}
-                  src={`${pdfUrl}#page=${leftPageNum}&view=FitV&toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit`}
-                  className="w-full h-full border-0"
-                  title={`Page ${leftPageNum}`}
-                  scrolling="no"
-                  style={{
-                    background: 'linear-gradient(to bottom, #fffbeb, #fef3c7)',
-                    overflow: 'hidden',
-                    pointerEvents: 'none',
-                  }}
-                />
-              </div>
-
-              {/* Page Number - More Visible */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-3 py-1 bg-amber-900/80 backdrop-blur-sm rounded-full text-sm text-amber-50 font-serif shadow-lg z-20">
-                {leftPageNum}
+                <div className="absolute inset-0" style={{ marginRight: '-20px', paddingRight: '20px', overflow: 'hidden' }}>
+                  <iframe
+                    key={`left-${leftPageNum}`}
+                    src={`${pdfUrl}#page=${leftPageNum}&view=FitV&toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit`}
+                    className="w-full h-full border-0 no-scrollbar"
+                    title={`Page ${leftPageNum}`}
+                    scrolling="no"
+                    style={{
+                      background: 'linear-gradient(to bottom, #fffbeb, #fef3c7)',
+                      overflow: 'hidden',
+                      pointerEvents: 'none',
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Left Page Shadow */}
               <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-black/10 to-transparent pointer-events-none z-10" />
             </div>
 
-            {/* Center Spine */}
-            <div className="w-2 bg-gradient-to-r from-amber-900 via-amber-800 to-amber-900 shadow-inner" style={{ height: '600px' }} />
+            {/* Center Spine with Page Numbers */}
+            <div className="relative flex flex-col items-center justify-center" style={{ width: '40px', height: '600px' }}>
+              {/* Spine */}
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-900 via-amber-800 to-amber-900 shadow-inner" />
+              
+              {/* Page Numbers in Spine Area */}
+              <div className="relative z-10 flex flex-col items-center justify-center gap-4">
+                <div className="px-2 py-1 bg-amber-950/90 backdrop-blur-sm rounded text-xs text-amber-50 font-serif shadow-lg">
+                  {leftPageNum}
+                </div>
+                <div className="w-px h-8 bg-amber-700/50" />
+                <div className="px-2 py-1 bg-amber-950/90 backdrop-blur-sm rounded text-xs text-amber-50 font-serif shadow-lg">
+                  {rightPageNum}
+                </div>
+              </div>
+            </div>
 
             {/* Right Page (Flipping) */}
             <div 
@@ -259,18 +293,20 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
                 className="absolute inset-0 overflow-hidden backface-hidden"
                 style={{ backfaceVisibility: 'hidden' }}
               >
-                <iframe
-                  key={`right-${rightPageNum}`}
-                  src={`${pdfUrl}#page=${rightPageNum}&view=FitV&toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit`}
-                  className="w-full h-full border-0"
-                  title={`Page ${rightPageNum}`}
-                  scrolling="no"
-                  style={{
-                    background: 'linear-gradient(to bottom, #fffbeb, #fef3c7)',
-                    overflow: 'hidden',
-                    pointerEvents: 'none',
-                  }}
-                />
+                <div className="absolute inset-0" style={{ marginRight: '-20px', paddingRight: '20px', overflow: 'hidden' }}>
+                  <iframe
+                    key={`right-${rightPageNum}`}
+                    src={`${pdfUrl}#page=${rightPageNum}&view=FitV&toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit`}
+                    className="w-full h-full border-0 no-scrollbar"
+                    title={`Page ${rightPageNum}`}
+                    scrolling="no"
+                    style={{
+                      background: 'linear-gradient(to bottom, #fffbeb, #fef3c7)',
+                      overflow: 'hidden',
+                      pointerEvents: 'none',
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Back of Page (for flip effect) */}
@@ -284,11 +320,6 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
                 <div className="w-full h-full bg-gradient-to-b from-amber-100 to-amber-50 flex items-center justify-center text-amber-400">
                   <span className="text-6xl opacity-20">📖</span>
                 </div>
-              </div>
-
-              {/* Page Number - More Visible */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-3 py-1 bg-amber-900/80 backdrop-blur-sm rounded-full text-sm text-amber-50 font-serif shadow-lg backface-hidden z-20">
-                {rightPageNum}
               </div>
 
               {/* Right Page Shadow */}
