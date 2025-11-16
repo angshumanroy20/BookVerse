@@ -14,7 +14,7 @@ import { BookOpen, Star, Edit, Trash2, Download, Bookmark, BookmarkCheck, BookOp
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { BookRecommendations } from "@/components/BookRecommendations";
-import BookReader from "@/components/common/BookReader";
+import FlipBookReader from "@/components/common/FlipBookReader";
 
 export default function BookDetail() {
   const { id } = useParams<{ id: string }>();
@@ -609,7 +609,7 @@ export default function BookDetail() {
       </div>
 
       {book.pdf_url && isPdfViewerOpen && (
-        <BookReader
+        <FlipBookReader
           pdfUrl={book.pdf_url}
           bookTitle={book.title}
           onClose={() => setIsPdfViewerOpen(false)}

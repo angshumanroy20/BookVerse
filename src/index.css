@@ -697,6 +697,59 @@ All colors MUST be HSL.
   }
 }
 
+/* 3D Page Flip Animations */
+@keyframes flipForward {
+  0% {
+    transform: perspective(2500px) rotateY(0deg);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+  25% {
+    transform: perspective(2500px) rotateY(-45deg);
+    box-shadow: -15px 0 40px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    transform: perspective(2500px) rotateY(-90deg);
+    box-shadow: -20px 0 50px rgba(0, 0, 0, 0.4);
+  }
+  75% {
+    transform: perspective(2500px) rotateY(-135deg);
+    box-shadow: -15px 0 40px rgba(0, 0, 0, 0.3);
+  }
+  100% {
+    transform: perspective(2500px) rotateY(-180deg);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@keyframes flipBackward {
+  0% {
+    transform: perspective(2500px) rotateY(-180deg);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+  25% {
+    transform: perspective(2500px) rotateY(-135deg);
+    box-shadow: 15px 0 40px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    transform: perspective(2500px) rotateY(-90deg);
+    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.4);
+  }
+  75% {
+    transform: perspective(2500px) rotateY(-45deg);
+    box-shadow: 15px 0 40px rgba(0, 0, 0, 0.3);
+  }
+  100% {
+    transform: perspective(2500px) rotateY(0deg);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Backface visibility utility */
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
 /* Smooth Scroll */
 html {
   scroll-behavior: smooth;
