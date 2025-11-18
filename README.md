@@ -1,96 +1,80 @@
-# Welcome to Your Miaoda Project
-Miaoda Application Link URL
-    URL:https://medo.dev/projects/app-7flusvzm3281
+# Miaoda — BookVerse (Project Overview & Setup)
 
-# Welcome to Your Miaoda Project
+A polished, responsive BookVerse web application built with TypeScript + React (Vite). This repo bundles a modern UI, music player, web-search integration, and a complete documentation set to help you develop, run, and deploy the app quickly.
 
-## Project Info
+## Key Features
+- Clean, modern UI and smooth animations
+- Built-in MusicPlayer component [`MusicPlayer`](src/components/common/MusicPlayer.tsx)
+- Search and web integration (Google Custom Search)
+- Lazy loading, pagination, caching, CDN-ready assets
+- Strict TypeScript + ESLint rules; responsive and accessible
 
-## Project Directory
+## Quick Links
+- Source entry: [`App`](src/App.tsx) — [src/App.tsx](src/App.tsx)
+- App bootstrap: [src/main.tsx](src/main.tsx)
+- Global styles: [src/index.css](src/index.css)
+- Components: [src/components](src/components)
+- Pages (example): [src/pages/Browse.tsx](src/pages/Browse.tsx)
+- Config files: [package.json](package.json), [components.json](components.json), [biome.json](biome.json), [index.html](index.html)
+- Environment template: [.env](.env)
+- Docs: [FEATURE_SUMMARY.md](FEATURE_SUMMARY.md), [FINAL_IMPLEMENTATION_SUMMARY.md](FINAL_IMPLEMENTATION_SUMMARY.md), [DEPLOYMENT_READY.md](DEPLOYMENT_READY.md), [IMPLEMENTATION_COMPLETE.md](IMPLEMENTATION_COMPLETE.md), [GOOGLE_SEARCH_SETUP.md](GOOGLE_SEARCH_SETUP.md)
 
-```
-├── README.md # Documentation
-├── components.json # Component library configuration
-├── eslint.config.js # ESLint configuration
-├── index.html # Entry file
-├── package.json # Package management
-├── postcss.config.js # PostCSS configuration
-├── public # Static resources directory
-│   ├── favicon.png # Icon
-│   └── images # Image resources
-├── src # Source code directory
-│   ├── App.tsx # Entry file
-│   ├── components # Components directory
-│   ├── context # Context directory
-│   ├── db # Database configuration directory
-│   ├── hooks # Common hooks directory
-│   ├── index.css # Global styles
-│   ├── layout # Layout directory
-│   ├── lib # Utility library directory
-│   ├── main.tsx # Entry file
-│   ├── routes.tsx # Routing configuration
-│   ├── pages # Pages directory
-│   ├── services # Database interaction directory
-│   ├── types # Type definitions directory
-├── tsconfig.app.json # TypeScript frontend configuration file
-├── tsconfig.json # TypeScript configuration file
-├── tsconfig.node.json # TypeScript Node.js configuration file
-└── vite.config.ts # Vite configuration file
-```
+## Prerequisites
+- Node.js (LTS recommended)
+- npm or yarn
+- Google API key & Search Engine ID (if using Web Search features) — see [GOOGLE_SEARCH_SETUP.md](GOOGLE_SEARCH_SETUP.md)
 
-## Tech Stack
+## Local Setup (Quick)
+1. Install dependencies
+   ```sh
+   npm install
+   ```
+2. Create `.env` in project root and add keys (see [GOOGLE_SEARCH_SETUP.md](GOOGLE_SEARCH_SETUP.md)):
+   ```
+   VITE_GOOGLE_API_KEY=your_key_here
+   VITE_GOOGLE_SEARCH_ENGINE_ID=your_engine_id
+   ```
+3. Run dev server
+   ```sh
+   npm run dev
+   ```
+4. Build for production
+   ```sh
+   npm run build
+   npm run preview
+   ```
 
-Vite, TypeScript, React, Supabase
+(If your `package.json` uses different scripts, replace the commands above with the appropriate ones found in [package.json](package.json).)
 
-## Development Guidelines
+## Testing & Linting
+- Lint: `npm run lint` (project configured; linting passes per docs)
+- Tests: `npm run test` (if tests are included)
 
-### How to edit code locally?
+## Project Structure (high level)
+- src/
+  - App entry: [`App`](src/App.tsx)
+  - components/: UI building blocks — [src/components](src/components)
+  - pages/: route pages (e.g., [src/pages/Browse.tsx](src/pages/Browse.tsx))
+  - styles: [src/index.css](src/index.css)
+- public/: static assets
+- .env: environment variables (local only; gitignored)
 
-You can choose [VSCode](https://code.visualstudio.com/Download) or any IDE you prefer. The only requirement is to have Node.js and npm installed.
+## Deployment Notes
+- See [DEPLOYMENT_READY.md](DEPLOYMENT_READY.md) for production steps, API key restrictions, and recommended security practices.
+- Docs and configuration for web search: [GOOGLE_SEARCH_SETUP.md](GOOGLE_SEARCH_SETUP.md)
 
-### Environment Requirements
+## Documentation & Design Notes
+- Full feature overview: [FEATURE_SUMMARY.md](FEATURE_SUMMARY.md)
+- Final implementation notes: [FINAL_IMPLEMENTATION_SUMMARY.md](FINAL_IMPLEMENTATION_SUMMARY.md)
+- Implementation checklist: [IMPLEMENTATION_COMPLETE.md](IMPLEMENTATION_COMPLETE.md)
 
-```
-# Node.js ≥ 20
-# npm ≥ 10
-Example:
-# node -v   # v20.18.3
-# npm -v    # 10.8.2
-```
+## Contributing
+- Follow existing TypeScript + ESLint conventions.
+- Keep changes modular and documented.
+- Update related markdown docs when altering features or env requirements.
 
-### Installing Node.js on Windows
+## Support
+- Use the included documentation files for troubleshooting and guides.
+- For deployment help, consult [DEPLOYMENT_READY.md](DEPLOYMENT_READY.md) and [GOOGLE_SEARCH_SETUP.md](GOOGLE_SEARCH_SETUP.md).
 
-```
-# Step 1: Visit the Node.js official website: https://nodejs.org/, click download. The website will automatically suggest a suitable version (32-bit or 64-bit) for your system.
-# Step 2: Run the installer: Double-click the downloaded installer to run it.
-# Step 3: Complete the installation: Follow the installation wizard to complete the process.
-# Step 4: Verify installation: Open Command Prompt (cmd) or your IDE terminal, and type `node -v` and `npm -v` to check if Node.js and npm are installed correctly.
-```
-
-### Installing Node.js on macOS
-
-```
-# Step 1: Using Homebrew (Recommended method): Open Terminal. Type the command `brew install node` and press Enter. If Homebrew is not installed, you need to install it first by running the following command in Terminal:
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-Alternatively, use the official installer: Visit the Node.js official website. Download the macOS .pkg installer. Open the downloaded .pkg file and follow the prompts to complete the installation.
-# Step 2: Verify installation: Open Command Prompt (cmd) or your IDE terminal, and type `node -v` and `npm -v` to check if Node.js and npm are installed correctly.
-```
-
-### After installation, follow these steps:
-
-```
-# Step 1: Download the code package
-# Step 2: Extract the code package
-# Step 3: Open the code package with your IDE and navigate into the code directory
-# Step 4: In the IDE terminal, run the command to install dependencies: npm i
-# Step 5: In the IDE terminal, run the command to start the development server: npm run dev -- --host 127.0.0.1
-# Step 6: if step 5 failed, try this command to start the development server: npx vite --host 127.0.0.1
-```
-
-### How to develop backend services?
-
-Configure environment variables and install relevant dependencies.If you need to use a database, please use the official version of Supabase.
-
-## Learn More
-
-You can also check the help documentation: Download and Building the app（ [https://intl.cloud.baidu.com/en/doc/MIAODA/s/download-and-building-the-app-en](https://intl.cloud.baidu.com/en/doc/MIAODA/s/download-and-building-the-app-en)）to learn more detailed content.
+Enjoy developing with Miaoda / BookVerse — clean architecture and comprehensive docs are included to get you from info to setup fast.
