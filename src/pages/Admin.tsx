@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Shield, Users, BookOpen, Edit, Trash2, Eye, BarChart3, Library, MessageSquare, Reply, Mail, Bot, Play, RefreshCw, Loader2 } from "lucide-react";
 
 export default function Admin() {
+  const { user, profile, loading: authLoading } = useAuth();
   const userEmail = (user?.email || profile?.email || "").toLowerCase();
   const isAdmin =
     profile?.role === "admin" ||
@@ -215,7 +216,8 @@ export default function Admin() {
   };
 
   const handleSendReply = async () => {
-    if (!selectedSubmission || !profile?.id || !replyMessage.trim()) {
+    const adminId = profile?.id || user?.id;
+    if (!selectedSubmission || !adminId || !replyMessage.trim()) {
       toast({
         title: "Error",
         description: "Please enter a reply message",
@@ -226,7 +228,7 @@ export default function Admin() {
 
     try {
       setReplyLoading(true);
-      await api.createContactReply(selectedSubmission.id, profile.id, replyMessage);
+      await api.createContactReply(selectedSubmission.id, adminId, replyMessage);
       
       await api.updateContactSubmissionStatus(selectedSubmission.id, "reviewed");
       
@@ -260,14 +262,15 @@ export default function Admin() {
       setBotRunning(true);
       setBotLogs(["Starting book upload bot..."]);
       
-      if (!profile?.id) {
+      const adminId = profile?.id || user?.id;
+      if (!adminId) {
         throw new Error("Admin profile not found");
       }
 
-      console.log("Invoking bot with admin ID:", profile.id);
+      console.log("Invoking bot with admin ID:", adminId);
 
       const { data, error } = await supabase.functions.invoke("book-upload-bot", {
-        body: { adminId: profile.id }
+        body: { adminId }
       });
       
       console.log("Bot response:", { data, error });
@@ -528,58 +531,61 @@ export default function Admin() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {profiles.map((user) => (
-                          <TableRow key={user.id}>
-                            <TableCell className="font-medium">{user.username || "N/A"}</TableCell>
-                            <TableCell>{user.email || "N/A"}</TableCell>
-                            <TableCell>
-                              <Select
-                                value={user.role}
-                                onValueChange={(value) => handleRoleChange(user.id, value as "user" | "admin")}
-                                disabled={user.id === profile.id}
-                              >
-                                <SelectTrigger className="w-32">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="user">User</SelectItem>
-                                  <SelectItem value="admin">Admin</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </TableCell>
-                            <TableCell>
-                              {new Date(user.created_at).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {user.id !== profile.id && (
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="sm">
-                                      <Trash2 className="w-4 h-4 text-destructive" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Delete User</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Are you sure you want to delete user "{user.username || user.email}"? This action cannot be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        onClick={() => handleDeleteUser(user.id)}
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                      >
-                                        Delete
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                        {profiles.map((targetProfile) => {
+                          const isCurrentAdmin = targetProfile.id === (profile?.id || user?.id);
+                          return (
+                            <TableRow key={targetProfile.id}>
+                              <TableCell className="font-medium">{targetProfile.username || "N/A"}</TableCell>
+                              <TableCell>{targetProfile.email || "N/A"}</TableCell>
+                              <TableCell>
+                                <Select
+                                  value={targetProfile.role}
+                                  onValueChange={(value) => handleRoleChange(targetProfile.id, value as "user" | "admin")}
+                                  disabled={isCurrentAdmin}
+                                >
+                                  <SelectTrigger className="w-32">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="user">User</SelectItem>
+                                    <SelectItem value="admin">Admin</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </TableCell>
+                              <TableCell>
+                                {new Date(targetProfile.created_at).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {!isCurrentAdmin && (
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button variant="ghost" size="sm">
+                                        <Trash2 className="w-4 h-4 text-destructive" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Delete User</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          Are you sure you want to delete user "{targetProfile.username || targetProfile.email}"? This action cannot be undone.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                          onClick={() => handleDeleteUser(targetProfile.id)}
+                                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        >
+                                          Delete
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </div>
