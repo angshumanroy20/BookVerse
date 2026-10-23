@@ -153,29 +153,28 @@ export default function ExternalSearch() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#090a0f] via-[#0d101a] to-[#090a0f] text-foreground pb-20">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 pb-20">
       {/* Hero Header */}
-      <div className="relative overflow-hidden border-b border-white/5 py-12 sm:py-16">
-        <div className="absolute inset-0 bg-radial-gradient pointer-events-none opacity-30" />
+      <div className="relative overflow-hidden border-b border-border/40 py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <Badge className="mb-4 bg-primary/20 text-primary border-primary/30 px-3.5 py-1 text-xs tracking-wider uppercase backdrop-blur-md">
+          <Badge className="mb-4 bg-primary/15 text-primary border-primary/30 px-3.5 py-1 text-xs tracking-wider uppercase backdrop-blur-md">
             <Sparkles className="w-3.5 h-3.5 mr-1.5" />
             Global Repository Discovery
           </Badge>
 
-          <h1 className="text-3xl sm:text-5xl font-display font-extrabold tracking-tight mb-4 text-white">
+          <h1 className="text-3xl sm:text-5xl font-display font-extrabold tracking-tight mb-4 text-foreground">
             Discover & Import <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-indigo-400 to-amber-400">Millions of Books</span>
           </h1>
 
-          <p className="text-base sm:text-lg text-zinc-400 max-w-2xl mx-auto mb-8">
-            Seamlessly search Anna's Archive, Internet Archive, Open Library, and Google Books with one-click library imports and direct PDF viewing.
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+            Seamlessly search Anna's Archive, Internet Archive, Open Library, and Google Books with one-click library imports and direct 3D flipbook reading.
           </p>
 
           {/* Search Card */}
           <div className="max-w-3xl mx-auto">
             <form
               onSubmit={handleSearchSubmit}
-              className="relative p-2 rounded-2xl bg-card/60 backdrop-blur-2xl border border-white/10 shadow-2xl flex flex-col sm:flex-row items-stretch gap-2"
+              className="relative p-2 rounded-2xl bg-card border border-border/80 shadow-2xl flex flex-col sm:flex-row items-stretch gap-2 transition-all hover:border-primary/50"
             >
               <div className="relative flex-1 flex items-center">
                 <Search className="w-5 h-5 text-muted-foreground absolute left-3.5 pointer-events-none" />
@@ -184,13 +183,13 @@ export default function ExternalSearch() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search by title, author, topic, or ISBN..."
-                  className="pl-11 pr-4 h-12 bg-transparent border-0 focus-visible:ring-0 text-base placeholder:text-zinc-500"
+                  className="pl-11 pr-4 h-12 bg-transparent border-0 focus-visible:ring-0 text-base placeholder:text-muted-foreground"
                 />
               </div>
 
               <div className="flex items-center gap-2">
                 <Select value={searchType} onValueChange={(val: any) => setSearchType(val)}>
-                  <SelectTrigger className="w-28 h-12 bg-white/5 border-white/10 text-xs rounded-xl">
+                  <SelectTrigger className="w-28 h-12 bg-muted/50 border-border/60 text-xs rounded-xl shadow-xs">
                     <Filter className="w-3.5 h-3.5 mr-1" />
                     <SelectValue />
                   </SelectTrigger>
@@ -229,7 +228,7 @@ export default function ExternalSearch() {
                     setSearchQuery(topic);
                     executeSearch(topic);
                   }}
-                  className="px-2.5 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 text-zinc-300 hover:text-white transition-colors"
+                  className="px-2.5 py-1 rounded-full bg-card hover:bg-muted border border-border/60 text-muted-foreground hover:text-foreground transition-all duration-200"
                 >
                   {topic}
                 </button>
@@ -244,31 +243,31 @@ export default function ExternalSearch() {
         {/* Source Switcher Tabs */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
           <Tabs value={source} onValueChange={handleSourceChange} className="w-full sm:w-auto">
-            <TabsList className="bg-card/70 border border-white/10 p-1 rounded-xl h-auto flex flex-wrap gap-1">
+            <TabsList className="bg-muted/70 border border-border/60 p-1 rounded-xl h-auto flex flex-wrap gap-1">
               <TabsTrigger
                 value="all"
-                className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1.5 px-3 py-2"
+                className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1.5 px-3 py-2 font-medium"
               >
                 <Layers className="w-3.5 h-3.5" />
                 All Sources
               </TabsTrigger>
               <TabsTrigger
                 value="annas"
-                className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-purple-600 data-[state=active]:text-white gap-1.5 px-3 py-2"
+                className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-purple-600 data-[state=active]:text-white gap-1.5 px-3 py-2 font-medium"
               >
                 <span className="text-sm">🏴‍☠️</span>
                 Anna's Archive & Shadow Library
               </TabsTrigger>
               <TabsTrigger
                 value="openlibrary"
-                className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-emerald-600 data-[state=active]:text-white gap-1.5 px-3 py-2"
+                className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-emerald-600 data-[state=active]:text-white gap-1.5 px-3 py-2 font-medium"
               >
                 <Library className="w-3.5 h-3.5" />
                 Open Library (Internet Archive)
               </TabsTrigger>
               <TabsTrigger
                 value="google"
-                className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-blue-600 data-[state=active]:text-white gap-1.5 px-3 py-2"
+                className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-blue-600 data-[state=active]:text-white gap-1.5 px-3 py-2 font-medium"
               >
                 <BookOpen className="w-3.5 h-3.5" />
                 Google Books
@@ -287,7 +286,7 @@ export default function ExternalSearch() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i} className="bg-card/40 border-white/5 h-64 animate-pulse rounded-2xl" />
+              <Card key={i} className="bg-card border-border/40 h-64 animate-pulse rounded-2xl" />
             ))}
           </div>
         ) : results.length > 0 ? (
@@ -299,11 +298,11 @@ export default function ExternalSearch() {
               return (
                 <Card
                   key={book.id}
-                  className="group overflow-hidden rounded-2xl bg-card/40 backdrop-blur-md border border-white/10 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 flex flex-col justify-between"
+                  className="group overflow-hidden rounded-2xl bg-card border border-border/70 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
                 >
                   <CardContent className="p-5 flex gap-4">
                     {/* Cover Thumbnail */}
-                    <div className="w-24 sm:w-28 aspect-[2/3] rounded-xl overflow-hidden bg-muted/30 border border-white/10 flex-shrink-0 shadow-md relative group-hover:scale-105 transition-transform duration-300">
+                    <div className="w-24 sm:w-28 aspect-[2/3] rounded-xl overflow-hidden bg-muted border border-border/50 flex-shrink-0 shadow-md relative group-hover:scale-105 transition-transform duration-300">
                       {book.cover_image_url ? (
                         <img
                           src={book.cover_image_url}
@@ -312,7 +311,7 @@ export default function ExternalSearch() {
                           loading="lazy"
                         />
                       ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center text-muted-foreground bg-gradient-to-br from-zinc-800 to-zinc-900">
+                        <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center text-muted-foreground bg-muted">
                           <BookOpen className="w-6 h-6 mb-1 opacity-50" />
                           <span className="text-[10px] leading-tight line-clamp-2">{book.title}</span>
                         </div>
@@ -320,7 +319,7 @@ export default function ExternalSearch() {
 
                       {/* File format chip */}
                       {book.file_format && (
-                        <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-black/80 backdrop-blur-md text-amber-300 border border-amber-400/30">
+                        <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[9px] font-bold bg-background/90 backdrop-blur-md text-amber-500 dark:text-amber-300 border border-border/60 shadow-xs">
                           {book.file_format}
                         </span>
                       )}
@@ -330,40 +329,40 @@ export default function ExternalSearch() {
                     <div className="flex-1 min-w-0 flex flex-col">
                       <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
                         {book.source === "annas" && (
-                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 text-[10px] py-0">
+                          <Badge className="bg-purple-500/15 text-purple-600 dark:text-purple-300 border-purple-500/30 text-[10px] py-0 font-medium">
                             Anna's Archive
                           </Badge>
                         )}
                         {book.source === "openlibrary" && (
-                          <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] py-0">
+                          <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/30 text-[10px] py-0 font-medium">
                             Open Library
                           </Badge>
                         )}
                         {book.source === "google" && (
-                          <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-[10px] py-0">
+                          <Badge className="bg-blue-500/15 text-blue-600 dark:text-blue-300 border-blue-500/30 text-[10px] py-0 font-medium">
                             Google Books
                           </Badge>
                         )}
                         {book.pdf_url && (
-                          <span className="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
-                            <FileCheck className="w-3 h-3" /> PDF Ready
+                          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                            <FileCheck className="w-3 h-3" /> Reader Ready
                           </span>
                         )}
                       </div>
 
-                      <h3 className="font-display font-bold text-base text-zinc-100 group-hover:text-primary transition-colors line-clamp-2 leading-tight mb-1">
+                      <h3 className="font-display font-bold text-base text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight mb-1">
                         {book.title}
                       </h3>
 
-                      <p className="text-xs text-zinc-400 line-clamp-1 mb-2 font-medium">
+                      <p className="text-xs text-muted-foreground line-clamp-1 mb-2 font-medium">
                         by {book.author}
                       </p>
 
-                      <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed mb-3">
+                      <p className="text-xs text-muted-foreground/80 line-clamp-3 leading-relaxed mb-3">
                         {book.synopsis || "Full digital book metadata available for import."}
                       </p>
 
-                      <div className="mt-auto flex items-center gap-2 text-[11px] text-zinc-500">
+                      <div className="mt-auto flex items-center gap-2 text-[11px] text-muted-foreground">
                         {book.published_date && <span>{book.published_date}</span>}
                         {book.language && <span>• {book.language.toUpperCase()}</span>}
                         {book.publisher && <span className="truncate">• {book.publisher}</span>}
@@ -372,23 +371,32 @@ export default function ExternalSearch() {
                   </CardContent>
 
                   {/* Bottom Action Bar */}
-                  <div className="px-5 py-3 bg-white/[0.02] border-t border-white/5 flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5">
+                  <div className="px-5 py-3 bg-muted/30 border-t border-border/50 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       {book.pdf_url ? (
                         <Button
                           size="sm"
                           onClick={() => setActiveReaderBook({ url: book.pdf_url!, title: book.title })}
-                          className="h-8 text-xs px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white gap-1.5 shadow-md shadow-emerald-900/30"
+                          className="h-8 text-xs px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white gap-1.5 shadow-md shadow-emerald-900/20"
                         >
                           <BookOpen className="w-3.5 h-3.5" />
                           Read Now
+                        </Button>
+                      ) : book.preview_link ? (
+                        <Button
+                          size="sm"
+                          onClick={() => setActiveReaderBook({ url: book.preview_link!, title: book.title })}
+                          className="h-8 text-xs px-3 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5 shadow-md shadow-primary/20"
+                        >
+                          <BookOpen className="w-3.5 h-3.5" />
+                          Preview
                         </Button>
                       ) : book.annas_search_url ? (
                         <Button
                           size="sm"
                           variant="outline"
                           asChild
-                          className="h-8 text-xs px-3 rounded-lg border-purple-500/30 text-purple-300 hover:bg-purple-500/10 gap-1.5"
+                          className="h-8 text-xs px-3 rounded-lg border-purple-500/40 text-purple-600 dark:text-purple-300 hover:bg-purple-500/10 gap-1.5"
                         >
                           <a href={book.annas_search_url} target="_blank" rel="noreferrer">
                             <ExternalLink className="w-3.5 h-3.5" />
@@ -400,7 +408,7 @@ export default function ExternalSearch() {
                           size="sm"
                           variant="outline"
                           asChild
-                          className="h-8 text-xs px-3 rounded-lg border-white/10 gap-1.5"
+                          className="h-8 text-xs px-3 rounded-lg border-border/70 gap-1.5"
                         >
                           <a href={book.download_url || "#"} target="_blank" rel="noreferrer">
                             <ExternalLink className="w-3.5 h-3.5" />
@@ -417,7 +425,7 @@ export default function ExternalSearch() {
                           className="h-8 w-8 p-0 rounded-lg text-muted-foreground hover:text-foreground"
                           title="Download file"
                         >
-                          <a href={book.download_url} target="_blank" rel="noreferrer">
+                          <a href={book.download_url} download target="_blank" rel="noreferrer">
                             <Download className="w-3.5 h-3.5" />
                           </a>
                         </Button>
@@ -431,8 +439,8 @@ export default function ExternalSearch() {
                       variant={isImported ? "secondary" : "default"}
                       className={`h-8 text-xs px-3 rounded-lg gap-1.5 transition-all ${
                         isImported
-                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                          : "bg-primary/90 hover:bg-primary shadow-md shadow-primary/20"
+                          ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30"
+                          : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md shadow-primary/20"
                       }`}
                     >
                       {isImporting ? (
@@ -442,7 +450,7 @@ export default function ExternalSearch() {
                         </>
                       ) : isImported ? (
                         <>
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
                           In Library
                         </>
                       ) : (
@@ -459,14 +467,14 @@ export default function ExternalSearch() {
           </div>
         ) : (
           /* Empty Initial State */
-          <div className="text-center py-16 px-4 rounded-3xl bg-card/20 border border-white/5 backdrop-blur-md max-w-2xl mx-auto">
+          <div className="text-center py-16 px-4 rounded-3xl bg-card border border-border/60 shadow-xl max-w-2xl mx-auto">
             <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4 text-primary">
               <BookMarked className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-display font-bold text-white mb-2">
+            <h3 className="text-xl font-display font-bold text-foreground mb-2">
               Ready to Explore Infinite Books
             </h3>
-            <p className="text-sm text-zinc-400 max-w-md mx-auto mb-6">
+            <p className="text-sm text-muted-foreground max-w-md mx-auto mb-6">
               Search above across Anna's Archive, Internet Archive, and global digital libraries. Click any trending topic above to get started immediately.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2">
@@ -479,7 +487,7 @@ export default function ExternalSearch() {
                     setSearchQuery(sample);
                     executeSearch(sample);
                   }}
-                  className="rounded-full text-xs border-white/10 hover:border-primary/40"
+                  className="rounded-full text-xs border-border/70 hover:border-primary/50 hover:bg-muted"
                 >
                   Try "{sample}"
                 </Button>

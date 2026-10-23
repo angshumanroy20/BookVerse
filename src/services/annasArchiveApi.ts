@@ -76,6 +76,7 @@ export async function searchAnnasArchive(query: string, limit = 20): Promise<Ann
       
       const coverUrl = `https://archive.org/services/img/${id}`;
       const directPdfUrl = `https://archive.org/download/${id}/${id}.pdf`;
+      const embedReaderUrl = `https://archive.org/embed/${id}`;
       const annasSearchUrl = `https://annas-archive.org/search?q=${encodeURIComponent(cleanTitle + ' ' + cleanAuthor)}&ext=pdf`;
 
       return {
@@ -86,7 +87,7 @@ export async function searchAnnasArchive(query: string, limit = 20): Promise<Ann
         genre: 'Digital Library',
         synopsis: cleanDesc,
         cover_image_url: coverUrl,
-        pdf_url: directPdfUrl,
+        pdf_url: embedReaderUrl,
         download_url: directPdfUrl,
         annas_search_url: annasSearchUrl,
         file_format: 'PDF',

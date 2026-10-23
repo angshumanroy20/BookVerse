@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import * as pdfjsLib from "pdfjs-dist";
 import { Button } from "@/components/ui/button";
 import {
   ChevronLeft,
@@ -10,13 +11,18 @@ import {
   ZoomIn,
   ZoomOut,
   BookOpen,
-  FileText,
-  Cloud,
-  ExternalLink,
   RotateCcw,
   Sun,
   Moon,
+  ExternalLink,
+  Loader2,
+  Layers,
 } from "lucide-react";
+
+// Configure PDF.js worker
+if (typeof window !== "undefined") {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+}
 
 interface FlipBookReaderProps {
   pdfUrl: string;
@@ -24,20 +30,166 @@ interface FlipBookReaderProps {
   onClose: () => void;
 }
 
-type ReaderMode = "flipbook" | "native" | "cloud";
 type ThemeMode = "parchment" | "dark" | "light";
 
-export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookReaderProps) {
-  const [mode, setMode] = useState<ReaderMode>("native");
-  const [theme, setTheme] = useState<ThemeMode>("dark");
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [zoomLevel, setZoomLevel] = useState(100);
-  const [isFlipping, setIsFlipping] = useState(false);
-  const [flipDirection, setFlipDirection] = useState<"forward" | "backward" | null>(null);
-  const [loadError, setLoadError] = useState(false);
+function resolveBookSource(rawUrl: string) {
+  // Archive.org matches (embed, download, or details)
+  const iaMatch = rawUrl.match(/archive\.org\/(?:embed|download|details)\/([^/?#]+)/i);
+  if (iaMatch && iaMatch[1]) {
+    const iaId = iaMatch[1];
+    return {
+      isEmbed: true,
+      embedUrl: `https://archive.org/embed/${iaId}`,
+      downloadUrl: `https://archive.org/download/${iaId}/${iaId}.pdf`,
+    };
+  }
 
-  // Keyboard navigation & escape listener
+  // Google Books preview
+  const googleMatch = rawUrl.match(/books\.google\.[a-z.]+\/books\?id=([^&]+)/i);
+  if (googleMatch && googleMatch[1]) {
+    return {
+      isEmbed: true,
+      embedUrl: `https://books.google.com/books?id=${googleMatch[1]}&lpg=PP1&pg=PP1&output=embed`,
+      downloadUrl: rawUrl,
+    };
+  }
+
+  return {
+    isEmbed: false,
+    embedUrl: rawUrl,
+    downloadUrl: rawUrl,
+  };
+}
+
+export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookReaderProps) {
+  const resolvedInfo = resolveBookSource(pdfUrl);
+  const isEmbed = resolvedInfo.isEmbed;
+  const [theme, setTheme] = useState<ThemeMode>("parchment");
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [numPages, setNumPages] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [scale, setScale] = useState<number>(1.2);
+  const [loading, setLoading] = useState<boolean>(!isEmbed);
+  const [renderingPage, setRenderingPage] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isFlipping, setIsFlipping] = useState<boolean>(false);
+
+  const pdfDocRef = useRef<any>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const renderTaskRef = useRef<any>(null);
+
+  // Load PDF Document via PDF.js if not an embedded reader
+  useEffect(() => {
+    if (isEmbed) {
+      setLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+    setLoading(true);
+    setError(null);
+
+    const loadingTask = pdfjsLib.getDocument({
+      url: resolvedInfo.embedUrl,
+      cMapUrl: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/",
+      cMapPacked: true,
+    });
+
+    loadingTask.promise
+      .then((pdf) => {
+        if (!isMounted) return;
+        pdfDocRef.current = pdf;
+        setNumPages(pdf.numPages);
+        setCurrentPage(1);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (!isMounted) return;
+        console.warn("PDF.js canvas direct parse failed:", err);
+        setError("Document requires external reader view");
+        setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+      if (loadingTask) {
+        loadingTask.destroy().catch(() => {});
+      }
+    };
+  }, [resolvedInfo.embedUrl, isEmbed]);
+
+  // Render Page onto Canvas
+  useEffect(() => {
+    if (isEmbed || !pdfDocRef.current || !canvasRef.current || loading) return;
+
+    let isCurrent = true;
+    setRenderingPage(true);
+
+    if (renderTaskRef.current) {
+      renderTaskRef.current.cancel();
+      renderTaskRef.current = null;
+    }
+
+    pdfDocRef.current
+      .getPage(currentPage)
+      .then((page: any) => {
+        if (!isCurrent || !canvasRef.current) return;
+
+        const canvas = canvasRef.current;
+        const context = canvas.getContext("2d");
+        if (!context) return;
+
+        // Calculate appropriate viewport for screen size & scale
+        const unscaledViewport = page.getViewport({ scale: 1.0 });
+        const containerWidth = Math.min(window.innerWidth * 0.88, 850);
+        const autoScale = containerWidth / unscaledViewport.width;
+        const finalScale = scale * (autoScale > 0.4 ? autoScale : 1.0);
+
+        const viewport = page.getViewport({ scale: finalScale });
+
+        // High-DPI screen support
+        const pixelRatio = window.devicePixelRatio || 1;
+        canvas.width = Math.floor(viewport.width * pixelRatio);
+        canvas.height = Math.floor(viewport.height * pixelRatio);
+        canvas.style.width = `${Math.floor(viewport.width)}px`;
+        canvas.style.height = `${Math.floor(viewport.height)}px`;
+
+        context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport,
+        };
+
+        const renderTask = page.render(renderContext);
+        renderTaskRef.current = renderTask;
+
+        renderTask.promise
+          .then(() => {
+            if (isCurrent) setRenderingPage(false);
+          })
+          .catch((err: any) => {
+            if (err?.name !== "RenderingCancelledException") {
+              console.warn("Render page error:", err);
+            }
+            if (isCurrent) setRenderingPage(false);
+          });
+      })
+      .catch((err: any) => {
+        console.warn("Get page error:", err);
+        if (isCurrent) setRenderingPage(false);
+      });
+
+    return () => {
+      isCurrent = false;
+      if (renderTaskRef.current) {
+        renderTaskRef.current.cancel();
+        renderTaskRef.current = null;
+      }
+    };
+  }, [currentPage, scale, loading, isEmbed]);
+
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && !document.fullscreenElement) {
@@ -51,7 +203,7 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentPage, isFlipping]);
+  }, [currentPage, numPages, isFlipping]);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -64,43 +216,40 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
   };
 
   const nextPage = () => {
-    if (isFlipping) return;
+    if (currentPage >= numPages || isFlipping) return;
     setIsFlipping(true);
-    setFlipDirection("forward");
     setTimeout(() => {
-      setCurrentPage((p) => p + 1);
+      setCurrentPage((p) => Math.min(numPages, p + 1));
       setIsFlipping(false);
-      setFlipDirection(null);
-    }, 400);
+    }, 200);
   };
 
   const prevPage = () => {
     if (currentPage <= 1 || isFlipping) return;
     setIsFlipping(true);
-    setFlipDirection("backward");
     setTimeout(() => {
       setCurrentPage((p) => Math.max(1, p - 1));
       setIsFlipping(false);
-      setFlipDirection(null);
-    }, 400);
+    }, 200);
   };
 
-  // Safe Google Cloud Viewer URL
-  const cloudViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`;
+  const zoomIn = () => setScale((s) => Math.min(2.0, s + 0.15));
+  const zoomOut = () => setScale((s) => Math.max(0.7, s - 0.15));
+  const resetZoom = () => setScale(1.0);
 
   return (
     <div
       className={`fixed inset-0 z-50 flex flex-col transition-colors duration-300 ${
         theme === "dark"
-          ? "bg-[#090a0f] text-zinc-100"
+          ? "bg-[#08090e] text-zinc-100"
           : theme === "parchment"
-          ? "bg-[#fbf7ee] text-[#3e2c1c]"
+          ? "bg-[#f7f2e7] text-[#362719]"
           : "bg-white text-zinc-900"
       }`}
     >
-      {/* Top Floating Control Bar */}
-      <header className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 border-b backdrop-blur-xl bg-background/80 border-border/40 z-20">
-        {/* Book Title & Icon */}
+      {/* Reader Control Header */}
+      <header className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 border-b backdrop-blur-xl bg-background/85 border-border/60 z-20 shadow-md">
+        {/* Book Title & Page Count */}
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary flex-shrink-0">
             <BookOpen className="w-4 h-4" />
@@ -110,75 +259,77 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
               {bookTitle}
             </h2>
             <p className="text-xs text-muted-foreground flex items-center gap-2">
-              <span>Reader Active</span>
-              <span>•</span>
-              <span className="capitalize">{mode} Mode</span>
+              {numPages > 0 ? (
+                <>
+                  <span>Page {currentPage} of {numPages}</span>
+                  <span>•</span>
+                  <span>Interactive FlipBook</span>
+                </>
+              ) : isEmbed ? (
+                <span>Digital Library Edition</span>
+              ) : (
+                <span>Loading Pages...</span>
+              )}
             </p>
           </div>
         </div>
 
-        {/* Center Mode Selector */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-muted/60 border border-border/40">
-          <Button
-            size="sm"
-            variant={mode === "native" ? "default" : "ghost"}
-            onClick={() => setMode("native")}
-            className="h-7 text-xs px-2.5 rounded-lg gap-1.5"
-            title="Clean standard browser PDF viewer"
-          >
-            <FileText className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">PDF Viewer</span>
-          </Button>
+        {/* Center Page Turner Controls (When PDF.js is active) */}
+        {!isEmbed && numPages > 0 && (
+          <div className="flex items-center gap-2 bg-muted/60 px-3 py-1 rounded-xl border border-border/40 text-xs">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={prevPage}
+              disabled={currentPage <= 1}
+              className="h-7 px-2"
+            >
+              <ChevronLeft className="w-4 h-4 mr-0.5" /> Prev
+            </Button>
+            <span className="font-semibold px-1">
+              {currentPage} / {numPages}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={nextPage}
+              disabled={currentPage >= numPages}
+              className="h-7 px-2"
+            >
+              Next <ChevronRight className="w-4 h-4 ml-0.5" />
+            </Button>
+          </div>
+        )}
 
-          <Button
-            size="sm"
-            variant={mode === "flipbook" ? "default" : "ghost"}
-            onClick={() => setMode("flipbook")}
-            className="h-7 text-xs px-2.5 rounded-lg gap-1.5"
-            title="Interactive 3D FlipBook experience"
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">3D FlipBook</span>
-          </Button>
-
-          <Button
-            size="sm"
-            variant={mode === "cloud" ? "default" : "ghost"}
-            onClick={() => setMode("cloud")}
-            className="h-7 text-xs px-2.5 rounded-lg gap-1.5"
-            title="Cloud Viewer (Fallback for all devices)"
-          >
-            <Cloud className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Cloud Viewer</span>
-          </Button>
-        </div>
-
-        {/* Right Tools & Close */}
+        {/* Right Tools & Actions */}
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {/* Theme Toggle */}
           <Button
             variant="ghost"
             size="icon"
             onClick={() =>
-              setTheme((t) => (t === "dark" ? "parchment" : t === "parchment" ? "light" : "dark"))
+              setTheme((t) => (t === "parchment" ? "dark" : t === "dark" ? "light" : "parchment"))
             }
             className="h-8 w-8 rounded-lg"
-            title={`Current: ${theme}. Click to switch theme`}
+            title={`Reading theme: ${theme}. Click to switch.`}
           >
             {theme === "dark" ? (
               <Moon className="w-4 h-4 text-primary" />
+            ) : theme === "parchment" ? (
+              <Layers className="w-4 h-4 text-amber-700" />
             ) : (
               <Sun className="w-4 h-4 text-amber-500" />
             )}
           </Button>
 
-          {/* Zoom In / Out (for flipbook) */}
-          {mode === "flipbook" && (
+          {/* Zoom Controls (for Canvas Reader) */}
+          {!isEmbed && (
             <>
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setZoomLevel((z) => Math.max(70, z - 10))}
+                onClick={zoomOut}
+                disabled={scale <= 0.7}
                 className="h-8 w-8 rounded-lg"
                 title="Zoom Out"
               >
@@ -187,7 +338,17 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setZoomLevel((z) => Math.min(150, z + 10))}
+                onClick={resetZoom}
+                className="h-8 w-8 rounded-lg text-xs font-semibold"
+                title="Reset Zoom"
+              >
+                {Math.round(scale * 100)}%
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={zoomIn}
+                disabled={scale >= 2.0}
                 className="h-8 w-8 rounded-lg"
                 title="Zoom In"
               >
@@ -200,14 +361,14 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => window.open(pdfUrl, "_blank")}
+            onClick={() => window.open(resolvedInfo.downloadUrl, "_blank")}
             className="h-8 w-8 rounded-lg"
             title="Open original file in new tab"
           >
             <ExternalLink className="w-4 h-4" />
           </Button>
 
-          {/* Download */}
+          {/* Download Button */}
           <Button
             variant="ghost"
             size="icon"
@@ -215,12 +376,12 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
             className="h-8 w-8 rounded-lg"
             title="Download PDF file"
           >
-            <a href={pdfUrl} download={`${bookTitle}.pdf`} target="_blank" rel="noreferrer">
+            <a href={resolvedInfo.downloadUrl} download={`${bookTitle}.pdf`} target="_blank" rel="noreferrer">
               <Download className="w-4 h-4" />
             </a>
           </Button>
 
-          {/* Fullscreen */}
+          {/* Fullscreen Toggle */}
           <Button
             variant="ghost"
             size="icon"
@@ -244,153 +405,145 @@ export default function FlipBookReader({ pdfUrl, bookTitle, onClose }: FlipBookR
         </div>
       </header>
 
-      {/* Main Reading Canvas */}
-      <main className="flex-1 relative overflow-hidden flex items-center justify-center">
-        {/* MODE 1: Native High-Performance PDF Viewer */}
-        {mode === "native" && (
-          <div className="w-full h-full relative bg-zinc-950 flex flex-col">
+      {/* Main Canvas Reading Surface */}
+      <main className="flex-1 relative overflow-auto flex items-center justify-center p-2 sm:p-6 select-none">
+        {/* CASE A: Embedded Official Reader (Archive.org 3D BookReader / Google Books) */}
+        {isEmbed ? (
+          <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-border/40 bg-card">
             <iframe
-              src={pdfUrl}
+              src={resolvedInfo.embedUrl}
               className="w-full h-full border-0"
               title={bookTitle}
-              onError={() => setLoadError(true)}
+              allowFullScreen
             />
-            {/* Fallback bar if browser plugin blocks iframe */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-background/90 backdrop-blur-md px-4 py-2 rounded-full border border-border shadow-2xl flex items-center gap-3 text-xs">
-              <span className="text-muted-foreground">Having trouble viewing?</span>
+          </div>
+        ) : loading ? (
+          /* Loading State */
+          <div className="flex flex-col items-center justify-center gap-3">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            <p className="text-sm font-medium text-muted-foreground">
+              Opening book pages with high-fidelity canvas rendering...
+            </p>
+          </div>
+        ) : error ? (
+          /* Fallback when third-party servers restrict canvas cross-origin */
+          <div className="flex flex-col items-center justify-center max-w-md mx-auto p-8 rounded-3xl bg-card border border-border/80 shadow-2xl text-center space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mx-auto">
+              <BookOpen className="w-7 h-7" />
+            </div>
+            <div>
+              <h3 className="text-xl font-display font-bold text-foreground mb-1">
+                External Book Reader
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                This volume is hosted on a secure external server. You can read it directly in an isolated fullscreen reader window or download the original file.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2 w-full">
               <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => setMode("cloud")}
-                className="h-6 text-xs px-2 rounded-full"
+                asChild
+                className="rounded-xl flex-1 h-10 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
               >
-                Switch to Cloud Viewer
+                <a href={resolvedInfo.embedUrl} target="_blank" rel="noreferrer">
+                  <ExternalLink className="w-4 h-4" />
+                  Open Fullscreen Reader
+                </a>
               </Button>
               <Button
-                size="sm"
+                asChild
                 variant="outline"
-                onClick={() => window.open(pdfUrl, "_blank")}
-                className="h-6 text-xs px-2 rounded-full gap-1"
+                className="rounded-xl flex-1 h-10 gap-2 border-border/80"
               >
-                Open Directly <ExternalLink className="w-3 h-3" />
+                <a href={resolvedInfo.downloadUrl} download target="_blank" rel="noreferrer">
+                  <Download className="w-4 h-4" />
+                  Download Book
+                </a>
               </Button>
             </div>
           </div>
-        )}
-
-        {/* MODE 2: Cloud Reader (Google Docs Viewer) */}
-        {mode === "cloud" && (
-          <div className="w-full h-full relative bg-zinc-950 flex flex-col">
-            <iframe
-              src={cloudViewerUrl}
-              className="w-full h-full border-0"
-              title={`${bookTitle} (Cloud Viewer)`}
-            />
-          </div>
-        )}
-
-        {/* MODE 3: 3D FlipBook Experience */}
-        {mode === "flipbook" && (
-          <div className="w-full h-full flex flex-col items-center justify-center p-2 sm:p-6 overflow-auto">
-            {/* Navigation buttons */}
+        ) : (
+          /* CASE B: True Canvas-Rendered Page-by-Page FlipBook */
+          <div className="relative flex items-center justify-center max-w-full">
+            {/* Previous Page Floating Button */}
             <Button
               variant="outline"
               size="icon"
               onClick={prevPage}
               disabled={currentPage <= 1 || isFlipping}
-              className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full shadow-2xl border-white/20 bg-background/80 hover:bg-background backdrop-blur-lg"
+              className="absolute -left-3 sm:-left-12 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full shadow-2xl border-border/60 bg-background/90 hover:bg-background backdrop-blur-md"
               title="Previous Page (Left Arrow)"
             >
               <ChevronLeft className="w-6 h-6" />
             </Button>
 
+            {/* Next Page Floating Button */}
             <Button
               variant="outline"
               size="icon"
               onClick={nextPage}
-              disabled={isFlipping}
-              className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full shadow-2xl border-white/20 bg-background/80 hover:bg-background backdrop-blur-lg"
+              disabled={currentPage >= numPages || isFlipping}
+              className="absolute -right-3 sm:-right-12 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full shadow-2xl border-border/60 bg-background/90 hover:bg-background backdrop-blur-md"
               title="Next Page (Right Arrow)"
             >
               <ChevronRight className="w-6 h-6" />
             </Button>
 
-            {/* Book Spine & Realistic Page Container */}
+            {/* Book Binding Frame */}
             <div
-              className="relative transition-transform duration-300 max-w-full"
-              style={{
-                transform: `scale(${zoomLevel / 100})`,
-                perspective: "2000px",
-              }}
+              className={`relative rounded-2xl shadow-2xl border p-2 sm:p-4 flex flex-col items-center transition-all duration-300 ${
+                isFlipping ? "scale-[0.99] opacity-95" : "scale-100 opacity-100"
+              } ${
+                theme === "parchment"
+                  ? "bg-[#ebd9b4] border-[#d4be95] shadow-[#2c1d10]/40"
+                  : theme === "dark"
+                  ? "bg-[#141622] border-white/10 shadow-black/90"
+                  : "bg-zinc-100 border-zinc-200 shadow-zinc-300"
+              }`}
             >
-              {/* Outer Book Cover Binding Effect */}
+              {/* Paper Surface with Canvas */}
               <div
-                className={`relative rounded-2xl shadow-2xl border p-2 sm:p-4 flex flex-col items-center transition-all duration-300 ${
+                className={`relative rounded-xl overflow-hidden shadow-inner flex flex-col items-center justify-center ${
                   theme === "parchment"
-                    ? "bg-[#ebd9b4] border-[#d4be95] shadow-[#2c1d10]/40"
+                    ? "bg-[#fbf7ee]"
                     : theme === "dark"
-                    ? "bg-[#141622] border-white/10 shadow-black/80"
-                    : "bg-zinc-100 border-zinc-200 shadow-zinc-400/50"
+                    ? "bg-[#0b0d14]"
+                    : "bg-white"
                 }`}
                 style={{
-                  width: "min(92vw, 920px)",
-                  height: "min(78vh, 680px)",
+                  minHeight: "450px",
                 }}
               >
-                {/* Book Page Surface */}
+                {renderingPage && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-xs z-10">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  </div>
+                )}
+
+                <canvas
+                  ref={canvasRef}
+                  className={`max-w-full block transition-opacity duration-200 ${
+                    renderingPage ? "opacity-75" : "opacity-100"
+                  }`}
+                />
+
+                {/* Bottom Spine Ribbon */}
                 <div
-                  className={`relative w-full h-full rounded-xl overflow-hidden border shadow-inner flex flex-col ${
+                  className={`w-full h-8 px-4 flex items-center justify-between text-[11px] border-t font-serif ${
                     theme === "parchment"
-                      ? "bg-[#fef9eb] border-[#d8c5a2]"
-                      : theme === "dark"
-                      ? "bg-[#0f111a] border-white/5"
-                      : "bg-white border-zinc-200"
+                      ? "border-[#d8c5a2]/60 text-[#694b2a]"
+                      : "border-border/40 text-muted-foreground"
                   }`}
                 >
-                  {/* Embedded Page Frame */}
-                  <iframe
-                    key={`page-${currentPage}`}
-                    src={`${pdfUrl}#page=${currentPage}&view=FitH&toolbar=0`}
-                    className="w-full flex-1 border-0"
-                    title={`Page ${currentPage}`}
-                  />
-
-                  {/* Bottom Spine Ribbon */}
-                  <div
-                    className={`h-9 px-4 flex items-center justify-between text-xs border-t ${
-                      theme === "parchment"
-                        ? "border-[#d8c5a2]/60 text-[#694b2a]"
-                        : "border-border/40 text-muted-foreground"
-                    }`}
+                  <span>Page {currentPage} of {numPages}</span>
+                  <span className="italic truncate max-w-xs">{bookTitle}</span>
+                  <button
+                    onClick={() => setCurrentPage(1)}
+                    className="hover:underline flex items-center gap-1"
                   >
-                    <span>Page {currentPage}</span>
-                    <span className="italic font-display">{bookTitle}</span>
-                    <button
-                      onClick={() => setCurrentPage(1)}
-                      className="hover:underline flex items-center gap-1"
-                    >
-                      <RotateCcw className="w-3 h-3" /> Cover
-                    </button>
-                  </div>
+                    <RotateCcw className="w-3 h-3" /> Start
+                  </button>
                 </div>
               </div>
-            </div>
-
-            {/* Bottom Floating FlipBook Controls */}
-            <div className="mt-4 flex items-center gap-3 bg-background/80 backdrop-blur-md px-4 py-2 rounded-full border border-border shadow-lg">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={prevPage}
-                disabled={currentPage <= 1}
-                className="h-7 text-xs"
-              >
-                Previous
-              </Button>
-              <span className="text-xs font-semibold px-2">Page {currentPage}</span>
-              <Button variant="ghost" size="sm" onClick={nextPage} className="h-7 text-xs">
-                Next
-              </Button>
             </div>
           </div>
         )}

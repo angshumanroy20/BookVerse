@@ -28,7 +28,7 @@ export default function App() {
     <Router>
       <AuthProvider>
         <ViewModeProvider>
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
             <Header />
             <main className="flex-grow">
               <Routes>

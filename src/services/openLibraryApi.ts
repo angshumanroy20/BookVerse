@@ -159,10 +159,11 @@ export function convertOpenLibraryBookToBook(olBook: OpenLibraryBook) {
   // Extract work ID from key
   const workId = olBook.key?.replace('/works/', '') || null;
 
-  // Extract real PDF from Internet Archive identifier if available
+  // Extract real readable BookReader embed from Internet Archive identifier if available
   const anyBook = olBook as any;
-  const iaId = Array.isArray(anyBook.ia) ? anyBook.ia[0] : anyBook.ia;
-  const pdfUrl = iaId ? `https://archive.org/download/${iaId}/${iaId}.pdf` : null;
+  const iaList = Array.isArray(anyBook.ia) ? anyBook.ia : (anyBook.ia ? [anyBook.ia] : []);
+  const validIa = iaList.find((id: string) => id && !id.startsWith('openlibrary'));
+  const pdfUrl = validIa ? `https://archive.org/embed/${validIa}` : null;
 
   // Generate clean synopsis
   const firstSentence = Array.isArray(anyBook.first_sentence) 

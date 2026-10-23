@@ -154,9 +154,9 @@ export async function searchExternalBooks(
                 id: `google-${book.id}`,
                 source: 'google',
                 ...converted,
-                pdf_url: null,
+                pdf_url: converted.pdf_url || null,
                 download_url: converted.preview_link || converted.info_link,
-                file_format: 'Web',
+                file_format: converted.pdf_url ? 'PDF' : 'Web',
                 external_id: book.id,
               };
             });

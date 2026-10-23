@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, User, LogOut, Library, Upload, Moon, Sun, LayoutDashboard, Menu, Sparkles, Inbox, Music } from "lucide-react";
+import { BookOpen, User, LogOut, Library, Upload, Moon, Sun, LayoutDashboard, Menu, Sparkles, Inbox, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -13,8 +13,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from "react";
 import routes from "../../routes";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import MusicPlayerContent from "./MusicPlayerContent";
 
 export default function Header() {
   const location = useLocation();
@@ -22,7 +20,6 @@ export default function Header() {
   const navigation = routes.filter((route) => route.visible !== false);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [musicDialogOpen, setMusicDialogOpen] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
@@ -105,40 +102,17 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Dialog open={musicDialogOpen} onOpenChange={setMusicDialogOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="rounded-full w-11 h-11 hover:bg-muted/50 transition-all duration-300"
-                  title="Music Player"
-                >
-                  <Music className="w-5 h-5" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-[95vw] sm:max-w-md max-h-[90vh] overflow-y-auto overflow-x-hidden">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <Music className="w-5 h-5 text-primary" />
-                    Reading Music
-                  </DialogTitle>
-                </DialogHeader>
-                <div className="w-full overflow-hidden">
-                  <MusicPlayerContent />
-                </div>
-              </DialogContent>
-            </Dialog>
-
             <Button
-              variant="ghost"
+              variant="outline"
               size="icon"
               onClick={toggleTheme}
-              className="rounded-full w-11 h-11 hover:bg-muted/50 transition-all duration-300"
+              className="rounded-full w-10 h-10 border-border/60 hover:bg-muted/80 transition-all duration-300 shadow-sm"
+              title={`Switch to ${theme === "light" ? "Dark" : "Light"} Mode`}
             >
               {theme === "light" ? (
-                <Moon className="w-5 h-5" />
+                <Moon className="w-4 h-4 text-primary transition-transform duration-300 hover:-rotate-12" />
               ) : (
-                <Sun className="w-5 h-5" />
+                <Sun className="w-4 h-4 text-amber-400 transition-transform duration-300 hover:rotate-45" />
               )}
             </Button>
 

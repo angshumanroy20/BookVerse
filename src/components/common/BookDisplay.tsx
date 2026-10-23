@@ -20,35 +20,45 @@ function BookCard({ book, index }: { book: Book | BookWithDetails; index: number
   const tiltRef = use3DTilt(8);
   
   return (
-    <Link key={book.id} to={`/book/${book.id}`}>
+    <Link key={book.id} to={`/book/${book.id}`} className="block">
       <Card 
         ref={tiltRef}
-        className="overflow-hidden card-3d hover-lift group h-full cursor-pointer border-0 transition-all duration-300 shadow-lg hover:shadow-2xl bg-transparent"
+        className="overflow-hidden card-3d hover-lift group h-full cursor-pointer rounded-2xl border border-border/60 hover:border-primary/50 transition-all duration-300 shadow-sm hover:shadow-2xl hover:shadow-primary/20 bg-card"
         style={{ 
-          animationDelay: `${index * 0.1}s`,
+          animationDelay: `${index * 0.05}s`,
         }}
       >
-        <div className="relative w-full aspect-auto sm:aspect-[2/3] overflow-hidden rounded-lg">
+        <div className="relative w-full aspect-auto sm:aspect-[2/3] overflow-hidden rounded-xl bg-muted/40">
           {book.cover_image_url ? (
             <img
               src={book.cover_image_url}
               alt={book.title}
-              className="w-full h-auto sm:h-full sm:object-cover group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-auto sm:h-full sm:object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
               loading="lazy"
             />
           ) : (
-            <div className="w-full aspect-[2/3] flex items-center justify-center bg-muted">
-              <BookOpen className="w-12 h-12 text-muted-foreground" />
+            <div className="w-full aspect-[2/3] flex flex-col items-center justify-center p-4 text-center bg-muted">
+              <BookOpen className="w-12 h-12 text-muted-foreground/60 mb-2" />
+              <span className="text-xs font-semibold text-foreground/80 line-clamp-2">{book.title}</span>
+            </div>
+          )}
+
+          {/* Genre Badge on Top Right */}
+          {book.genre && (
+            <div className="absolute top-2.5 right-2.5 z-10">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-background/85 backdrop-blur-md text-foreground border border-border/60 shadow-xs">
+                {book.genre}
+              </span>
             </div>
           )}
           
           {/* Title and Author Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-4 pt-12">
-            <h3 className="font-display font-bold text-white text-sm sm:text-base mb-1 line-clamp-2">
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/75 to-transparent p-4 pt-12 text-white">
+            <h3 className="font-display font-bold text-white text-sm sm:text-base mb-1 line-clamp-2 leading-tight group-hover:text-amber-300 transition-colors">
               {book.title}
             </h3>
-            <p className="text-xs sm:text-sm text-white/80 line-clamp-1">
-              {book.author}
+            <p className="text-xs text-white/80 line-clamp-1">
+              by {book.author}
             </p>
           </div>
         </div>
@@ -110,10 +120,10 @@ export default function BookDisplay({ books }: BookDisplayProps) {
       <>
         <div className="space-y-6">
           {books.map((book) => (
-            <Card key={book.id} className="overflow-hidden hover-lift group cursor-pointer border border-border/30 hover:border-primary/50 transition-all duration-300 bg-card/50 backdrop-blur-sm">
+            <Card key={book.id} className="overflow-hidden hover-lift group cursor-pointer border border-border/60 hover:border-primary/50 transition-all duration-300 bg-card shadow-sm hover:shadow-xl rounded-2xl">
               <Link to={`/book/${book.id}`} className="flex gap-4 sm:gap-6 p-4 sm:p-6">
                 {/* Book Cover Thumbnail */}
-                <div className="relative w-20 sm:w-24 aspect-[2/3] flex-shrink-0 overflow-hidden rounded-lg shadow-lg">
+                <div className="relative w-20 sm:w-24 aspect-[2/3] flex-shrink-0 overflow-hidden rounded-xl shadow-md border border-border/40">
                   {book.cover_image_url ? (
                     <img
                       src={book.cover_image_url}
@@ -129,11 +139,11 @@ export default function BookDisplay({ books }: BookDisplayProps) {
 
                 {/* Book Details */}
                 <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <h3 className="font-display font-bold text-base sm:text-xl mb-1 group-hover:text-primary transition-colors line-clamp-1">
+                  <h3 className="font-display font-bold text-base sm:text-xl mb-1 group-hover:text-primary transition-colors line-clamp-1 text-foreground">
                     {book.title}
                   </h3>
                   <p className="text-sm sm:text-base text-muted-foreground mb-2 sm:mb-3 line-clamp-1">
-                    {book.author}
+                    by {book.author}
                   </p>
                   {book.synopsis && (
                     <p className="text-xs sm:text-sm text-muted-foreground/80 line-clamp-2 leading-relaxed">
@@ -146,7 +156,8 @@ export default function BookDisplay({ books }: BookDisplayProps) {
                 <div className="flex items-center justify-center flex-shrink-0">
                   <button
                     onClick={(e) => openAddDialog(e, book)}
-                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-border/50 hover:border-primary/50 flex items-center justify-center transition-all duration-300 group-hover:bg-primary/10"
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-border/70 hover:border-primary/50 flex items-center justify-center transition-all duration-300 hover:bg-primary/10 shadow-xs"
+                    title="Add to library"
                   >
                     <Plus className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                   </button>

@@ -170,9 +170,9 @@ export default function Browse() {
   }, [books, sortBy]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#090a0f] via-[#0d101a] to-[#090a0f] text-foreground pb-20">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 pb-20">
       {/* Header Banner */}
-      <div className="border-b border-white/5 bg-card/20 backdrop-blur-xl py-10 sm:py-14 relative overflow-hidden">
+      <div className="border-b border-border/40 bg-card/60 backdrop-blur-xl py-10 sm:py-14 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
             <div>
@@ -182,10 +182,10 @@ export default function Browse() {
                 </span>
                 <span className="text-xs text-muted-foreground">• {books.length} Available Titles</span>
               </div>
-              <h1 className="text-3xl sm:text-4xl font-display font-extrabold tracking-tight text-white mb-2">
+              <h1 className="text-3xl sm:text-4xl font-display font-extrabold tracking-tight text-foreground mb-2">
                 Browse Library
               </h1>
-              <p className="text-sm sm:text-base text-zinc-400 max-w-xl">
+              <p className="text-sm sm:text-base text-muted-foreground max-w-xl">
                 Explore the complete collection with zero-cropping covers, 3D flipbook reading, and real-time category filtering.
               </p>
             </div>
@@ -194,7 +194,7 @@ export default function Browse() {
               <Button
                 asChild
                 variant="outline"
-                className="rounded-xl border-purple-500/30 text-purple-300 hover:bg-purple-500/10 gap-2 text-xs h-10 flex-1 md:flex-none"
+                className="rounded-xl border-purple-500/40 text-purple-600 dark:text-purple-300 hover:bg-purple-500/10 gap-2 text-xs h-10 flex-1 md:flex-none"
               >
                 <Link to="/discover">
                   <Compass className="w-4 h-4" />
@@ -214,7 +214,7 @@ export default function Browse() {
                 placeholder="Search catalog by title, author, or keyword..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-20 h-11 bg-white/5 border-white/10 rounded-xl text-sm placeholder:text-zinc-500 focus-visible:ring-primary"
+                className="pl-10 pr-20 h-11 bg-card border-border/70 rounded-xl text-sm placeholder:text-muted-foreground focus-visible:ring-primary shadow-sm"
               />
               {searchQuery && (
                 <button
@@ -242,7 +242,7 @@ export default function Browse() {
 
             <div className="flex items-center gap-2">
               <Select value={sortBy} onValueChange={(val: any) => setSortBy(val)}>
-                <SelectTrigger className="w-36 h-11 bg-white/5 border-white/10 rounded-xl text-xs">
+                <SelectTrigger className="w-36 h-11 bg-card border-border/70 rounded-xl text-xs shadow-sm">
                   <SlidersHorizontal className="w-3.5 h-3.5 mr-1 text-muted-foreground" />
                   <SelectValue placeholder="Sort" />
                 </SelectTrigger>
@@ -257,7 +257,7 @@ export default function Browse() {
                 type="button"
                 variant="outline"
                 onClick={() => setWebSearchDialogOpen(true)}
-                className="h-11 px-3.5 rounded-xl border-white/10 gap-1.5 text-xs bg-white/5 hover:bg-white/10"
+                className="h-11 px-3.5 rounded-xl border-border/70 gap-1.5 text-xs bg-card hover:bg-muted shadow-sm"
               >
                 <Globe className="w-4 h-4" />
                 <span className="hidden sm:inline">Web Search</span>
@@ -272,7 +272,7 @@ export default function Browse() {
               className={`px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
                 selectedGenre === "all"
                   ? "bg-primary text-primary-foreground shadow-md shadow-primary/30"
-                  : "bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/5"
+                  : "bg-card hover:bg-muted text-muted-foreground hover:text-foreground border border-border/60"
               }`}
             >
               All Genres
@@ -284,7 +284,7 @@ export default function Browse() {
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
                   selectedGenre === g
                     ? "bg-primary text-primary-foreground shadow-md shadow-primary/30"
-                    : "bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/5"
+                    : "bg-card hover:bg-muted text-muted-foreground hover:text-foreground border border-border/60"
                 }`}
               >
                 {g}
@@ -299,19 +299,19 @@ export default function Browse() {
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
             {Array.from({ length: 10 }).map((_, i) => (
-              <div key={i} className="aspect-[2/3] bg-card/40 rounded-2xl animate-pulse border border-white/5" />
+              <div key={i} className="aspect-[2/3] bg-card rounded-2xl animate-pulse border border-border/40" />
             ))}
           </div>
         ) : sortedBooks.length > 0 ? (
           <BookDisplay books={sortedBooks} />
         ) : (
-          <div className="text-center py-20 px-4 rounded-3xl bg-card/20 border border-white/5 backdrop-blur-md max-w-lg mx-auto">
+          <div className="text-center py-20 px-4 rounded-3xl bg-card border border-border/60 shadow-xl max-w-lg mx-auto">
             <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-40" />
-            <h3 className="text-lg font-display font-bold text-white mb-2">No Local Books Found</h3>
-            <p className="text-xs sm:text-sm text-zinc-400 mb-6 leading-relaxed">
+            <h3 className="text-lg font-display font-bold text-foreground mb-2">No Local Books Found</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground mb-6 leading-relaxed">
               We couldn't find any books matching "{searchQuery}". You can discover and import books instantly from Anna's Archive or Open Library.
             </p>
-            <Button asChild className="rounded-xl bg-gradient-to-r from-primary to-indigo-600 gap-2">
+            <Button asChild className="rounded-xl bg-gradient-to-r from-primary to-indigo-600 gap-2 shadow-lg shadow-primary/25">
               <Link to="/discover">
                 <Compass className="w-4 h-4" />
                 <span>Search Anna's Archive</span>
