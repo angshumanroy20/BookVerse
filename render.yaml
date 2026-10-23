@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: bookverse
+    runtime: static
+    buildCommand: pnpm install && pnpm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: VITE_APP_ID
+        value: app-7flusvzm3281
+      - key: VITE_LOGIN_TYPE
+        value: gmail
+      - key: VITE_API_ENV
+        value: production
+      - key: VITE_GOOGLE_API_KEY
+        sync: false
+      - key: VITE_GOOGLE_SEARCH_ENGINE_ID
+        sync: false
