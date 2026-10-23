@@ -1,53 +1,46 @@
 import { useEffect, useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "@/db/api";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Book } from "@/types/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { BookOpen, Star, TrendingUp, Sparkles, ChevronLeft, ChevronRight, ArrowRight, Library, Users, Heart } from "lucide-react";
+import {
+  BookOpen,
+  Sparkles,
+  ArrowRight,
+  Library,
+  Headphones,
+  Compass,
+  Search,
+  BookMarked,
+  ShieldCheck,
+  ChevronLeft,
+  ChevronRight,
+  Flame,
+} from "lucide-react";
 import BookDisplay from "@/components/common/BookDisplay";
 import ViewModeToggle from "@/components/common/ViewModeToggle";
 import RandomThought from "@/components/common/RandomThought";
-import { useViewMode } from "@/contexts/ViewModeContext";
-import { useFadeInOnScroll, useStaggerAnimation } from "@/hooks/use3DAnimation";
+import { Input } from "@/components/ui/input";
 
 export default function Home() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const { viewMode } = useViewMode();
-  const [isMobile, setIsMobile] = useState(false);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const animatedItems = useStaggerAnimation(100);
-  const { ref: sectionRef, isVisible } = useFadeInOnScroll(0.1);
+  const [heroSearch, setHeroSearch] = useState("");
   const booksContainerRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to top when component mounts
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, []);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
     loadBooks();
   }, []);
 
   const loadBooks = async () => {
     try {
-      const data = await api.getBooks(50);
+      const data = await api.getBooks(40);
       setBooks(data);
     } catch (error) {
       console.error("Error loading books:", error);
@@ -56,311 +49,246 @@ export default function Home() {
     }
   };
 
-  const BOOKS_PER_PAGE = isMobile ? 6 : 5;
+  const handleHeroSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (heroSearch.trim()) {
+      navigate(`/discover?q=${encodeURIComponent(heroSearch.trim())}`);
+    } else {
+      navigate("/browse");
+    }
+  };
+
+  const BOOKS_PER_PAGE = 10;
   const totalPages = Math.ceil(books.length / BOOKS_PER_PAGE);
   const startIndex = (currentPage - 1) * BOOKS_PER_PAGE;
-  const endIndex = startIndex + BOOKS_PER_PAGE;
-  const currentBooks = books.slice(startIndex, endIndex);
-
-  const handlePreviousPage = () => {
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentPage((prev) => Math.max(prev - 1, 1));
-      setIsTransitioning(false);
-      
-      if (booksContainerRef.current) {
-        const yOffset = -100;
-        const y = booksContainerRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        window.scrollTo({ top: y, behavior: "smooth" });
-      }
-    }, 150);
-  };
-
-  const handleNextPage = () => {
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-      setIsTransitioning(false);
-      
-      if (booksContainerRef.current) {
-        const yOffset = -100;
-        const y = booksContainerRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        window.scrollTo({ top: y, behavior: "smooth" });
-      }
-    }, 150);
-  };
-
-  const handlePageClick = (page: number) => {
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentPage(page);
-      setIsTransitioning(false);
-      
-      if (booksContainerRef.current) {
-        const yOffset = -100;
-        const y = booksContainerRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        window.scrollTo({ top: y, behavior: "smooth" });
-      }
-    }, 150);
-  };
+  const currentBooks = books.slice(startIndex, startIndex + BOOKS_PER_PAGE);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Modern Hero Section - Split Layout */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-coral-soft via-purple-soft to-blue-soft">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 xl:py-24">
-          <div className="grid xl:grid-cols-2 gap-12 items-center">
-            {/* Left Content */}
-            <div className="space-y-8 animate-fade-in-left">
-              <h1 className="text-4xl sm:text-5xl xl:text-6xl font-display font-bold leading-tight">
-                {profile ? (
-                  <>
-                    <span className="gradient-text">Welcome back,</span>
-                    <br />
-                    <span className="text-foreground break-words">{profile.username}! 📚</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="gradient-text">Discover</span>
-                    <br />
-                    <span className="text-foreground">Your Next</span>
-                    <br />
-                    <span className="gradient-text-warm">Great Read</span>
-                  </>
-                )}
-              </h1>
+    <div className="min-h-screen bg-gradient-to-b from-[#08090e] via-[#0d101a] to-[#08090e] text-foreground overflow-x-hidden">
+      {/* Cinematic Hero Section */}
+      <section className="relative overflow-hidden pt-12 pb-20 sm:pt-20 sm:pb-28 border-b border-white/5">
+        {/* Glow ambient background orbs */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-primary/20 via-purple-600/15 to-transparent blur-[140px] pointer-events-none rounded-full" />
+        <div className="absolute -top-10 -right-10 w-96 h-96 bg-amber-500/10 blur-[120px] pointer-events-none rounded-full" />
 
-              <p className="text-lg xl:text-xl text-muted-foreground max-w-xl">
-                {profile 
-                  ? "Continue your reading adventure with personalized recommendations and your curated collection."
-                  : "Join thousands of book lovers discovering, sharing, and celebrating the magic of reading."
-                }
-              </p>
-
-              <div className="flex flex-wrap gap-4">
-                <Button 
-                  asChild 
-                  size="lg" 
-                  className="gradient-primary text-white hover-lift shadow-glow-primary rounded-2xl text-base px-8"
-                >
-                  <Link to="/browse">
-                    <BookOpen className="w-5 h-5 mr-2" />
-                    {profile ? "Browse Library" : "Start Exploring"}
-                  </Link>
-                </Button>
-                
-                {!profile && (
-                  <Button 
-                    asChild 
-                    size="lg" 
-                    variant="outline"
-                    className="rounded-2xl text-base px-8 border-2 hover-lift"
-                  >
-                    <Link to="/login">
-                      <ArrowRight className="w-5 h-5 mr-2" />
-                      Join Now
-                    </Link>
-                  </Button>
-                )}
-              </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="max-w-4xl mx-auto text-center space-y-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl text-xs font-semibold text-zinc-300 shadow-xl">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Next-Gen Digital Library & Shadow Archive</span>
             </div>
 
-            {/* Right Image */}
-            <div className="relative animate-fade-in-right">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl hover-lift">
-                <img 
-                  src="https://miaoda-site-img.s3cdn.medo.dev/images/845502f2-3391-44bb-81c5-fce390c05642.jpg"
-                  alt="Person reading book in cozy setting"
-                  className="w-full h-[500px] xl:h-[600px] object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+            <h1 className="text-4xl sm:text-6xl xl:text-7xl font-display font-extrabold tracking-tight text-white leading-[1.1]">
+              Unfold Infinite Worlds with{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-indigo-300 to-amber-300">
+                BookVerse
+              </span>
+            </h1>
+
+            <p className="text-base sm:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
+              Experience books like never before: 3D realistic page-turn physics, curated ambient focus audio, and instant discovery across Anna's Archive and global open libraries.
+            </p>
+
+            {/* Quick Hero Search Box */}
+            <div className="pt-2 max-w-2xl mx-auto">
+              <form
+                onSubmit={handleHeroSearch}
+                className="p-2 rounded-2xl bg-card/60 backdrop-blur-2xl border border-white/10 shadow-2xl flex flex-col sm:flex-row items-stretch gap-2"
+              >
+                <div className="relative flex-1 flex items-center">
+                  <Search className="w-5 h-5 text-muted-foreground absolute left-3.5 pointer-events-none" />
+                  <Input
+                    type="text"
+                    value={heroSearch}
+                    onChange={(e) => setHeroSearch(e.target.value)}
+                    placeholder="Search millions of books from Anna's Archive & Open Library..."
+                    className="pl-11 pr-4 h-12 bg-transparent border-0 focus-visible:ring-0 text-sm sm:text-base placeholder:text-zinc-500"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="h-12 px-6 rounded-xl font-medium bg-gradient-to-r from-primary to-indigo-600 hover:opacity-95 shadow-lg shadow-primary/25"
+                >
+                  Explore Now
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </form>
+            </div>
+
+            {/* CTA action buttons */}
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <Button
+                asChild
+                size="lg"
+                className="rounded-xl h-12 px-7 font-medium bg-white text-zinc-950 hover:bg-zinc-200 shadow-xl"
+              >
+                <Link to="/browse">
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Browse Catalog
+                </Link>
+              </Button>
+
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="rounded-xl h-12 px-7 border-purple-500/30 text-purple-300 hover:bg-purple-500/10 backdrop-blur-xl"
+              >
+                <Link to="/discover">
+                  <Compass className="w-4 h-4 mr-2" />
+                  Discover Anna's Archive
+                </Link>
+              </Button>
+            </div>
+
+            {/* Stats row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-8 max-w-3xl mx-auto border-t border-white/5 text-center">
+              <div>
+                <p className="text-2xl sm:text-3xl font-display font-extrabold text-white">35+</p>
+                <p className="text-xs text-zinc-400">Curated Classics</p>
+              </div>
+              <div>
+                <p className="text-2xl sm:text-3xl font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-300">
+                  20M+
+                </p>
+                <p className="text-xs text-zinc-400">Anna's Archive & Texts</p>
+              </div>
+              <div>
+                <p className="text-2xl sm:text-3xl font-display font-extrabold text-white">3D</p>
+                <p className="text-xs text-zinc-400">Realistic FlipBook</p>
+              </div>
+              <div>
+                <p className="text-2xl sm:text-3xl font-display font-extrabold text-amber-300">Audius</p>
+                <p className="text-xs text-zinc-400">Ambient Reading Audio</p>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Decorative Elements */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl animate-3d-float pointer-events-none" />
-        <div className="absolute bottom-20 right-10 w-48 h-48 bg-secondary/10 rounded-full blur-3xl animate-3d-float pointer-events-none" style={{ animationDelay: '2s' }} />
       </section>
 
-      {/* Random Thought Section */}
-      <section className="py-12 xl:py-16 bg-background">
+      {/* Feature Highlights Grid */}
+      <section className="py-16 sm:py-20 border-b border-white/5 bg-white/[0.01]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-display font-bold text-white mb-3">
+              Engineered for the Modern Bibliophile
+            </h2>
+            <p className="text-sm sm:text-base text-zinc-400 max-w-xl mx-auto">
+              Every detail is designed to make reading, discovering, and collecting books an effortless delight.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-6">
+            <Card className="rounded-2xl bg-card/40 backdrop-blur-md border border-white/10 hover:border-primary/40 transition-all p-6 text-center group">
+              <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Compass className="w-6 h-6" />
+              </div>
+              <h3 className="font-display font-bold text-lg text-white mb-2">Anna's Archive</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Connect directly with the world's open shadow libraries to discover millions of full PDFs and EPUBs.
+              </p>
+            </Card>
+
+            <Card className="rounded-2xl bg-card/40 backdrop-blur-md border border-white/10 hover:border-primary/40 transition-all p-6 text-center group">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <BookOpen className="w-6 h-6" />
+              </div>
+              <h3 className="font-display font-bold text-lg text-white mb-2">3D FlipBook</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Smooth dual-page and single-page physics with parchment texture, zoom, and multi-engine PDF rendering.
+              </p>
+            </Card>
+
+            <Card className="rounded-2xl bg-card/40 backdrop-blur-md border border-white/10 hover:border-primary/40 transition-all p-6 text-center group">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Headphones className="w-6 h-6" />
+              </div>
+              <h3 className="font-display font-bold text-lg text-white mb-2">Focus Audio</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Stream decentralized Audius ambient electronic and lofi soundscapes in the background while reading.
+              </p>
+            </Card>
+
+            <Card className="rounded-2xl bg-card/40 backdrop-blur-md border border-white/10 hover:border-primary/40 transition-all p-6 text-center group">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <h3 className="font-display font-bold text-lg text-white mb-2">Zero Cropping</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Responsive cover display ensures 100% of book artwork and titles remain pristine on all screens.
+              </p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Random Literary Thought Banner */}
+      <section className="py-12 border-b border-white/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <RandomThought />
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16 xl:py-20 bg-muted/30">
+      {/* Catalog Showcase Section */}
+      <section ref={booksContainerRef} className="py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 animate-fade-in-up">
-            <h2 className="text-3xl sm:text-4xl xl:text-5xl font-display font-bold mb-4">
-              Why Choose <span className="gradient-text">BookVerse</span>?
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Everything you need to discover, organize, and enjoy your reading journey
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="card-coral hover-lift border-0">
-              <CardContent className="p-8 text-center space-y-4">
-                <div className="w-16 h-16 mx-auto bg-primary rounded-2xl flex items-center justify-center shadow-glow-primary">
-                  <BookOpen className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-display font-bold">Vast Library</h3>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  Access thousands of books across all genres. From classics to contemporary bestsellers.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="card-purple hover-lift border-0">
-              <CardContent className="p-8 text-center space-y-4">
-                <div className="w-16 h-16 mx-auto bg-secondary rounded-2xl flex items-center justify-center shadow-glow-secondary">
-                  <Sparkles className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-display font-bold">Smart Recommendations</h3>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  AI-powered suggestions based on your reading history and preferences.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="card-mint hover-lift border-0">
-              <CardContent className="p-8 text-center space-y-4">
-                <div className="w-16 h-16 mx-auto bg-accent rounded-2xl flex items-center justify-center shadow-glow-accent">
-                  <Users className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-display font-bold">Community</h3>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  Connect with fellow readers, share reviews, and discover hidden gems.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* New Arrivals Section */}
-      <section ref={sectionRef} className="py-12 sm:py-16 xl:py-20 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4 ${isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
             <div>
-              <h2 className="text-2xl sm:text-3xl xl:text-5xl font-display font-bold mb-2">
-                <span className="gradient-text">New Arrivals</span>
+              <div className="flex items-center gap-2 mb-1">
+                <Flame className="w-4 h-4 text-amber-400" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-amber-300">Featured Volumes</span>
+              </div>
+              <h2 className="text-2xl sm:text-4xl font-display font-bold text-white">
+                Featured & Popular Books
               </h2>
-              <p className="text-sm sm:text-base xl:text-lg text-muted-foreground">Recently added to our collection</p>
             </div>
-            <div className="flex items-center gap-4">
+
+            <div className="flex items-center gap-3">
               <ViewModeToggle />
-              <Button asChild variant="outline" className="hover-lift rounded-2xl border-2">
+              <Button asChild variant="outline" className="rounded-xl border-white/10 text-xs">
                 <Link to="/browse">
-                  View All
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  View All ({books.length})
+                  <ArrowRight className="w-3.5 h-3.5 ml-1" />
                 </Link>
               </Button>
             </div>
           </div>
 
           {loading ? (
-            viewMode === "grid" ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Card key={i} className="overflow-hidden rounded-2xl border-0 shadow-lg">
-                    <Skeleton className="w-full aspect-[2/3] bg-muted" />
-                    <CardContent className="p-3 sm:p-4">
-                      <Skeleton className="h-4 sm:h-5 w-3/4 mb-2 bg-muted" />
-                      <Skeleton className="h-3 sm:h-4 w-1/2 bg-muted" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Card key={i} className="overflow-hidden rounded-2xl border-0 shadow-lg">
-                    <div className="flex gap-4 sm:gap-6 p-4 sm:p-5">
-                      <Skeleton className="w-24 xl:w-32 aspect-[2/3] flex-shrink-0 bg-muted rounded-xl" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-5 sm:h-6 w-3/4 bg-muted" />
-                        <Skeleton className="h-4 w-1/2 bg-muted" />
-                        <Skeleton className="h-3 sm:h-4 w-1/3 bg-muted" />
-                        <Skeleton className="h-12 sm:h-16 w-full bg-muted" />
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            )
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div key={i} className="aspect-[2/3] bg-card/40 rounded-2xl animate-pulse border border-white/5" />
+              ))}
+            </div>
           ) : (
             <>
-              <div 
-                ref={booksContainerRef}
-                className={`transition-all duration-300 ${
-                  isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
-                }`}
-              >
-                <BookDisplay books={currentBooks} />
-              </div>
-              
+              <BookDisplay books={currentBooks} />
+
+              {/* Pagination Controls */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-12">
+                <div className="mt-12 flex items-center justify-center gap-3">
                   <Button
                     variant="outline"
-                    size="icon"
-                    onClick={handlePreviousPage}
-                    disabled={currentPage === 1}
-                    className="rounded-2xl border-2 hover:bg-muted/50 transition-all duration-300 disabled:opacity-50"
+                    size="sm"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage <= 1}
+                    className="rounded-xl border-white/10 text-xs gap-1"
                   >
-                    <ChevronLeft className="w-5 h-5" />
+                    <ChevronLeft className="w-3.5 h-3.5" /> Previous
                   </Button>
 
-                  <div className="flex items-center gap-2">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                      if (
-                        page === 1 ||
-                        page === totalPages ||
-                        (page >= currentPage - 1 && page <= currentPage + 1)
-                      ) {
-                        return (
-                          <Button
-                            key={page}
-                            variant={currentPage === page ? "default" : "outline"}
-                            size="icon"
-                            onClick={() => handlePageClick(page)}
-                            className={`rounded-2xl transition-all duration-300 ${
-                              currentPage === page
-                                ? "gradient-primary text-white shadow-glow-primary"
-                                : "border-2 hover:bg-muted/50"
-                            }`}
-                          >
-                            {page}
-                          </Button>
-                        );
-                      } else if (
-                        page === currentPage - 2 ||
-                        page === currentPage + 2
-                      ) {
-                        return (
-                          <span key={page} className="text-muted-foreground px-2">
-                            ...
-                          </span>
-                        );
-                      }
-                      return null;
-                    })}
-                  </div>
+                  <span className="text-xs text-muted-foreground px-2">
+                    Page <span className="font-semibold text-foreground">{currentPage}</span> of {totalPages}
+                  </span>
 
                   <Button
                     variant="outline"
-                    size="icon"
-                    onClick={handleNextPage}
-                    disabled={currentPage === totalPages}
-                    className="rounded-2xl border-2 hover:bg-muted/50 transition-all duration-300 disabled:opacity-50"
+                    size="sm"
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage >= totalPages}
+                    className="rounded-xl border-white/10 text-xs gap-1"
                   >
-                    <ChevronRight className="w-5 h-5" />
+                    Next <ChevronRight className="w-3.5 h-3.5" />
                   </Button>
                 </div>
               )}
@@ -368,48 +296,6 @@ export default function Home() {
           )}
         </div>
       </section>
-
-      {/* CTA Section */}
-      {!profile && (
-        <section className="py-20 xl:py-28 bg-gradient-to-br from-primary via-pink to-secondary relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-10 left-10 w-64 h-64 bg-white rounded-full blur-3xl animate-3d-float" />
-            <div className="absolute bottom-10 right-10 w-96 h-96 bg-white rounded-full blur-3xl animate-3d-float" style={{ animationDelay: '2s' }} />
-          </div>
-          
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <h2 className="text-3xl sm:text-4xl xl:text-6xl font-display font-bold text-white mb-6">
-              Ready to Start Your Reading Journey?
-            </h2>
-            <p className="text-lg sm:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Join our community of passionate readers and unlock a world of literary adventures.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Button 
-                asChild 
-                size="lg" 
-                className="bg-white text-primary hover:bg-white/90 hover-lift shadow-2xl rounded-2xl text-base px-8"
-              >
-                <Link to="/signup">
-                  <Sparkles className="w-5 h-5 mr-2" />
-                  Get Started Free
-                </Link>
-              </Button>
-              <Button 
-                asChild 
-                size="lg" 
-                variant="outline"
-                className="border-2 border-white text-white hover:bg-white/10 rounded-2xl text-base px-8"
-              >
-                <Link to="/browse">
-                  <BookOpen className="w-5 h-5 mr-2" />
-                  Explore Books
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-      )}
     </div>
   );
 }

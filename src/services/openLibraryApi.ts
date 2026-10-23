@@ -159,12 +159,26 @@ export function convertOpenLibraryBookToBook(olBook: OpenLibraryBook) {
   // Extract work ID from key
   const workId = olBook.key?.replace('/works/', '') || null;
 
+  // Extract real PDF from Internet Archive identifier if available
+  const anyBook = olBook as any;
+  const iaId = Array.isArray(anyBook.ia) ? anyBook.ia[0] : anyBook.ia;
+  const pdfUrl = iaId ? `https://archive.org/download/${iaId}/${iaId}.pdf` : null;
+
+  // Generate clean synopsis
+  const firstSentence = Array.isArray(anyBook.first_sentence) 
+    ? anyBook.first_sentence.join(' ') 
+    : (anyBook.first_sentence || '');
+  const subjects = olBook.subject?.slice(0, 4).join(', ');
+  const synopsis = firstSentence || 
+    (subjects ? `Topics: ${subjects}. Published in ${olBook.first_publish_year || 'various editions'}.` : `A recognized literary work by ${olBook.author_name?.join(', ') || 'Unknown Author'}.`);
+
   return {
     title: olBook.title || 'Unknown Title',
     author: olBook.author_name?.join(', ') || 'Unknown Author',
-    genre: olBook.subject?.[0] || null,
-    synopsis: null, // Will need to fetch work details for description
+    genre: olBook.subject?.[0] || 'Literature',
+    synopsis: synopsis,
     cover_image_url: coverImage,
+    pdf_url: pdfUrl,
     isbn: isbn,
     publisher: olBook.publisher?.[0] || null,
     published_date: olBook.first_publish_year?.toString() || null,

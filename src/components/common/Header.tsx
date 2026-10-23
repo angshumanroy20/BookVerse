@@ -58,18 +58,23 @@ export default function Header() {
               </span>
             </Link>
 
-            <div className="hidden xl:flex items-center gap-2">
+            <div className="hidden xl:flex items-center gap-1.5">
               {navigation.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`px-5 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 ${
+                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-300 flex items-center gap-1.5 ${
                     location.pathname === item.path
                       ? "gradient-primary text-primary-foreground shadow-glow"
                       : "text-foreground hover:bg-muted/50"
                   }`}
                 >
                   {item.name}
+                  {item.path === "/discover" && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      Anna's Archive
+                    </span>
+                  )}
                 </Link>
               ))}
               {user && (

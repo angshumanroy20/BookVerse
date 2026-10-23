@@ -383,19 +383,32 @@ export default function BookDetail() {
                 </>
               )}
 
-              {book.pdf_url && (
+              {book.pdf_url ? (
                 <>
-                  <Button onClick={() => setIsPdfViewerOpen(true)} variant="default">
-                    <BookOpenCheck className="w-4 h-4 mr-2" />
-                    Read Book
+                  <Button 
+                    onClick={() => setIsPdfViewerOpen(true)} 
+                    className="h-11 px-6 rounded-xl font-medium bg-gradient-to-r from-primary to-indigo-600 hover:opacity-95 shadow-lg shadow-primary/25 gap-2"
+                  >
+                    <BookOpenCheck className="w-5 h-5" />
+                    Read in 3D FlipBook / PDF Reader
                   </Button>
-                  <Button asChild variant="outline">
-                    <a href={book.pdf_url} download>
-                      <Download className="w-4 h-4 mr-2" />
+                  <Button asChild variant="outline" className="h-11 px-4 rounded-xl border-white/10 gap-2">
+                    <a href={book.pdf_url} download={`${book.title}.pdf`} target="_blank" rel="noreferrer">
+                      <Download className="w-4 h-4" />
                       Download PDF
                     </a>
                   </Button>
                 </>
+              ) : (
+                <Button
+                  asChild
+                  className="h-11 px-5 rounded-xl font-medium bg-purple-600 hover:bg-purple-500 text-white gap-2 shadow-lg shadow-purple-900/30"
+                >
+                  <Link to={`/discover?q=${encodeURIComponent(book.title)}`}>
+                    <span className="text-base">🏴‍☠️</span>
+                    Find File on Anna's Archive
+                  </Link>
+                </Button>
               )}
 
               {!book.pdf_url && canEdit && (

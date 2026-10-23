@@ -1,7 +1,8 @@
 /**
  * External Books API Service
  * 
- * Combines Google Books and Open Library APIs for comprehensive book search
+ * Combines Anna's Archive, Open Library, and Google Books APIs
+ * for comprehensive global multi-source book search.
  */
 
 import {
@@ -23,18 +24,28 @@ import {
   type OpenLibraryBook,
 } from './openLibraryApi';
 
+import {
+  searchAnnasArchive,
+  type AnnasBook,
+} from './annasArchiveApi';
+
 export interface ExternalBook {
   id: string;
-  source: 'google' | 'openlibrary';
+  source: 'annas' | 'openlibrary' | 'google';
   title: string;
   author: string;
   genre: string | null;
   synopsis: string | null;
   cover_image_url: string | null;
-  isbn: string | null;
-  publisher: string | null;
-  published_date: string | null;
-  page_count: number | null;
+  pdf_url: string | null;
+  download_url?: string | null;
+  annas_search_url?: string | null;
+  file_format?: 'PDF' | 'EPUB' | 'Web' | string;
+  file_size?: string | null;
+  isbn?: string | null;
+  publisher?: string | null;
+  published_date?: string | null;
+  page_count?: number | null;
   language: string;
   preview_link?: string | null;
   info_link?: string | null;
@@ -42,250 +53,153 @@ export interface ExternalBook {
   external_id: string;
 }
 
+export type ExternalSearchSource = 'all' | 'annas' | 'openlibrary' | 'google' | 'both';
+
 export interface SearchResults {
   books: ExternalBook[];
   totalResults: number;
-  source: 'google' | 'openlibrary' | 'both';
+  source: ExternalSearchSource;
 }
 
 /**
- * Search both Google Books and Open Library
+ * Search across Anna's Archive, Open Library, and Google Books
  * @param query - Search query
- * @param source - Which API to use ('google', 'openlibrary', or 'both')
- * @param limit - Maximum number of results per source
+ * @param source - Selected search source
+ * @param limit - Maximum number of results per provider
  */
 export async function searchExternalBooks(
   query: string,
-  source: 'google' | 'openlibrary' | 'both' = 'both',
-  limit: number = 20
+  source: ExternalSearchSource = 'all',
+  limit = 20
 ): Promise<SearchResults> {
+  const cleanQuery = query.trim();
+  if (!cleanQuery) {
+    return { books: [], totalResults: 0, source };
+  }
+
   const results: ExternalBook[] = [];
   let totalResults = 0;
 
-  try {
-    if (source === 'google' || source === 'both') {
-      const googleResults = await searchGoogleBooks(query, limit);
-      
-      if (googleResults.items) {
-        const googleBooks = googleResults.items.map((book) => {
-          const converted = convertGoogleBookToBook(book);
-          return {
-            id: `google-${book.id}`,
-            source: 'google' as const,
-            ...converted,
-            external_id: book.id,
-          };
-        });
-        results.push(...googleBooks);
-        totalResults += googleResults.totalItems;
-      }
-    }
+  const tasks: Promise<void>[] = [];
 
-    if (source === 'openlibrary' || source === 'both') {
-      const olResults = await searchOpenLibrary(query, limit);
-      
-      if (olResults.docs) {
-        const olBooks = olResults.docs.map((book) => {
-          const converted = convertOpenLibraryBookToBook(book);
-          const workId = book.key?.replace('/works/', '') || book.key || '';
-          return {
-            id: `openlibrary-${workId}`,
-            source: 'openlibrary' as const,
-            ...converted,
-            external_id: workId,
-          };
-        });
-        results.push(...olBooks);
-        totalResults += olResults.numFound;
-      }
-    }
-
-    return {
-      books: results,
-      totalResults,
-      source,
-    };
-  } catch (error) {
-    console.error('Error searching external books:', error);
-    throw error;
+  // 1. Anna's Archive & Open Texts
+  if (source === 'all' || source === 'annas' || source === 'both') {
+    tasks.push(
+      searchAnnasArchive(cleanQuery, limit)
+        .then((res) => {
+          const annasBooks: ExternalBook[] = res.books.map((b) => ({
+            id: b.id,
+            source: 'annas',
+            title: b.title,
+            author: b.author,
+            genre: b.genre || 'Shadow Library',
+            synopsis: b.synopsis,
+            cover_image_url: b.cover_image_url,
+            pdf_url: b.pdf_url,
+            download_url: b.download_url,
+            annas_search_url: b.annas_search_url,
+            file_format: b.file_format,
+            file_size: b.file_size,
+            publisher: b.publisher,
+            published_date: b.published_date,
+            language: b.language,
+            external_id: b.identifier,
+          }));
+          results.push(...annasBooks);
+          totalResults += res.totalResults;
+        })
+        .catch((err) => {
+          console.warn("Anna's Archive provider error:", err);
+        })
+    );
   }
+
+  // 2. Open Library
+  if (source === 'all' || source === 'openlibrary' || source === 'both') {
+    tasks.push(
+      searchOpenLibrary(cleanQuery, limit)
+        .then((olResults) => {
+          if (olResults.docs) {
+            const olBooks: ExternalBook[] = olResults.docs.map((book) => {
+              const converted = convertOpenLibraryBookToBook(book);
+              const workId = book.key?.replace('/works/', '') || book.key || '';
+              return {
+                id: `openlibrary-${workId}`,
+                source: 'openlibrary',
+                ...converted,
+                download_url: converted.pdf_url || `https://openlibrary.org${book.key || ''}`,
+                file_format: converted.pdf_url ? 'PDF' : 'Web',
+                external_id: workId,
+              };
+            });
+            results.push(...olBooks);
+            totalResults += olResults.numFound || olBooks.length;
+          }
+        })
+        .catch((err) => {
+          console.warn('Open Library provider error:', err);
+        })
+    );
+  }
+
+  // 3. Google Books (safe fallback)
+  if (source === 'all' || source === 'google' || source === 'both') {
+    tasks.push(
+      searchGoogleBooks(cleanQuery, limit)
+        .then((googleResults) => {
+          if (googleResults.items) {
+            const googleBooks: ExternalBook[] = googleResults.items.map((book) => {
+              const converted = convertGoogleBookToBook(book);
+              return {
+                id: `google-${book.id}`,
+                source: 'google',
+                ...converted,
+                pdf_url: null,
+                download_url: converted.preview_link || converted.info_link,
+                file_format: 'Web',
+                external_id: book.id,
+              };
+            });
+            results.push(...googleBooks);
+            totalResults += googleResults.totalItems || googleBooks.length;
+          }
+        })
+        .catch((err) => {
+          console.warn('Google Books provider error:', err);
+        })
+    );
+  }
+
+  await Promise.allSettled(tasks);
+
+  // Deduplicate by title & author lowercase match
+  const seen = new Set<string>();
+  const deduplicated: ExternalBook[] = [];
+
+  for (const b of results) {
+    const key = `${b.title.toLowerCase().trim()}|${b.author.toLowerCase().trim()}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      deduplicated.push(b);
+    }
+  }
+
+  return {
+    books: deduplicated,
+    totalResults: Math.max(totalResults, deduplicated.length),
+    source,
+  };
 }
 
 /**
- * Search by ISBN across both APIs
+ * Search by specific criteria
  */
-export async function searchExternalBooksByISBN(
-  isbn: string,
-  source: 'google' | 'openlibrary' | 'both' = 'both'
+export async function searchByCriteria(
+  criteria: 'title' | 'author' | 'isbn',
+  value: string,
+  source: ExternalSearchSource = 'all',
+  limit = 20
 ): Promise<SearchResults> {
-  const results: ExternalBook[] = [];
-  let totalResults = 0;
-
-  try {
-    if (source === 'google' || source === 'both') {
-      const googleResults = await searchGoogleBooksByISBN(isbn);
-      
-      if (googleResults.items) {
-        const googleBooks = googleResults.items.map((book) => {
-          const converted = convertGoogleBookToBook(book);
-          return {
-            id: `google-${book.id}`,
-            source: 'google' as const,
-            ...converted,
-            external_id: book.id,
-          };
-        });
-        results.push(...googleBooks);
-        totalResults += googleResults.totalItems;
-      }
-    }
-
-    if (source === 'openlibrary' || source === 'both') {
-      const olResults = await searchOpenLibraryByISBN(isbn);
-      
-      if (olResults.docs) {
-        const olBooks = olResults.docs.map((book) => {
-          const converted = convertOpenLibraryBookToBook(book);
-          const workId = book.key?.replace('/works/', '') || book.key || '';
-          return {
-            id: `openlibrary-${workId}`,
-            source: 'openlibrary' as const,
-            ...converted,
-            external_id: workId,
-          };
-        });
-        results.push(...olBooks);
-        totalResults += olResults.numFound;
-      }
-    }
-
-    return {
-      books: results,
-      totalResults,
-      source,
-    };
-  } catch (error) {
-    console.error('Error searching by ISBN:', error);
-    throw error;
-  }
-}
-
-/**
- * Search by author across both APIs
- */
-export async function searchExternalBooksByAuthor(
-  author: string,
-  source: 'google' | 'openlibrary' | 'both' = 'both',
-  limit: number = 20
-): Promise<SearchResults> {
-  const results: ExternalBook[] = [];
-  let totalResults = 0;
-
-  try {
-    if (source === 'google' || source === 'both') {
-      const googleResults = await searchGoogleBooksByAuthor(author);
-      
-      if (googleResults.items) {
-        const googleBooks = googleResults.items.slice(0, limit).map((book) => {
-          const converted = convertGoogleBookToBook(book);
-          return {
-            id: `google-${book.id}`,
-            source: 'google' as const,
-            ...converted,
-            external_id: book.id,
-          };
-        });
-        results.push(...googleBooks);
-        totalResults += googleResults.totalItems;
-      }
-    }
-
-    if (source === 'openlibrary' || source === 'both') {
-      const olResults = await searchOpenLibraryByAuthor(author);
-      
-      if (olResults.docs) {
-        const olBooks = olResults.docs.slice(0, limit).map((book) => {
-          const converted = convertOpenLibraryBookToBook(book);
-          const workId = book.key?.replace('/works/', '') || book.key || '';
-          return {
-            id: `openlibrary-${workId}`,
-            source: 'openlibrary' as const,
-            ...converted,
-            external_id: workId,
-          };
-        });
-        results.push(...olBooks);
-        totalResults += olResults.numFound;
-      }
-    }
-
-    return {
-      books: results,
-      totalResults,
-      source,
-    };
-  } catch (error) {
-    console.error('Error searching by author:', error);
-    throw error;
-  }
-}
-
-/**
- * Search by title across both APIs
- */
-export async function searchExternalBooksByTitle(
-  title: string,
-  source: 'google' | 'openlibrary' | 'both' = 'both',
-  limit: number = 20
-): Promise<SearchResults> {
-  const results: ExternalBook[] = [];
-  let totalResults = 0;
-
-  try {
-    if (source === 'google' || source === 'both') {
-      const googleResults = await searchGoogleBooksByTitle(title);
-      
-      if (googleResults.items) {
-        const googleBooks = googleResults.items.slice(0, limit).map((book) => {
-          const converted = convertGoogleBookToBook(book);
-          return {
-            id: `google-${book.id}`,
-            source: 'google' as const,
-            ...converted,
-            external_id: book.id,
-          };
-        });
-        results.push(...googleBooks);
-        totalResults += googleResults.totalItems;
-      }
-    }
-
-    if (source === 'openlibrary' || source === 'both') {
-      const olResults = await searchOpenLibraryByTitle(title);
-      
-      if (olResults.docs) {
-        const olBooks = olResults.docs.slice(0, limit).map((book) => {
-          const converted = convertOpenLibraryBookToBook(book);
-          const workId = book.key?.replace('/works/', '') || book.key || '';
-          return {
-            id: `openlibrary-${workId}`,
-            source: 'openlibrary' as const,
-            ...converted,
-            external_id: workId,
-          };
-        });
-        results.push(...olBooks);
-        totalResults += olResults.numFound;
-      }
-    }
-
-    return {
-      books: results,
-      totalResults,
-      source,
-    };
-  } catch (error) {
-    console.error('Error searching by title:', error);
-    throw error;
-  }
+  const query = criteria === 'title' ? `intitle:${value}` : criteria === 'author' ? `inauthor:${value}` : `isbn:${value}`;
+  return searchExternalBooks(query, source, limit);
 }

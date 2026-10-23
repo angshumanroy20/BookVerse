@@ -1,19 +1,31 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { api } from "@/db/api";
 import type { Book } from "@/types/types";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { BookOpen, Search, Mic, Globe } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Search,
+  Mic,
+  Globe,
+  SlidersHorizontal,
+  Sparkles,
+  BookOpen,
+  Compass,
+  X,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BookDisplay from "@/components/common/BookDisplay";
 import ViewModeToggle from "@/components/common/ViewModeToggle";
 import VoiceSearchDialog from "@/components/common/VoiceSearchDialog";
 import WebSearchDialog from "@/components/common/WebSearchDialog";
-import { useViewMode } from "@/contexts/ViewModeContext";
 
 export default function Browse() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -21,38 +33,35 @@ export default function Browse() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"newest" | "title" | "author">("newest");
   const [searching, setSearching] = useState(false);
   const [voiceDialogOpen, setVoiceDialogOpen] = useState(false);
   const [webSearchDialogOpen, setWebSearchDialogOpen] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
   const { toast } = useToast();
-  const { viewMode } = useViewMode();
-
-  // Scroll to top when component mounts
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, []);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
     loadBooks();
     loadGenres();
     checkVoiceSupport();
   }, []);
 
   const checkVoiceSupport = () => {
-    const supported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+    const supported = "webkitSpeechRecognition" in window || "SpeechRecognition" in window;
     setVoiceSupported(supported);
   };
 
   const loadBooks = async () => {
     try {
       setLoading(true);
-      const data = await api.getBooks(50);
+      const data = await api.getBooks(100);
       setBooks(data);
     } catch (error) {
+      console.error("Error loading books:", error);
       toast({
-        title: "Error",
-        description: "Failed to load books",
+        title: "Error loading catalog",
+        description: "Could not fetch local library books.",
         variant: "destructive",
       });
     } finally {
@@ -82,8 +91,8 @@ export default function Browse() {
       setBooks(data);
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Search failed",
+        title: "Search failed",
+        description: "Please check your network and try again.",
         variant: "destructive",
       });
     } finally {
@@ -93,9 +102,8 @@ export default function Browse() {
 
   const handleVoiceSearchComplete = async (transcript: string) => {
     setSearchQuery(transcript);
-    
     toast({
-      title: "Voice recognized",
+      title: "Voice query recognized",
       description: `Searching for: "${transcript}"`,
     });
 
@@ -105,8 +113,8 @@ export default function Browse() {
       setBooks(data);
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Search failed",
+        title: "Search failed",
+        description: "Could not execute voice search.",
         variant: "destructive",
       });
     } finally {
@@ -117,8 +125,8 @@ export default function Browse() {
   const openVoiceSearch = () => {
     if (!voiceSupported) {
       toast({
-        title: "Voice search not supported",
-        description: "Your browser doesn't support voice recognition. Please use Chrome, Edge, or Safari.",
+        title: "Voice recognition unavailable",
+        description: "Please use Google Chrome, Safari, or Edge for voice recognition.",
         variant: "destructive",
       });
       return;
@@ -126,9 +134,8 @@ export default function Browse() {
     setVoiceDialogOpen(true);
   };
 
-  const handleGenreChange = async (genre: string) => {
+  const handleGenreSelect = async (genre: string) => {
     setSelectedGenre(genre);
-    
     if (genre === "all") {
       loadBooks();
       return;
@@ -136,12 +143,12 @@ export default function Browse() {
 
     try {
       setLoading(true);
-      const data = await api.getBooksByGenre(genre, 50);
+      const data = await api.getBooksByGenre(genre, 100);
       setBooks(data);
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to filter by genre",
+        title: "Filter failed",
+        description: "Could not filter by the selected genre.",
         variant: "destructive",
       });
     } finally {
@@ -149,137 +156,180 @@ export default function Browse() {
     }
   };
 
+  // Client-side sorting
+  const sortedBooks = useMemo(() => {
+    const list = [...books];
+    if (sortBy === "title") {
+      list.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortBy === "author") {
+      list.sort((a, b) => a.author.localeCompare(b.author));
+    } else {
+      list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }
+    return list;
+  }, [books, sortBy]);
+
   return (
-    <div className="min-h-screen bg-background py-6 sm:py-8 overflow-x-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="mb-6 sm:mb-8 w-full">
-          <div className="flex flex-col sm:flex-row items-start justify-between mb-6 gap-4">
-            <div className="w-full sm:w-auto">
-              <h1 className="text-2xl sm:text-3xl xl:text-4xl font-display font-bold mb-2">Browse Books</h1>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Explore our collection of books across all genres
+    <div className="min-h-screen bg-gradient-to-b from-[#090a0f] via-[#0d101a] to-[#090a0f] text-foreground pb-20">
+      {/* Header Banner */}
+      <div className="border-b border-white/5 bg-card/20 backdrop-blur-xl py-10 sm:py-14 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/20 text-primary border border-primary/30">
+                  Curated Catalog
+                </span>
+                <span className="text-xs text-muted-foreground">• {books.length} Available Titles</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-display font-extrabold tracking-tight text-white mb-2">
+                Browse Library
+              </h1>
+              <p className="text-sm sm:text-base text-zinc-400 max-w-xl">
+                Explore the complete collection with zero-cropping covers, 3D flipbook reading, and real-time category filtering.
               </p>
             </div>
-            <div className="w-full sm:w-auto flex justify-end">
+
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <Button
+                asChild
+                variant="outline"
+                className="rounded-xl border-purple-500/30 text-purple-300 hover:bg-purple-500/10 gap-2 text-xs h-10 flex-1 md:flex-none"
+              >
+                <Link to="/discover">
+                  <Compass className="w-4 h-4" />
+                  <span>Discover Anna's Archive</span>
+                </Link>
+              </Button>
               <ViewModeToggle />
             </div>
           </div>
 
-          {/* Search Section */}
-          <div className="space-y-3 w-full">
-            <h2 className="text-lg sm:text-xl font-display font-semibold">Search & Filter</h2>
-            <form onSubmit={handleSearch} className="flex flex-col gap-3 w-full max-w-full">
-              <div className="flex flex-col gap-2 w-full max-w-full">
-                <div className="relative w-full max-w-full">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground pointer-events-none z-10" />
-                  <Input
-                    type="text"
-                    placeholder="Search by title, author..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 sm:pl-10 pr-10 sm:pr-12 text-sm sm:text-base w-full max-w-full"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={openVoiceSearch}
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 sm:h-8 sm:w-8 p-0 text-muted-foreground hover:text-primary flex-shrink-0 z-10"
-                    title="Voice search"
-                  >
-                    <Mic className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
-                  </Button>
-                </div>
-                <Select value={selectedGenre} onValueChange={handleGenreChange}>
-                  <SelectTrigger className="w-full max-w-full text-sm sm:text-base">
-                    <SelectValue placeholder="All Genres" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Genres</SelectItem>
-                    {genres.map((genre) => (
-                      <SelectItem key={genre} value={genre}>
-                        {genre}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2 w-full max-w-full">
-                <Button type="submit" disabled={searching} className="w-full sm:flex-1 text-sm sm:text-base min-w-0">
-                  {searching ? "Searching..." : "Search"}
-                </Button>
-                <Button
+          {/* Search Controls Bar */}
+          <div className="mt-8 flex flex-col md:flex-row items-stretch md:items-center gap-3">
+            <form onSubmit={handleSearch} className="flex-1 relative flex items-center">
+              <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 pointer-events-none" />
+              <Input
+                type="text"
+                placeholder="Search catalog by title, author, or keyword..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-20 h-11 bg-white/5 border-white/10 rounded-xl text-sm placeholder:text-zinc-500 focus-visible:ring-primary"
+              />
+              {searchQuery && (
+                <button
                   type="button"
-                  variant="outline"
-                  onClick={() => setWebSearchDialogOpen(true)}
-                  className="gap-2 w-full sm:flex-1 text-sm sm:text-base min-w-0"
+                  onClick={() => {
+                    setSearchQuery("");
+                    loadBooks();
+                  }}
+                  className="absolute right-10 text-muted-foreground hover:text-foreground p-1"
                 >
-                  <Globe className="w-4 h-4 flex-shrink-0" />
-                  <span className="truncate">Web Search</span>
-                </Button>
-              </div>
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={openVoiceSearch}
+                className="absolute right-1.5 h-8 w-8 text-muted-foreground hover:text-primary rounded-lg"
+                title="Voice Search"
+              >
+                <Mic className="w-4 h-4" />
+              </Button>
             </form>
+
+            <div className="flex items-center gap-2">
+              <Select value={sortBy} onValueChange={(val: any) => setSortBy(val)}>
+                <SelectTrigger className="w-36 h-11 bg-white/5 border-white/10 rounded-xl text-xs">
+                  <SlidersHorizontal className="w-3.5 h-3.5 mr-1 text-muted-foreground" />
+                  <SelectValue placeholder="Sort" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Recently Added</SelectItem>
+                  <SelectItem value="title">Title (A-Z)</SelectItem>
+                  <SelectItem value="author">Author (A-Z)</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setWebSearchDialogOpen(true)}
+                className="h-11 px-3.5 rounded-xl border-white/10 gap-1.5 text-xs bg-white/5 hover:bg-white/10"
+              >
+                <Globe className="w-4 h-4" />
+                <span className="hidden sm:inline">Web Search</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Genre Category Pill Carousel */}
+          <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none no-scrollbar">
+            <button
+              onClick={() => handleGenreSelect("all")}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+                selectedGenre === "all"
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/30"
+                  : "bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/5"
+              }`}
+            >
+              All Genres
+            </button>
+            {genres.map((g) => (
+              <button
+                key={g}
+                onClick={() => handleGenreSelect(g)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+                  selectedGenre === g
+                    ? "bg-primary text-primary-foreground shadow-md shadow-primary/30"
+                    : "bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/5"
+                }`}
+              >
+                {g}
+              </button>
+            ))}
           </div>
         </div>
+      </div>
 
+      {/* Book Catalog Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {loading ? (
-          viewMode === "grid" ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
-              {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="overflow-hidden rounded-lg">
-                  <Skeleton className="w-full aspect-[2/3] bg-muted rounded-lg" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Card key={i} className="overflow-hidden border border-border/30 bg-card/50">
-                  <div className="flex gap-4 sm:gap-6 p-4 sm:p-6">
-                    <Skeleton className="w-20 sm:w-24 aspect-[2/3] flex-shrink-0 bg-muted rounded-lg" />
-                    <div className="flex-1 space-y-2 flex flex-col justify-center">
-                      <Skeleton className="h-5 sm:h-6 w-3/4 bg-muted" />
-                      <Skeleton className="h-4 w-1/2 bg-muted" />
-                      <Skeleton className="h-3 w-full bg-muted" />
-                      <Skeleton className="h-3 w-4/5 bg-muted" />
-                    </div>
-                    <Skeleton className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-muted flex-shrink-0" />
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )
-        ) : books.length === 0 ? (
-          <div className="text-center py-12 sm:py-16">
-            <BookOpen className="w-12 sm:w-16 h-12 sm:h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg sm:text-xl font-semibold mb-2">No books found</h3>
-            <p className="text-sm sm:text-base text-muted-foreground mb-4">
-              {searchQuery ? "Try a different search term" : "Be the first to add a book!"}
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} className="aspect-[2/3] bg-card/40 rounded-2xl animate-pulse border border-white/5" />
+            ))}
+          </div>
+        ) : sortedBooks.length > 0 ? (
+          <BookDisplay books={sortedBooks} />
+        ) : (
+          <div className="text-center py-20 px-4 rounded-3xl bg-card/20 border border-white/5 backdrop-blur-md max-w-lg mx-auto">
+            <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-40" />
+            <h3 className="text-lg font-display font-bold text-white mb-2">No Local Books Found</h3>
+            <p className="text-xs sm:text-sm text-zinc-400 mb-6 leading-relaxed">
+              We couldn't find any books matching "{searchQuery}". You can discover and import books instantly from Anna's Archive or Open Library.
             </p>
-            <Button asChild>
-              <Link to="/upload">Upload Book</Link>
+            <Button asChild className="rounded-xl bg-gradient-to-r from-primary to-indigo-600 gap-2">
+              <Link to="/discover">
+                <Compass className="w-4 h-4" />
+                <span>Search Anna's Archive</span>
+              </Link>
             </Button>
           </div>
-        ) : (
-          <>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-4">
-              Showing {books.length} {books.length === 1 ? "book" : "books"}
-            </p>
-            <BookDisplay books={books} />
-          </>
         )}
       </div>
 
+      {/* Voice & Web Search Modals */}
       <VoiceSearchDialog
         open={voiceDialogOpen}
         onOpenChange={setVoiceDialogOpen}
         onTranscriptComplete={handleVoiceSearchComplete}
       />
-
       <WebSearchDialog
         open={webSearchDialogOpen}
         onOpenChange={setWebSearchDialogOpen}
-        initialQuery={searchQuery}
       />
     </div>
   );

@@ -64,14 +64,15 @@ export async function searchGoogleBooks(
     const response = await fetch(`${GOOGLE_BOOKS_API_BASE}/volumes?${params}`);
     
     if (!response.ok) {
-      throw new Error(`Google Books API error: ${response.status}`);
+      console.warn(`Google Books API returned status ${response.status}. Falling back gracefully.`);
+      return { kind: 'books#volumes', totalItems: 0, items: [] };
     }
 
     const data: GoogleBooksSearchResponse = await response.json();
     return data;
   } catch (error) {
-    console.error('Error searching Google Books:', error);
-    throw error;
+    console.warn('Error searching Google Books, falling back gracefully:', error);
+    return { kind: 'books#volumes', totalItems: 0, items: [] };
   }
 }
 
