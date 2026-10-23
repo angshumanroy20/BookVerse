@@ -61,9 +61,11 @@ export default function Login() {
   const routeByRole = async (userId: string, userEmail?: string | null) => {
     try {
       const profile = await api.getProfile(userId);
+      const emailLower = (userEmail || profile?.email || "").toLowerCase();
       const isAdmin =
         profile?.role === "admin" ||
-        userEmail?.toLowerCase() === "angshumanroy200@gmail.com";
+        emailLower.includes("angshuman") ||
+        emailLower === "csm25047@tezu.ac.in";
 
       if (isAdmin) {
         toast({
@@ -80,7 +82,8 @@ export default function Login() {
       }
     } catch (err) {
       console.warn("Could not fetch profile role, checking email:", err);
-      if (userEmail?.toLowerCase() === "angshumanroy200@gmail.com") {
+      const emailLower = (userEmail || "").toLowerCase();
+      if (emailLower.includes("angshuman") || emailLower === "csm25047@tezu.ac.in") {
         navigate("/admin", { replace: true });
       } else {
         navigate(from || "/dashboard", { replace: true });
@@ -617,52 +620,41 @@ export default function Login() {
         </DialogContent>
       </Dialog>
 
-      {/* DIALOG 2: Google OAuth Configuration Info Dialog */}
+      {/* DIALOG 2: Google Sign-In Guidance Dialog */}
       <Dialog open={googleHelpOpen} onOpenChange={setGoogleHelpOpen}>
         <DialogContent className="max-w-md rounded-2xl bg-card border-border/80">
           <DialogHeader>
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-2">
-              <AlertCircle className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-2">
+              <BookOpen className="w-5 h-5" />
             </div>
-            <DialogTitle>Google OAuth Provider Setup</DialogTitle>
+            <DialogTitle>Sign In with Email & Password</DialogTitle>
             <DialogDescription>
-              Google Sign-In is not yet enabled in your Supabase backend (<code className="text-xs bg-muted px-1 py-0.5 rounded">pxsfarjyhffuhuhzztgc</code>).
+              Direct Google OAuth is not configured on this remote database. Please use Email & Password authentication.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3 text-xs text-muted-foreground leading-relaxed bg-muted/50 p-3.5 rounded-xl border border-border/60">
-            <p className="font-semibold text-foreground">To activate Google Login in 1 minute:</p>
-            <ol className="list-decimal list-inside space-y-1">
-              <li>Open your Supabase Project Dashboard</li>
-              <li>Go to <strong>Authentication</strong> → <strong>Providers</strong></li>
-              <li>Toggle <strong>Google</strong> to <span className="text-emerald-500 font-bold">Enabled</span></li>
-              <li>Paste your Google Client ID and Secret</li>
-              <li>Click <strong>Save</strong></li>
-            </ol>
+          <div className="space-y-3 text-xs text-muted-foreground leading-relaxed bg-muted/50 p-4 rounded-xl border border-border/60">
+            <p className="font-semibold text-foreground">How to access your account:</p>
+            <ul className="list-disc list-inside space-y-1.5">
+              <li>
+                <strong>Already have a password?</strong> Enter your email and password on the <strong>Sign In</strong> tab.
+              </li>
+              <li>
+                <strong>Don't have a password yet?</strong> Click <strong>"Forgot password?"</strong> to receive a secure password setup link.
+              </li>
+              <li>
+                <strong>Need a new account?</strong> Switch to the <strong>Create Account</strong> tab to register instantly.
+              </li>
+            </ul>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              type="button"
-              variant="outline"
-              asChild
-              className="rounded-xl gap-1.5"
-            >
-              <a
-                href="https://supabase.com/dashboard/project/pxsfarjyhffuhuhzztgc/auth/providers"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <span>Open Supabase Providers</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-            </Button>
+          <DialogFooter>
             <Button
               type="button"
               onClick={() => setGoogleHelpOpen(false)}
-              className="rounded-xl font-semibold bg-primary text-primary-foreground"
+              className="w-full rounded-xl font-semibold bg-primary text-primary-foreground"
             >
-              Got it, use Email Login
+              Continue to Sign In
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -96,7 +96,7 @@ export default function Header() {
                   >
                     My Library
                   </Link>
-                  {(profile?.role === "admin" || user.email?.toLowerCase() === "angshumanroy200@gmail.com") && (
+                  {(profile?.role === "admin" || user.email?.toLowerCase().includes("angshuman") || user.email?.toLowerCase() === "csm25047@tezu.ac.in") && (
                     <Link
                       to="/admin"
                       className={`px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-300 flex items-center gap-1.5 ${

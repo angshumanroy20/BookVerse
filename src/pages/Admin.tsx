@@ -17,8 +17,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Shield, Users, BookOpen, Edit, Trash2, Eye, BarChart3, Library, MessageSquare, Reply, Mail, Bot, Play, RefreshCw, Loader2 } from "lucide-react";
 
 export default function Admin() {
-  const { user, profile, loading: authLoading } = useAuth();
-  const isAdmin = profile?.role === "admin" || user?.email?.toLowerCase() === "angshumanroy200@gmail.com";
+  const userEmail = (user?.email || profile?.email || "").toLowerCase();
+  const isAdmin =
+    profile?.role === "admin" ||
+    userEmail.includes("angshuman") ||
+    userEmail === "csm25047@tezu.ac.in";
   const { toast } = useToast();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
