@@ -1,4 +1,4 @@
-export type UserRole = 'user' | 'admin';
+export type UserRole = 'user' | 'admin' | 'bot';
 export type ReadingStatus = 'want_to_read' | 'currently_reading' | 'read';
 export type ContactStatus = 'pending' | 'reviewed' | 'resolved';
 

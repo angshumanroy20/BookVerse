@@ -28,16 +28,16 @@ function BookCard({ book, index }: { book: Book | BookWithDetails; index: number
           animationDelay: `${index * 0.1}s`,
         }}
       >
-        <div className="relative aspect-[2/3] overflow-hidden rounded-lg">
+        <div className="relative w-full aspect-auto sm:aspect-[2/3] overflow-hidden rounded-lg">
           {book.cover_image_url ? (
             <img
               src={book.cover_image_url}
               alt={book.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-auto sm:h-full sm:object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-muted">
+            <div className="w-full aspect-[2/3] flex items-center justify-center bg-muted">
               <BookOpen className="w-12 h-12 text-muted-foreground" />
             </div>
           )}
