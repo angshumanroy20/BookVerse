@@ -14,10 +14,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Users, BookOpen, Edit, Trash2, Eye, BarChart3, Library, MessageSquare, Reply, Mail, Bot, Play, RefreshCw } from "lucide-react";
+import { Shield, Users, BookOpen, Edit, Trash2, Eye, BarChart3, Library, MessageSquare, Reply, Mail, Bot, Play, RefreshCw, Loader2 } from "lucide-react";
 
 export default function Admin() {
-  const { profile } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
+  const isAdmin = profile?.role === "admin" || user?.email?.toLowerCase() === "angshumanroy200@gmail.com";
   const { toast } = useToast();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
@@ -39,13 +40,13 @@ export default function Admin() {
   });
 
   useEffect(() => {
-    if (profile?.role === "admin") {
+    if (isAdmin) {
       loadProfiles();
       loadBooks();
       loadStats();
       loadContactSubmissions();
     }
-  }, [profile]);
+  }, [isAdmin]);
 
   const loadProfiles = async () => {
     try {
@@ -315,13 +316,31 @@ export default function Admin() {
     }
   };
 
-  if (profile?.role !== "admin") {
+  if (authLoading) {
     return (
-      <div className="min-h-screen bg-background py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Shield className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
-          <p className="text-muted-foreground">You don't have permission to access this page</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Checking administrator credentials...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-background py-16">
+        <div className="max-w-md mx-auto px-4 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center mx-auto mb-4 text-destructive">
+            <Shield className="w-8 h-8" />
+          </div>
+          <h2 className="text-2xl font-bold mb-2">Admin Access Required</h2>
+          <p className="text-muted-foreground mb-6">
+            This management console is restricted to verified administrators.
+          </p>
+          <Button asChild variant="outline">
+            <Link to="/login">Sign In with Admin Account</Link>
+          </Button>
         </div>
       </div>
     );

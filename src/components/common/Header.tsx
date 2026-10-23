@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, User, LogOut, Library, Upload, Moon, Sun, LayoutDashboard, Menu, Sparkles, Inbox, Compass } from "lucide-react";
+import { BookOpen, User, LogOut, Library, Upload, Moon, Sun, LayoutDashboard, Menu, Sparkles, Inbox, Compass, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -78,7 +78,7 @@ export default function Header() {
                 <>
                   <Link
                     to="/dashboard"
-                    className={`px-5 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 ${
+                    className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-300 ${
                       location.pathname === "/dashboard"
                         ? "gradient-primary text-primary-foreground shadow-glow"
                         : "text-foreground hover:bg-muted/50"
@@ -88,7 +88,7 @@ export default function Header() {
                   </Link>
                   <Link
                     to="/my-library"
-                    className={`px-5 py-2.5 text-sm font-medium rounded-xl transition-all duration-300 ${
+                    className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-300 ${
                       location.pathname === "/my-library"
                         ? "gradient-primary text-primary-foreground shadow-glow"
                         : "text-foreground hover:bg-muted/50"
@@ -96,6 +96,19 @@ export default function Header() {
                   >
                     My Library
                   </Link>
+                  {(profile?.role === "admin" || user.email?.toLowerCase() === "angshumanroy200@gmail.com") && (
+                    <Link
+                      to="/admin"
+                      className={`px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-300 flex items-center gap-1.5 ${
+                        location.pathname === "/admin"
+                          ? "bg-amber-500 text-slate-950 font-bold shadow-lg shadow-amber-500/25"
+                          : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/25"
+                      }`}
+                    >
+                      <Shield className="w-3.5 h-3.5" />
+                      <span>Admin</span>
+                    </Link>
+                  )}
                 </>
               )}
             </div>

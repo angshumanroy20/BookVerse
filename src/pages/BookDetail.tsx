@@ -392,7 +392,7 @@ export default function BookDetail() {
                     <BookOpenCheck className="w-5 h-5" />
                     Read in 3D FlipBook / PDF Reader
                   </Button>
-                  <Button asChild variant="outline" className="h-11 px-4 rounded-xl border-white/10 gap-2">
+                  <Button asChild variant="outline" className="h-11 px-4 rounded-xl border-border/80 shadow-xs hover:bg-muted gap-2">
                     <a href={book.pdf_url} download={`${book.title}.pdf`} target="_blank" rel="noreferrer">
                       <Download className="w-4 h-4" />
                       Download PDF
